@@ -126,16 +126,17 @@ class VidsJSON:
         else:
             vids_dict = _json_to_dict(path)
         return vids_dict
-    def reset_vid_i(self):
-        self.__dict["log"]["nxt_vid_i"] = 0
     def set_status(self, value):
         self.__dict["log"]["status"] = value
     def set_changes(self, value):
         self.__dict["log"]["changes"] = value
     def set_vid_obj(self, vid_obj):
         video_i = str(vid_obj.get_video_i())
-        self.__dict["body"][video_i] = vid_obj.get_dict()
-        self.__dict["log"]["nxt_vid_i"] = self.__dict["log"]["nxt_vid_i"] + 1
+        if video_i not in self.__dict["body"]:
+            self.__dict["body"][video_i] = vid_obj.get_dict()
+            self.__dict["log"]["nxt_vid_i"] = self.__dict["log"]["nxt_vid_i"] + 1
+        else:
+            self.__dict["body"][video_i] = vid_obj.get_dict()
     def get_dict(self):
         return self.__dict
     def to_JSON(self):

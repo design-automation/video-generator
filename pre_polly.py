@@ -22,7 +22,7 @@ changes_lst = vids_obj.get_dict()["log"]["changes"]
 
 for folder_i in range(0, len(FOLDERS)):
     VIDEO_i = vids_obj.get_dict()["log"]["nxt_vid_i"]
-    vids_obj.reset_vid_i()
+
     FOLDER_PATH = FOLDERS[folder_i]
     json_paths = get_paths_by_typ(FOLDER_PATH,"json")
     mp4_paths = get_paths_by_typ(FOLDER_PATH,"mp4")
@@ -72,7 +72,8 @@ for folder_i in range(0, len(FOLDERS)):
         vid_obj.set_status(curr_status)
         vid_obj.set_lst_edt(curr_edit_time)
         vid_obj.update_JSON()
-        changes_lst.append(VIDEO_i)
+        if vid_obj.get_video_i() not in changes_lst:
+            changes_lst.append(vid_obj.get_video_i())
         vids_obj.set_vid_obj(vid_obj)
         if _ERROR:
             break
