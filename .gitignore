@@ -2,7 +2,7 @@
 **/test
 
 ## videos
-/VIDEOS
+/VIDEOS/*
 
 ## YouTube client secret and user auth token
 client_secret.json
