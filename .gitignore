@@ -1,8 +1,7 @@
 ## tests
-**/test
+test/
 
 ## videos
-/VIDEOS/*
 videos.json
 
 ## YouTube client secret and user auth token

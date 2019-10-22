@@ -40,7 +40,7 @@ class ToYouTubeMP4:
     def __init__(self, folder):
         self.__path = get_paths_by_typ(folder, "mp4")[0]
         self.__json = get_paths_by_typ(folder, "json")[0]
-        self.__name = re.search("(\w+).mp4",self.__path).group(1)
+        self.__name = re.search("(.*).mp4",self.__path).group(1)
 
     def get_path(self):
         return self.__path
@@ -198,15 +198,15 @@ def del_vid(yt_service, id):
     except HttpError as e:
         raise HttpError ('An HTTP error %d occurred:\n%s' % (e.resp.status, e.content))
 
-def dl_vid(id, folder): # this does not use the official youtube api as YouTube does not allow downloading of videos
+def dl_vid(yt_id, folder, vid_id, vid_name): # this does not use the official youtube api as YouTube does not allow downloading of videos
     ydl_opts = {
-        'outtmpl': folder + "%(title)s.%(ext)s",
+        'outtmpl': folder + "%s_%s" % (vid_id, vid_name) + ".%(ext)s",
         'format': 'best', #22
-        'writesubtitles': folder + "%(title)s.%(ext)s",
+        'writesubtitles': folder + "%s_%s" % (vid_id, vid_name) + ".%(ext)s",
         'postprocessors': [{
             'key': 'FFmpegSubtitlesConvertor',
             'format': 'srt',
         }]
     }
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download(['https://www.youtube.com/watch?v=' + id])
+        ydl.download(['https://www.youtube.com/watch?v=' + yt_id])

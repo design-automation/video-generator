@@ -5,6 +5,7 @@ import glob
 import math
 import datetime
 import time
+import shutil
 
 from moviepy.editor import *
 from boto3 import Session
@@ -18,7 +19,7 @@ OUTPUT_FDR = "output\\"
 class ToPollyMP4:
     def __init__(self, folder):
         self.__path = get_paths_by_typ(folder, "mp4")[0]
-        self.__name = re.search("(\w+).mp4",self.__path).group(1)
+        self.__name = re.search(r"\\[\d+]\\(.*).mp4",self.__path).group(1)
         self.__folder = folder
     def get_folder(self):
         return self.__folder
@@ -30,7 +31,7 @@ class ToPollyMP4:
 class ToPollySRT:
     def __init__(self, folder):
         self.__path = get_paths_by_typ(folder, "srt")[0]
-        self.__name = re.search("(\w+).srt",self.__path).group(1)
+        self.__name = re.search(r"\\[\d+]\\(.*).srt",self.__path).group(1)
         self.__seq_dict = self.__seqDict(self.__path)
         self.__folder = folder
         self.__n_seq
@@ -52,8 +53,12 @@ class ToPollySRT:
     def update_SRT(self):
         with open(self.__path, "wt", encoding="utf-8") as srt_f:
             for seq_n in self.__seq_dict:
+                if seq_n != 1:
+                    self.__update_seq_start(seq_n)
                 srt_f.write(self.__seq_for_SRT(seq_n))
-        print("SRT updated at %s" % (self.__path))
+        print("\nSRT updated at %s" % (self.__path))
+        shutil.copy(self.__path, self.__folder + "..\\..\\POST_SRT\\")
+        print("SRT copy made in \\POST_SRT\n")
         
     def __seqDict(self,srt_file): # cut SRT into timestamp dict
         seq_dict={}
@@ -80,6 +85,12 @@ class ToPollySRT:
     def __seq_for_SRT(self,seq_n):
         time_stamp = "%s --> %s"% (self.__seq_dict[seq_n]["script_start"], self.__seq_dict[seq_n]["script_end"])
         return "%s\n%s\n%s\n\n" % (str(seq_n), time_stamp, self.__seq_dict[seq_n]["script"])
+    
+    def __update_seq_start(self,seq_n):
+        prev_end = _to_seconds(self.__seq_dict[seq_n-1]["script_end"])
+        curr_start = _to_seconds(self.__seq_dict[seq_n]["script_start"])
+        if prev_end > curr_start:
+            self.__seq_dict[seq_n]["script_start"] = _to_time_str(float(prev_end))
 
 def _to_seconds(time_str):
     ms = float(('.' + time_str.split(',')[1]).zfill(3))
@@ -150,9 +161,11 @@ def to_Polly(srt_obj):# returns mp3s in subfolder
         script = srt_obj.get_seq(seq_i)["script"]
         file_name = srt_obj.get_name() + "_" + str(seq_i).zfill(3) + ".mp3"
         output_path = output_fdr + file_name
-        print("Communincating to AWS Polly")
+        print("\nCommunicating to AWS Polly")
         _polly(output_fdr=output_fdr, file_name=file_name, script=script, voice_id="Brian", news=False)
-        polly_aud = AudioFileClip(glob.glob(output_fdr + "*.mp3")[seq_i-1])
+        aud_out = glob.glob(output_fdr + "*.mp3")[seq_i-1]
+        print("Polly MP3 saved at %s" % (aud_out))
+        polly_aud = AudioFileClip(aud_out)
         srt_obj.set_seq_end(seq_i, polly_aud.duration)
         polly_aud.reader.close_proc()
     srt_obj.update_SRT()

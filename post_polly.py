@@ -42,12 +42,13 @@ for folder_id in changes_lst:
     folder_path = os.path.join(VIDEOS_FDR,folder_id) + "\\"
     vid_dict = body_dict[folder_id]
     pre_id = vid_dict["meta"]["pre_polly_id"]
+    vid_name = re.search("-[\d]{4}-(.*)",vid_dict["title"]).group(1)
     os.makedirs(folder_path, exist_ok=True)
     
     dict_to_json(vid_dict,os.path.join(folder_path,"%s.json" % (folder_id)))
     # download video and srt into VIDEOS_FDR\folder_id
     folder_paths.append(folder_path)
-    dl_vid(pre_id,folder_path) # triggers error
+    dl_vid(pre_id,folder_path,folder_id, vid_name) # triggers error
    
 for folder in folder_paths:
     folder_name = re.search(r"\\(\d+)", folder).group(1)
@@ -100,12 +101,14 @@ vids_obj.set_changes(updated_ch_lst)
 vids_obj.to_JSON()
 
 if CLEANUP:
-    print("Cleanup initiated. Removing Processed Files")
-    shutil.rmtree(VIDEOS_FDR)
+    print("\nCleanup initiated. Removing Processed Files")
+    fdrs = glob.glob(VIDEOS_FDR + "*\\")
+    for fdr in fdrs:
+        shutil.rmtree(fdr)
 else:
-    print("Cleanup skipped. Include --clean to remove processed files.")
+    print("\nCleanup skipped. Include --clean to remove processed files.")
 
 if _ERROR:
     print(_ERROR_msg)
 else:   
-    print("Post-Polly Process Complete. Changes Made: %s" % (len(changes_lst) - len(updated_ch_lst)))
+    print("\nPost-Polly Process Complete. Changes Made: %s" % (len(changes_lst) - len(updated_ch_lst)))
