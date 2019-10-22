@@ -1,7 +1,7 @@
-from checks import *
-from get_by_type import *
-from video_JSON import VidJSON, VidsJSON
-from to_youtube import *
+from _checks import *
+from _get_by_type import *
+from _video_JSON import VidJSON, VidsJSON
+from _to_youtube import *
 import glob
 import argparse
 import os
@@ -59,7 +59,7 @@ for folder_i in range(0, len(FOLDERS)):
                     update_vid_details(YT_SESSION,pre_polly_id,vid_obj.get_yt_args())
                     curr_status = vid_obj.get_status()
                 else: # update mp4
-                    dl_captions(YT_SESSION,pre_polly_id,FOLDER_PATH)
+                    dl_captions(YT_SESSION,pre_polly_id,FOLDER_PATH, False)
                     del_vid(YT_SESSION,pre_polly_id)
                     pre_polly_id = upload_vid(YT_SESSION, mp4_path, vid_obj.get_yt_args())
         except HttpError as e:

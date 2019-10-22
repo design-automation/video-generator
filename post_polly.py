@@ -1,14 +1,15 @@
-from checks import *
-from get_by_type import *
-from video_JSON import VidJSON, VidsJSON, dict_to_json
-from movie_to_polly import *
-from to_youtube import *
+from _checks import *
+from _get_by_type import *
+from _video_JSON import VidJSON, VidsJSON, dict_to_json
+from _movie_to_polly import *
+from _to_youtube import *
 import glob
 import argparse
 import os
 import sys
 import re
 import shutil
+import time
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--clean", dest="cleanup", action="store_true", help="Delete files after process.")
@@ -30,8 +31,7 @@ _Error_msg = None
 
 vids_obj = VidsJSON(VIDEOS_JSON_PATH, FRESH)
 vids_dict = vids_obj.get_dict()
-if vids_dict["log"]["status"] == "post":
-    sys.exit("Post-Polly: No new updates to process.")
+
 updated_ch_lst = []
 changes_lst = vids_dict["log"]["changes"]
 body_dict = vids_dict["body"]
@@ -67,7 +67,6 @@ for folder in folder_paths:
         
         # Polly
         vid_name = mp4_obj.get_name()
-        print(vid_name)
         cut_MP4(mp4_obj,srt_obj)
         to_Polly(srt_obj)
 

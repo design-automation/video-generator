@@ -9,7 +9,7 @@ import time
 import json
 import re
 
-from get_by_type import *
+from _get_by_type import *
 
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -124,6 +124,9 @@ def _get_caption_lst(yt_service, id):
 
 def _filterNotASR(caption_dict):
     return caption_dict["snippet"]["trackKind"] != "ASR"
+
+def _filterASR(caption_dict):
+    return caption_dict["snippet"]["trackKind"] == "ASR"
         
 def get_authenticated_service(): # creates youtube service object
     credentials = None
@@ -177,9 +180,13 @@ def update_vid_details(yt_service, id, yt_details):
     except HttpError as e:
         raise HttpError ('An HTTP error %d occurred:\n%s' % (e.resp.status, e.content))
 
-def dl_captions(yt_service, id, folder):
+def dl_captions(yt_service, id, folder, ASR):
     caption_lst = _get_caption_lst(yt_service,id)#[0]["id"]
-    caption_id = list(filter(_filterNotASR,caption_lst))[0]["id"]
+    caption_id = ""
+    if ASR:
+        caption_id = list(filter(_filterASR, caption_lst))[0]["id"]
+    else:
+        caption_id = list(filter(_filterNotASR,caption_lst))[0]["id"]
     caption_bin = yt_service.captions().download(id=caption_id, tfmt="srt").execute()
     with open("%s%s_captions.srt" % (folder,id), "wt", encoding="utf-8") as srt_f:
         srt_f.write(caption_bin.decode("utf-8"))

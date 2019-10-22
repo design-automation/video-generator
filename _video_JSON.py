@@ -36,8 +36,6 @@ videos.json = {
 import os
 import json
 
-from checks import valid_vid_json, vids_json_exists, valid_vids_json
-
 class VIDEO_OBJ:
     def __init__(self):
         self.__title=""

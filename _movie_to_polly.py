@@ -2,11 +2,15 @@ import re
 import os
 import sys
 import glob
+import math
+import datetime
+import time
+
 from moviepy.editor import *
 from boto3 import Session
 from botocore.exceptions import BotoCoreError, ClientError
 from contextlib import closing
-from get_by_type import *
+from _get_by_type import *
 
 IMAGEMAGICK_BINARY = os.getenv('IMAGEMAGICK_BINARY', 'C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe')
 OUTPUT_FDR = "output\\"
@@ -41,9 +45,16 @@ class ToPollySRT:
         return self.__n_seq
     def get_folder(self):
         return self.__folder
-    # def get_dict(self):
-    #     return self.__seq_dict
-
+    def set_seq_end(self, seq_n, seconds):
+        start_secs = _to_seconds(self.__seq_dict[seq_n]["script_start"])
+        end_secs = start_secs + seconds
+        self.__seq_dict[seq_n]["script_end"] = _to_time_str(end_secs)
+    def update_SRT(self):
+        with open(self.__path, "wt", encoding="utf-8") as srt_f:
+            for seq_n in self.__seq_dict:
+                srt_f.write(self.__seq_for_SRT(seq_n))
+        print("SRT updated at %s" % (self.__path))
+        
     def __seqDict(self,srt_file): # cut SRT into timestamp dict
         seq_dict={}
         contents=[]
@@ -60,11 +71,27 @@ class ToPollySRT:
                         script += contents[line_i + script_i][:-1] + " "
                         script_i += 1
                     seq_dict[seq_n] = {"script_start": matches[0],
+                                       "script_end": "",
                                        "script": script}
                     seq_n += 1
             self.__n_seq = seq_n - 1 #-1
         return seq_dict
+    
+    def __seq_for_SRT(self,seq_n):
+        time_stamp = "%s --> %s"% (self.__seq_dict[seq_n]["script_start"], self.__seq_dict[seq_n]["script_end"])
+        return "%s\n%s\n%s\n\n" % (str(seq_n), time_stamp, self.__seq_dict[seq_n]["script"])
 
+def _to_seconds(time_str):
+    ms = float(('.' + time_str.split(',')[1]).zfill(3))
+    x = time.strptime(time_str.split(',')[0],'%H:%M:%S')
+    return datetime.timedelta(hours=x.tm_hour,minutes=x.tm_min,seconds=x.tm_sec).total_seconds() + ms
+
+def _to_time_str(f_seconds):
+    time_str = str(datetime.timedelta(seconds = f_seconds))
+    matches = re.search(r"(\d+):(\d+\:\d+)\.*(\d*)", time_str)
+    matches_3 = matches.group(3).zfill(3)[:3]
+    return "%s:%s,%s" % (matches.group(1).zfill(2), matches.group(2), matches_3)
+        
 def _polly(output_fdr, file_name, script, voice_id, news):
     session = Session()
     polly = session.client("polly")
@@ -125,6 +152,10 @@ def to_Polly(srt_obj):# returns mp3s in subfolder
         output_path = output_fdr + file_name
         print("Communincating to AWS Polly")
         _polly(output_fdr=output_fdr, file_name=file_name, script=script, voice_id="Brian", news=False)
+        polly_aud = AudioFileClip(glob.glob(output_fdr + "*.mp3")[seq_i-1])
+        srt_obj.set_seq_end(seq_i, polly_aud.duration)
+        polly_aud.reader.close_proc()
+    srt_obj.update_SRT()
 
 def composite_MP4(folder, vid_name, title): # returns mp4 in basefolder
     video_res = (1080,720)
