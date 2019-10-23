@@ -15,6 +15,8 @@ from _get_by_type import *
 
 IMAGEMAGICK_BINARY = os.getenv('IMAGEMAGICK_BINARY', 'C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe')
 OUTPUT_FDR = "output\\"
+TITLE_PERIOD = 3 #seconds
+PAUSE_PERIOD = 0.7 #seconds
 
 class ToPollyMP4:
     def __init__(self, folder):
@@ -86,20 +88,22 @@ class ToPollySRT:
     def __rebuild_dict(self):
         new_dict = {}
         n_seq_i = 1
-        base_start = _to_seconds(self.__seq_dict[1]["script_start"])
+        BASE_START = _to_seconds(self.__seq_dict[1]["script_start"])
         for seq_i in self.__seq_dict:
             seq_script = self.__seq_dict[seq_i]["script"]
             ori_len = len(seq_script)
-            ori_start = _to_seconds(self.__seq_dict[seq_i]["script_start"]) + 3 - base_start # title length = 3seconds
-            ori_end = _to_seconds(self.__seq_dict[seq_i]["script_end"]) + 3 - base_start
+            ori_start = _to_seconds(self.__seq_dict[seq_i]["script_start"]) + TITLE_PERIOD - BASE_START # title length = 3seconds
+            ori_end = _to_seconds(self.__seq_dict[seq_i]["script_end"]) + TITLE_PERIOD - BASE_START
             ori_period = ori_end - ori_start
             script_splt = _split_script(seq_script)
+            n_script_splt = len(script_splt)
+            ori_period -= (n_script_splt - 1) * PAUSE_PERIOD
             prev_end = ori_start
             for script in script_splt:
                 splt_len = len(script)
                 splt_period = splt_len/ori_len * ori_period
                 new_start = prev_end
-                new_end = new_start + splt_period
+                new_end = new_start + splt_period + PAUSE_PERIOD
                 seq_dict = dict(
                     script=script,
                     script_start=_to_time_str(new_start),
@@ -196,7 +200,7 @@ def to_Polly(srt_obj):# returns mp3s in subfolder
         file_name = srt_obj.get_name() + "_" + str(seq_i).zfill(3) + ".mp3"
         output_path = output_fdr + file_name
         # print("\nCommunicating to AWS Polly")
-        _polly(output_fdr=output_fdr, file_name=file_name, script=script, voice_id="Brian", news=False)
+        # _polly(output_fdr=output_fdr, file_name=file_name, script=script, voice_id="Brian", news=False)
         aud_out = glob.glob(output_fdr + "*.mp3")[seq_i-1]
         print("Polly MP3 saved at %s" % (aud_out))
         polly_aud = AudioFileClip(aud_out)
@@ -209,7 +213,7 @@ def composite_MP4(folder, vid_name, title): # returns mp4 in basefolder
     fade_color = [255,255,255]
     vid_clips = sorted(glob.glob(folder + OUTPUT_FDR + "*.mp4"), key=_file_idx)
     aud_clips = sorted(glob.glob(folder + OUTPUT_FDR + "*.mp3"), key=_file_idx)
-    title_clip = TextClip(txt=title, size=video_res, method="label", font="Ubuntu-Mono", color="black", bg_color="white", fontsize=103).set_duration("00:00:03").fadeout(duration=1, final_color=fade_color)
+    title_clip = TextClip(txt=title, size=video_res, method="label", font="Ubuntu-Mono", color="black", bg_color="white", fontsize=103).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
     vid_list = [title_clip]
     for i in range(0,len(vid_clips)):
         vid_clip = VideoFileClip(vid_clips[i])

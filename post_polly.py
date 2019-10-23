@@ -68,7 +68,7 @@ for folder in folder_paths:
         
         # Polly
         vid_name = mp4_obj.get_name()
-        cut_MP4(mp4_obj,srt_obj)
+        # cut_MP4(mp4_obj,srt_obj)
         to_Polly(srt_obj)
 
         comp_path = composite_MP4(folder,vid_name,vid_obj.get_yt_args()["description"])
@@ -79,7 +79,6 @@ for folder in folder_paths:
 
     except Exception as e:
         updated_ch_lst.append(folder_name) # add failed to change list
-        raise e
         if SKIP:
             print (e.args[0] + " Folder skipped.")
         else:
