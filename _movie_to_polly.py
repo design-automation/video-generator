@@ -92,7 +92,7 @@ class ToPollySRT:
         for seq_i in self.__seq_dict:
             seq_script = self.__seq_dict[seq_i]["script"]
             ori_len = len(seq_script)
-            ori_start = _to_seconds(self.__seq_dict[seq_i]["script_start"]) + TITLE_PERIOD - BASE_START # title length = 3seconds
+            ori_start = _to_seconds(self.__seq_dict[seq_i]["script_start"]) + TITLE_PERIOD - BASE_START
             ori_end = _to_seconds(self.__seq_dict[seq_i]["script_end"]) + TITLE_PERIOD - BASE_START
             ori_period = ori_end - ori_start
             script_splt = _split_script(seq_script)
@@ -199,8 +199,8 @@ def to_Polly(srt_obj):# returns mp3s in subfolder
         script = srt_obj.get_seq(seq_i)["script"]
         file_name = srt_obj.get_name() + "_" + str(seq_i).zfill(3) + ".mp3"
         output_path = output_fdr + file_name
-        # print("\nCommunicating to AWS Polly")
-        # _polly(output_fdr=output_fdr, file_name=file_name, script=script, voice_id="Brian", news=False)
+        print("\nCommunicating to AWS Polly")
+        _polly(output_fdr=output_fdr, file_name=file_name, script=script, voice_id="Brian", news=False)
         aud_out = glob.glob(output_fdr + "*.mp3")[seq_i-1]
         print("Polly MP3 saved at %s" % (aud_out))
         polly_aud = AudioFileClip(aud_out)
