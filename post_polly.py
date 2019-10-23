@@ -79,6 +79,7 @@ for folder in folder_paths:
 
     except Exception as e:
         updated_ch_lst.append(folder_name) # add failed to change list
+        raise e
         if SKIP:
             print (e.args[0] + " Folder skipped.")
         else:

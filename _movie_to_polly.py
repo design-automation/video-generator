@@ -51,6 +51,7 @@ class ToPollySRT:
         end_secs = start_secs + seconds
         self.__seq_dict[seq_n]["script_end"] = _to_time_str(end_secs)
     def update_SRT(self):
+        self.__rebuild_dict()
         with open(self.__path, "wt", encoding="utf-8") as srt_f:
             for seq_n in self.__seq_dict:
                 if seq_n != 1:
@@ -81,6 +82,34 @@ class ToPollySRT:
                     seq_n += 1
             self.__n_seq = seq_n - 1 #-1
         return seq_dict
+
+    def __rebuild_dict(self):
+        new_dict = {}
+        n_seq_i = 1
+        base_start = _to_seconds(self.__seq_dict[1]["script_start"])
+        for seq_i in self.__seq_dict:
+            seq_script = self.__seq_dict[seq_i]["script"]
+            ori_len = len(seq_script)
+            ori_start = _to_seconds(self.__seq_dict[seq_i]["script_start"]) + 3 - base_start # title length = 3seconds
+            ori_end = _to_seconds(self.__seq_dict[seq_i]["script_end"]) + 3 - base_start
+            ori_period = ori_end - ori_start
+            script_splt = _split_script(seq_script)
+            prev_end = ori_start
+            for script in script_splt:
+                splt_len = len(script)
+                splt_period = splt_len/ori_len * ori_period
+                new_start = prev_end
+                new_end = new_start + splt_period
+                seq_dict = dict(
+                    script=script,
+                    script_start=_to_time_str(new_start),
+                    script_end=_to_time_str(new_end)
+                )
+                new_dict[n_seq_i] = seq_dict
+                prev_end = new_end
+                n_seq_i += 1
+        self.__n_seq = n_seq_i - 1
+        self.__seq_dict = new_dict          
     
     def __seq_for_SRT(self,seq_n):
         time_stamp = "%s --> %s"% (self.__seq_dict[seq_n]["script_start"], self.__seq_dict[seq_n]["script_end"])
@@ -91,6 +120,11 @@ class ToPollySRT:
         curr_start = _to_seconds(self.__seq_dict[seq_n]["script_start"])
         if prev_end > curr_start:
             self.__seq_dict[seq_n]["script_start"] = _to_time_str(float(prev_end))
+
+def _split_script(script):
+    ret_script = re.sub("([\\.\\,\\?\\;\\!])\s","\\1#",script)
+    ret_script = ret_script.split("#")
+    return ret_script
 
 def _to_seconds(time_str):
     ms = float(('.' + time_str.split(',')[1]).zfill(3))
@@ -161,7 +195,7 @@ def to_Polly(srt_obj):# returns mp3s in subfolder
         script = srt_obj.get_seq(seq_i)["script"]
         file_name = srt_obj.get_name() + "_" + str(seq_i).zfill(3) + ".mp3"
         output_path = output_fdr + file_name
-        print("\nCommunicating to AWS Polly")
+        # print("\nCommunicating to AWS Polly")
         _polly(output_fdr=output_fdr, file_name=file_name, script=script, voice_id="Brian", news=False)
         aud_out = glob.glob(output_fdr + "*.mp3")[seq_i-1]
         print("Polly MP3 saved at %s" % (aud_out))
