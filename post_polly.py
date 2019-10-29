@@ -113,6 +113,8 @@ if _ERROR:
     print(_ERROR_msg)
 else:   
     print("\nPost-Polly Process Complete. Changes Made: %s" % (len(changes_lst) - len(updated_ch_lst)))
-    if (len(changes_lst) - len(updated_ch_lst)) > 0:
-        commit_msg = "Post-Polly. Changes Left: [%s]" % ", ".join(map(str, updated_ch_lst))
-        commit_n_push([VIDEOS_JSON_FILE],commit_msg)
+    # if (len(changes_lst) - len(updated_ch_lst)) > 0:
+    #     commit_msg = "Post-Polly. Changes Left: [%s]" % ", ".join(map(str, updated_ch_lst))
+    #     paths_lst = glob.glob("POST_SRT\\")
+    #     paths_lst.append(VIDEOS_JSON_FILE)
+    #     commit_n_push(paths_lst,commit_msg)
