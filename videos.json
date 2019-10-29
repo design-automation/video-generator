@@ -1,9 +1,7 @@
 {
     "log": {
-        "status": "pre",
-        "changes": [
-            0
-        ],
+        "status": "post",
+        "changes": [],
         "nxt_vid_i": 1
     },
     "body": {
@@ -12,10 +10,10 @@
             "description": "Mobius Interface",
             "meta": {
                 "video_i": 0,
-                "status": "srt",
+                "status": "post",
                 "last_edit": 1572326771.3799975,
                 "pre_polly_id": "B3Ej6Omr1dY",
-                "post_polly_id": ""
+                "post_polly_id": "vLbxvcWmgWg"
             }
         }
     }
