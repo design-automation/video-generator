@@ -3,6 +3,7 @@ from _get_by_type import *
 from _video_JSON import VidJSON, VidsJSON, dict_to_json
 from _movie_to_polly import *
 from _to_youtube import *
+from _to_github import *
 import glob
 import argparse
 import os
@@ -112,3 +113,6 @@ if _ERROR:
     print(_ERROR_msg)
 else:   
     print("\nPost-Polly Process Complete. Changes Made: %s" % (len(changes_lst) - len(updated_ch_lst)))
+    if (len(changes_lst) - len(updated_ch_lst)) > 0:
+        commit_msg = "Post-Polly. Changes Left: [%s]" % ", ".join(map(str, updated_ch_lst))
+        commit_n_push([VIDEOS_JSON_FILE],commit_msg)

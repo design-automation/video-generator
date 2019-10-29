@@ -2,6 +2,7 @@ from _checks import *
 from _get_by_type import *
 from _video_JSON import VidJSON, VidsJSON
 from _to_youtube import *
+from _to_github import *
 import glob
 import argparse
 import os
@@ -9,7 +10,8 @@ import os
 YT_SESSION = get_authenticated_service()
 
 SKIP = True
-VIDEOS_JSON_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),"videos.json")
+VIDEOS_JSON_FILE = "videos.json"
+VIDEOS_JSON_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),VIDEOS_JSON_FILE)
 VIDEOS_FDR = "VIDEOS\\"
 FOLDERS = glob.glob("%s*\\" % (VIDEOS_FDR))
 STATUS = "pre"
@@ -85,4 +87,7 @@ vids_obj.to_JSON()
 if _ERROR:
     print(_ERROR_msg)
 else:   
-    print("Pre-Polly Process Complete. Changes Made: %s" % (len(changes_lst)))
+    print("Pre-Polly Process Complete. Changes Made: %s" % len(changes_lst))
+    if len(changes_lst) > 0:
+        commit_msg = "Pre-Polly. Changes Made: [%s]" % ", ".join(map(str, changes_lst))
+        commit_n_push([VIDEOS_JSON_FILE],commit_msg)
