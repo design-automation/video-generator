@@ -8,7 +8,6 @@ import base64
 g = Github(login_or_token=__GH_API_TOKEN__.token)
 DA_ORG = g.get_organization(login="design-automation")
 REPO = DA_ORG.get_repo("video-generator")
-# REPO = g.get_user().get_repo("gitapi_test")
 
 MASTER_REF = REPO.get_git_ref(ref="heads/master")
 HEAD_COMMIT = REPO.get_git_commit(MASTER_REF.object.sha)

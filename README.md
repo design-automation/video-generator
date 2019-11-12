@@ -1,2 +1,2 @@
 # video-generator
-A workflow to generate videos using Amazon Polly and YouTube
+A workflow to generate videos using Amazon Polly and Translate

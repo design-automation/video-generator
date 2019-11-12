@@ -1,18 +1,19 @@
 '''
 video.json = {
         "title" : "YOUTUBE TITLE HERE",
-        "description" : "YOUTUBE DESCRIPTION HERE"
+        "description" : "YOUTUBE DESCRIPTION HERE",
+        "voice_id" : [int] 1-4 (types of voices available) ** MODULO IF SPECIFIED IS LESS THAN AVAILABLE VOICES
     }
 
 video.json = {
         "title" : "YOUTUBE TITLE HERE",
         "description" : "YOUTUBE DESCRIPTION HERE",
+        "voice_id" : [int] 1-4 (types of voices available) ** MODULO IF SPECIFIED IS LESS THAN AVAILABLE VOICES,
         "meta" : {
             video_i: [int] index,
-            status: [string] "json" || "mp4" || "srt" || "post",
-            last_edit: [int] last edit time for json/mp4 (pre_polly),
-            pre_polly_id: [string] youtube_video_id,
-            post_polly_id: [string] youtube_video_id,
+            status: [string] "pre" || "post",
+            json_edit: [float] last edit time for JSON (pre_polly), ** Any change should always be reflected on json: descr, or updated uploaded
+            pre_polly_id: [string] youtube_video_id
         }
     }
 
@@ -40,15 +41,16 @@ class VIDEO_OBJ:
     def __init__(self):
         self.__title=""
         self.__description=""
+        self.__voice_id=""
         self.__meta=dict(
+            WARNING="DO NOT DELETE meta OR MODIFY ANY meta KEY OTHER THAN pre_polly_id",
             video_i=0,
             status="",
             last_edit=0,
-            pre_polly_id="",
-            post_polly_id=""
+            pre_polly_id=""
         )
     def as_dict(self):
-        return dict(title=self.__title, description=self.__description, meta=self.__meta)
+        return dict(title=self.__title, description=self.__description, voice_id=self.__voice_id, meta=self.__meta)
 
 class VIDEOS_OBJ:
     def __init__(self):
@@ -89,12 +91,8 @@ class VidJSON:
         self.__dict["meta"]["status"] = value
     def set_pre_id(self, value):
         self.__dict["meta"]["pre_polly_id"] = value
-    def set_post_id(self, value):
-        self.__dict["meta"]["post_polly_id"] = value
     def get_dict(self):
         return self.__dict
-    def get_path(self):
-        return self.__path
     def get_video_i(self):
         return self.__dict["meta"]["video_i"]
     def get_status(self):
@@ -103,9 +101,7 @@ class VidJSON:
         return self.__dict["meta"]["last_edit"]
     def get_pre_id(self):
         return self.__dict["meta"]["pre_polly_id"]
-    def get_post_id(self):
-        return self.__dict["meta"]["post_polly_id"]
-    def get_yt_args(self):
+    def get_vid_args(self):
         sh_cpy = dict(self.__dict)
         del sh_cpy["meta"]
         sh_cpy["tags"] = [self.get_status()]
@@ -135,7 +131,11 @@ class VidsJSON:
             self.__dict["log"]["nxt_vid_i"] = self.__dict["log"]["nxt_vid_i"] + 1
         else:
             self.__dict["body"][video_i] = vid_obj.get_dict()
-    def get_dict(self):
-        return self.__dict
+    def get_nxt_vid_i(self):
+        return self.__dict["log"]["nxt_vid_i"]
+    def get_changes_lst(self):
+        return self.__dict["log"]["changes"]
+    def get_body_dict(self):
+        return self.__dict["body"]
     def to_JSON(self):
         return dict_to_json(self.__dict, self.__path)

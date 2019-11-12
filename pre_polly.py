@@ -1,13 +1,10 @@
 from _checks import *
 from _get_by_type import *
 from _video_JSON import VidJSON, VidsJSON
-from _to_youtube import *
 from _to_github import *
 import glob
 import argparse
 import os
-
-YT_SESSION = get_authenticated_service()
 
 SKIP = True
 VIDEOS_JSON_FILE = "videos.json"
@@ -16,78 +13,61 @@ VIDEOS_FDR = "VIDEOS\\"
 FOLDERS = glob.glob("%s*\\" % (VIDEOS_FDR))
 STATUS = "pre"
 FRESH = not vids_json_exists(VIDEOS_JSON_PATH,True)
-_ERROR = False
-_ERROR_msg = None
 
 vids_obj = VidsJSON(VIDEOS_JSON_PATH, FRESH)
-changes_lst = vids_obj.get_dict()["log"]["changes"]
+changes_lst = vids_obj.get_changes_lst()
+vids_body_dict = vids_obj.get_body_dict()
+change_log = {}
+end_msg = "Pre-Polly Process Complete."
 
 for folder_i in range(0, len(FOLDERS)):
-    VIDEO_i = vids_obj.get_dict()["log"]["nxt_vid_i"]
+    VIDEO_i = vids_obj.get_nxt_vid_i()
 
     FOLDER_PATH = FOLDERS[folder_i]
     json_paths = get_paths_by_typ(FOLDER_PATH,"json")
-    mp4_paths = get_paths_by_typ(FOLDER_PATH,"mp4")
     vid_obj = None
-    if json_paths == None or mp4_paths == None:
+    status = STATUS
+    if json_paths == None:
         continue
-    if not valid_vid_json(json_paths[0],SKIP):
+    if not valid_vid_json(json_paths[0]):
         continue
-    else: # check time
-        mp4_path = mp4_paths[0]
+    else: # check for changes
         json_path = json_paths[0]
         vid_obj = VidJSON(json_path, VIDEO_i)
 
-        curr_edit_time = vid_obj.get_lst_edt()
-        curr_status = vid_obj.get_status()
-        
-        json_edit_time = os.path.getmtime(json_path)
-        if json_edit_time > curr_edit_time:
-            curr_status = "json"
-            curr_edit_time = json_edit_time
-        mp4_edit_time = os.path.getmtime(mp4_path)
-        if mp4_edit_time > curr_edit_time:
-            curr_status = "mp4"
-            curr_edit_time = mp4_edit_time
-        if vid_obj.get_lst_edt() >= curr_edit_time:
-            continue
-        
-        pre_polly_id = vid_obj.get_pre_id()
-        try:
-            if pre_polly_id == "": # new upload
-                pre_polly_id = upload_vid(YT_SESSION, mp4_path, vid_obj.get_yt_args())
-            else: # update
-                if curr_status == "json": # update video details
-                    update_vid_details(YT_SESSION,pre_polly_id,vid_obj.get_yt_args())
-                    curr_status = vid_obj.get_status()
-                else: # update mp4
-                    dl_captions(YT_SESSION,pre_polly_id,FOLDER_PATH, False)
-                    del_vid(YT_SESSION,pre_polly_id)
-                    pre_polly_id = upload_vid(YT_SESSION, mp4_path, vid_obj.get_yt_args())
-        except HttpError as e:
-            if SKIP:
-                print(e.args[0] + ". Folder skipped.")
-            else:
-                _ERROR = True
-                _ERROR_msg = e.args[0]
-        vid_obj.set_pre_id(pre_polly_id)
-        vid_obj.set_status(curr_status)
-        vid_obj.set_lst_edt(curr_edit_time)
+        vid_curr_edit = os.path.getmtime(json_path)
+        if FRESH:
+            change_log[VIDEO_i] = "FRESH"
+        else:
+            try:
+                vids_saved_edit = vids_body_dict[str(vid_obj.get_video_i())]["meta"]["last_edit"]
+                saved_prepolly = vids_obj.get_body_dict()[str(vid_obj.get_video_i())]["meta"]["pre_polly_id"]
+                curr_prepolly = vid_obj.get_pre_id()
+                if vids_saved_edit != vid_curr_edit:
+                    change_log[vid_obj.get_video_i()] = "UPDATE"
+                    if (curr_prepolly != saved_prepolly) and curr_prepolly != "":
+                        status = "video"
+                else:
+                    end_msg += " No changes detected."
+                    continue
+            except Exception:
+                change_log[VIDEO_i] = "FRESH"
+
+        vid_obj.set_status(status)
         vid_obj.update_JSON()
+        end_msg += " Change log:"
         if vid_obj.get_video_i() not in changes_lst:
             changes_lst.append(vid_obj.get_video_i())
+        vid_obj.set_lst_edt(os.path.getmtime(json_path))
         vids_obj.set_vid_obj(vid_obj)
-        if _ERROR:
-            break
-
+          
 vids_obj.set_status(STATUS)
 vids_obj.set_changes(changes_lst)
 vids_obj.to_JSON()
 
-if _ERROR:
-    print(_ERROR_msg)
-else:   
-    print("Pre-Polly Process Complete. Changes Made: %s" % len(changes_lst))
-    if len(changes_lst) > 0:
-        commit_msg = "Pre-Polly. Changes Made: [%s]" % ", ".join(map(str, changes_lst))
-        commit_n_push([VIDEOS_JSON_FILE],commit_msg)
+print(end_msg)
+for log_i in change_log:
+    print("\t%s: %s" % (log_i, change_log[log_i]))
+# if len(changes_lst) > 0:
+#     commit_msg = "Pre-Polly. Changes Made: [%s]" % ", ".join(map(str, changes_lst))
+#     commit_n_push([VIDEOS_JSON_FILE],commit_msg)

@@ -10,7 +10,7 @@ vids_json_exists(path, skip)
 valid_vid_json(path, skip): shallow check
     title
     description
-    tags
+    voice_id
     ? meta
 
 valid_vids_json(path): shallow check
@@ -22,36 +22,33 @@ valid_vids_json(path): shallow check
 import os
 import json
 import glob
+from _video_JSON import VIDEO_OBJ, VIDEOS_OBJ
 
-VID_JSON_KEYS = ["title", "description"]
-VIDS_JSON_KEYS = ["log", "body"]
+VID_JSON_KEYS = list(VIDEO_OBJ().as_dict().keys())
+VID_JSON_KEYS.remove("meta") # non-essential first run
+VIDS_JSON_KEYS = list(VIDEOS_OBJ().as_dict().keys())
 
-def _valid_json(path, skip): # checks if json can be loaded.
+def _valid_json(path): # checks if json can be loaded.
     err_msg = "Invalid JSON at: %s" % (path)
     try:
         with open(path) as json_f:
             test = json.load(json_f)
             return True
     except IOError:
-        if not skip:
-            raise Exception (err_msg)
-        else:
-            print(err_msg + " Folder skipped.")
+        print(err_msg)
+        raise
 
-def valid_vid_json(path,skip):
+def valid_vid_json(path):
     err_msg = "%s is invalid." % (path)
     check = False
-    if not _valid_json(path, skip): return False
+    if not _valid_json(path): return False
     with open(path) as json_f:
         vid_dict = json.load(json_f)
         for key in VID_JSON_KEYS:
             check = key in vid_dict
             if not check:
                 err_msg += "key: '%s' does not exist. " % (key)
-                if not skip:
-                    raise Exception(err_msg)
-                else:
-                    print(err_msg + " Folder skipped.")
+                raise Exception(err_msg)
     return check
 
 def vids_json_exists(path,skip): # to check videos.json
