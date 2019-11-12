@@ -72,6 +72,7 @@ for folder in folder_paths:
         voice_id = vid_args["voice_id"]
         description = vid_args["description"]
         AVAIL_VOICES = srt_obj.get_languages() # dictionary of available voices in _movie_to_polly
+        post_id_dict = vid_obj.get_post_id()
 
         for lang in LANGUAGES:
             neural = AVAIL_VOICES[lang]["neural"]
@@ -81,11 +82,12 @@ for folder in folder_paths:
             print(polly_voice_id)
             to_Polly(srt_obj, lang, polly_voice_id, neural)
             comp_path = composite_MP4(lang, folder, vid_name, description)
-            # Upload 
-            # Upload to S3 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            # if post_id != "":
-            #     del_vid(YT_SESSION, post_id)
-            # post_id = upload_vid(YT_SESSION,comp_path,vid_obj.get_vid_args())
+            #Upload 
+            #Upload to S3 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            # if (lang not in post_id_dict):
+            #     # upload
+            # else:
+            #     # delete then upload
 
     except Exception as e:
         updated_ch_lst.append(folder_name) # add failed to change list
@@ -100,7 +102,7 @@ for folder in folder_paths:
     if _ERROR or vid_obj == None:
         break
     else:
-        # vid_obj.set_post_id(post_id)
+        vid_obj.set_post_id(post_id)
         if folder_name not in updated_ch_lst:
             vid_obj.set_status(STATUS)
         vids_obj.set_vid_obj(vid_obj)

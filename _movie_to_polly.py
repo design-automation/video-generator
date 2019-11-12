@@ -179,27 +179,10 @@ class ToPollySRT:
         if prev_end > curr_start:
             self.__seq_dict[language][seq_n]["script_start"] = _to_time_str(float(prev_end))
 
-def _split_script(script): # to create separate split functions for different languages !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # if language == "uk" or language == "us":
-    #     return _split_script_en(script)
-    # elif language == "zh":
-    #     return _split_script_zh(script)
-    # else:
-    #     raise Exception("Language SRT not implemented")
+def _split_script(script):
     ret_script = re.sub(r"([^\w\s])","\\1#",script)
     ret_script = ret_script.split("#")
     return ret_script
-
-
-# def _split_script_zh(script):
-#     ret_script = re.sub(r"([^\w\s])","\\1#",script)
-#     ret_script = ret_script.split("#")
-#     return ret_script
-
-# def _split_script_en(script): 
-#     ret_script = re.sub("([\\.\\,\\?\\;\\!])\s","\\1#",script)
-#     ret_script = ret_script.split("#")
-#     return ret_script
 
 def _to_seconds(time_str):
     ms = float(('.' + time_str.split(',')[1]).zfill(3))

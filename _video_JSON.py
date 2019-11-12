@@ -47,7 +47,8 @@ class VIDEO_OBJ:
             video_i=0,
             status="",
             last_edit=0,
-            pre_polly_id=""
+            pre_polly_id="",
+            post_polly_id={}
         )
     def as_dict(self):
         return dict(title=self.__title, description=self.__description, voice_id=self.__voice_id, meta=self.__meta)
@@ -91,6 +92,8 @@ class VidJSON:
         self.__dict["meta"]["status"] = value
     def set_pre_id(self, value):
         self.__dict["meta"]["pre_polly_id"] = value
+    def set_post_id_dict(self, value):
+        self.__dict["meta"]["post_polly_id"] = value
     def get_dict(self):
         return self.__dict
     def get_video_i(self):
@@ -101,6 +104,8 @@ class VidJSON:
         return self.__dict["meta"]["last_edit"]
     def get_pre_id(self):
         return self.__dict["meta"]["pre_polly_id"]
+    def get_post_id_dict(self):
+        return self.__dict["meta"]["post_polly_id"]
     def get_vid_args(self):
         sh_cpy = dict(self.__dict)
         del sh_cpy["meta"]
