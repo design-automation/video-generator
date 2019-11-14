@@ -4,8 +4,9 @@ test/
 ## YouTube client secret and user auth token
 client_secret.json
 auth_user_file.json
+__GH_API_TOKEN__.py
 
 ##pycache
 __pycache__/
 
-__GH_API_TOKEN__.py
+error_log.json

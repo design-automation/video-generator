@@ -15,6 +15,7 @@ from _get_by_type import *
 
 IMAGEMAGICK_BINARY = os.getenv('IMAGEMAGICK_BINARY', 'C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe')
 OUTPUT_FDR = "output"
+VIDEO_RES = (1080,720)
 # example folder structure:
 # |_VIDEOS
 #   |_TOPIC1
@@ -149,12 +150,15 @@ class ToPollySRT:
             ori_start = _to_seconds(self.__seq_dict[language][seq_i]["script_start"]) + TITLE_PERIOD - BASE_START
             ori_end = _to_seconds(self.__seq_dict[language][seq_i]["script_end"]) + TITLE_PERIOD - BASE_START
             ori_period = ori_end - ori_start
-            script_splt = _split_script(seq_script)
+            script_splt = _split_script(seq_script, language)
             n_script_splt = len(script_splt)
             ori_period -= (n_script_splt - 1) * PAUSE_PERIOD
             prev_end = ori_start
             for script in script_splt:
                 splt_len = len(script)
+                if script == "":
+                    ori_len = 1
+                    splt_len = 1
                 splt_period = splt_len/ori_len * ori_period
                 new_start = prev_end
                 new_end = new_start + splt_period + PAUSE_PERIOD
@@ -179,8 +183,21 @@ class ToPollySRT:
         if prev_end > curr_start:
             self.__seq_dict[language][seq_n]["script_start"] = _to_time_str(float(prev_end))
 
-def _split_script(script):
+def _split_script(script, language): # to create separate split functions for different languages !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if language == "uk" or language == "us":
+        return _split_script_en(script)
+    elif language == "zh":
+        return _split_script_zh(script)
+    else:
+        raise Exception("Language SRT not implemented")
+
+def _split_script_zh(script):
     ret_script = re.sub(r"([^\w\s])","\\1#",script)
+    ret_script = ret_script.split("#")
+    return ret_script
+
+def _split_script_en(script): 
+    ret_script = re.sub("([\\.\\,\\?\\;\\!])\s","\\1#",script)
     ret_script = ret_script.split("#")
     return ret_script
 
@@ -232,7 +249,7 @@ def _polly(session, output_fdr, file_name, script, voice_id, neural):
         sys.exit(-1)
 
 def _file_idx(file_name):
-    return re.search(r"_(\d\d\d)\.",file_name).group(1)
+    return re.search(r"-(\d+)\.",file_name).group(1)
 
 def cut_MP4(mp4_obj, srt_obj): # returns mp4s in subfolder
     clip = VideoFileClip(mp4_obj.get_path())
@@ -249,7 +266,7 @@ def cut_MP4(mp4_obj, srt_obj): # returns mp4s in subfolder
             new_clip = clip.subclip(script_start, next_start)
         
         prev_end = script_start
-        file_name = mp4_obj.get_name() + "_" + str(seq_i).zfill(3) + ".mp4"
+        file_name = mp4_obj.get_name() + "-" + str(seq_i).zfill(3) + ".mp4"
         output_path = output_fdr + file_name
         new_clip.write_videofile(output_path, audio=False)
 
@@ -257,43 +274,74 @@ def to_Polly(srt_obj, language, voice_id, neural):# returns mp3s in subfolder
     session = Session()
     output_fdr = srt_obj.get_folder() + OUTPUT_FDR + "_%s\\" % language
     os.makedirs(output_fdr, exist_ok=True)
+    aud_i = 0
     for seq_i in range(1, srt_obj.get_n_seq()+1): #range(0, srt_obj.get_n_seq())
         script = srt_obj.get_seq(language, seq_i)["script"]
-        if language!="uk" and language!="us":
-            script = _translate(session, script, language)
-            srt_obj.update_script(language, seq_i, script)
-
-        file_name = srt_obj.get_name() + "_" + str(seq_i).zfill(3) + ".mp3"
-        output_path = output_fdr + file_name
-        print("\nCommunicating to AWS Polly")
-        _polly(session=session, output_fdr=output_fdr, file_name=file_name, script=script, voice_id=voice_id , neural=neural)
-        aud_out = glob.glob(output_fdr + "*.mp3")[seq_i-1]
-        print("Polly MP3 saved at %s" % (aud_out))
-        polly_aud = AudioFileClip(aud_out)
-        srt_obj.set_seq_end(language, seq_i, polly_aud.duration)
-        polly_aud.reader.close_proc()
+        if script!="":
+            if language!="uk" and language!="us":
+                script = _translate(session, script, language)
+                srt_obj.update_script(language, seq_i, script)
+            file_name = srt_obj.get_name() + "-" + str(seq_i).zfill(3) + ".mp3"
+            output_path = output_fdr + file_name
+            print("\nCommunicating to AWS Polly")
+            _polly(session=session, output_fdr=output_fdr, file_name=file_name, script=script, voice_id=voice_id , neural=neural)
+            aud_out = glob.glob(output_fdr + "*.mp3")[aud_i]
+            aud_i += 1
+            print("Polly MP3 saved at %s" % (aud_out))
+            polly_aud = AudioFileClip(aud_out)
+            srt_obj.set_seq_end(language, seq_i, polly_aud.duration)
+            polly_aud.reader.close_proc()
+        else:
+            srt_obj.set_seq_end(language, seq_i, PAUSE_PERIOD)
     srt_obj.update_SRT(language)
 
 def composite_MP4(language, folder, vid_name, title):
-    video_res = (1080,720)
-    fade_color = [255,255,255]
-    vid_clips = sorted(glob.glob(folder + OUTPUT_FDR + "_VIDEOS\\" + "*.mp4"), key=_file_idx)
+    return _composite_video("YT", language, folder, vid_name, title)
 
+def composite_PNGs(language, folder, vid_name, title):    
+    return _composite_video("PPTX", language, folder, vid_name, title)
+
+def _composite_video(typ, language, folder, vid_name, title):
+    fade_color = [255,255,255]
     aud_clips = sorted(glob.glob(folder + OUTPUT_FDR + "_%s\\" % language + "*.mp3"), key=_file_idx)
+    aud_dict = {int(_file_idx(aud_clips[i])):aud_clips[i] for i in range(0, len(aud_clips))}
+    print(aud_dict)
     if language!="uk" and language!="us":
         title += "\n(%s)" % language
-    title_clip = TextClip(txt=title, size=video_res, method="label", font="Ubuntu-Mono", color="black", bg_color="white", fontsize=103).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
+    title_clip = TextClip(txt=title, size=VIDEO_RES, method="label", font="Ubuntu-Mono", color="black", bg_color="white", fontsize=103).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
     vid_list = [title_clip]
-    for i in range(0,len(vid_clips)):
-        vid_clip = VideoFileClip(vid_clips[i])
-        aud_clip = AudioFileClip(aud_clips[i])
-        if (vid_clip.duration < aud_clip.duration):
-            vid_clip = vid_clip.set_duration(aud_clip.duration)
-        if i==0:
-            vid_list.append(vid_clip.set_audio(aud_clip).fadein(duration=1, initial_color=fade_color))
-        else:
-            vid_list.append(vid_clip.set_audio(aud_clip))
 
+    if typ == "YT":
+        vid_clips = sorted(glob.glob(folder + OUTPUT_FDR + "_VIDEOS\\" + "*.mp4"), key=_file_idx)
+        for i in range(0,len(vid_clips)):
+            vid_clip = VideoFileClip(vid_clips[i])
+            vid_idx = int(_file_idx(vid_clips[i]))
+            aud_clip = AudioFileClip(aud_dict[vid_idx])
+            if (vid_clip.duration < aud_clip.duration):
+                vid_clip = vid_clip.set_duration(aud_clip.duration)
+            if i==0:
+                vid_list.append(vid_clip.set_audio(aud_clip).fadein(duration=1, initial_color=fade_color))
+            else:
+                vid_list.append(vid_clip.set_audio(aud_clip))
+    else:
+        slide_pngs = sorted(glob.glob(folder + "images\\" + "*.png"), key=_file_idx)
+        for i in range(0,len(slide_pngs)):
+            slide_clip = ImageClip(slide_pngs[i])
+            slides_idx = int(_file_idx(slide_pngs[i])) + 1
+            try:
+                aud_clip = AudioFileClip(aud_dict[slides_idx])
+                buffer = 0
+                if aud_clip.duration > 5:
+                    buffer = PAUSE_PERIOD
+                slide_clip = slide_clip.set_duration(aud_clip.duration + buffer).set_audio(aud_clip)
+            except KeyError:
+                slide_clip = slide_clip.set_duration(PAUSE_PERIOD)
+                pass
+            if i==0:
+                vid_list.append(slide_clip.fadein(duration=1, initial_color=fade_color))
+            else:
+                vid_list.append(slide_clip)
+    print(vid_list)
     composite = concatenate_videoclips(vid_list).resize(height=720)
     composite.fps = 30
     composite_path = folder + vid_name + "_%s_comp.mp4" % language

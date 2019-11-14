@@ -46,6 +46,7 @@ class VIDEO_OBJ:
             WARNING="DO NOT DELETE meta OR MODIFY ANY meta KEY OTHER THAN pre_polly_id",
             video_i=0,
             status="",
+            pptx_rel_path="",
             last_edit=0,
             pre_polly_id="",
             post_polly_id={}
@@ -90,6 +91,8 @@ class VidJSON:
         self.__dict["meta"]["last_edit"] = value
     def set_status(self, value):
         self.__dict["meta"]["status"] = value
+    def set_pptx_path(self, value):
+        self.__dict["meta"]["pptx_rel_path"] = value
     def set_pre_id(self, value):
         self.__dict["meta"]["pre_polly_id"] = value
     def set_post_id_dict(self, value):
@@ -100,6 +103,8 @@ class VidJSON:
         return self.__dict["meta"]["video_i"]
     def get_status(self):
         return self.__dict["meta"]["status"]
+    def get_pptx_path(self):
+        return self.__dict["meta"]["pptx_rel_path"]
     def get_lst_edt(self):
         return self.__dict["meta"]["last_edit"]
     def get_pre_id(self):
