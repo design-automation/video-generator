@@ -1,11 +1,11 @@
 # GitHub REST API
 
-import __GH_API_TOKEN__
+from __CONSTS__ import GH_token
 from github import Github
 from github import InputGitTreeElement
 import base64
 
-g = Github(login_or_token=__GH_API_TOKEN__.token)
+g = Github(login_or_token=GH_token)
 DA_ORG = g.get_organization(login="design-automation")
 REPO = DA_ORG.get_repo("video-generator")
 

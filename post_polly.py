@@ -5,6 +5,9 @@ from _movie_to_polly import *
 from _pptx_to_video import pptx_to_ingreds
 from _to_youtube import dl_vid
 from _to_github import *
+from _to_S3 import upload_s3
+from __CONSTS__ import S3_bucket
+
 import glob
 import argparse
 import os
@@ -38,7 +41,6 @@ def sub_process(typ, folder, vids_obj):
     try:
         vid_obj = VidJSON(get_paths_by_typ(folder, "json")[0], folder_name)
         vid_args = vid_obj.get_vid_args()
-        print(vid_args)
         vid_name = re.search("-[\d]{4}-(.*)",vid_args["title"]).group(1)
         if typ == "YT":
             srt_obj = ToPollySRT(folder, LANGUAGES)
@@ -46,7 +48,7 @@ def sub_process(typ, folder, vids_obj):
             cut_MP4(mp4_obj,srt_obj)
         else:
             pptx_path = vid_obj.get_pptx_path()
-            # pptx_to_ingreds(pptx_path, folder) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            pptx_to_ingreds(pptx_path, folder) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             srt_obj = ToPollySRT(folder, LANGUAGES)
 
         voice_id = vid_args["voice_id"]
@@ -60,18 +62,16 @@ def sub_process(typ, folder, vids_obj):
             avail_voice_ids = AVAIL_VOICES[lang]["ids"]
             polly_voice_id = avail_voice_ids[voice_id % len(avail_voice_ids)]
             print("\n%s" % polly_voice_id)
-            # to_Polly(srt_obj, lang, polly_voice_id, neural) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            to_Polly(srt_obj, lang, polly_voice_id, neural) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
             if typ == "YT":
                 comp_path = composite_MP4(lang, folder, vid_name, description)
             else:
                 comp_path = composite_PNGs(lang, folder, vid_name, description)
-            #Upload to S3 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            # if (lang not in post_id_dict):
-            #     # upload
-            # else:
-            #     # delete then upload
-            post_id_dict[lang] = "S3 PATH HERE"
+
+            S3_path = re.sub("-", "/", vid_args["title"]) + ".mp4" 
+            upload_s3(comp_path, S3_bucket, S3_path)
+            post_id_dict[lang] = S3_path
     except Exception as e:
         try:
             raise e
