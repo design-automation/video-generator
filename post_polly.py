@@ -72,6 +72,7 @@ def sub_process(typ, folder, vids_obj):
             S3_path = re.sub("-", "/", vid_args["title"]) + ".mp4" 
             upload_s3(comp_path, S3_bucket, S3_path)
             post_id_dict[lang] = S3_path
+            print("\nUploaded to S3")
     except Exception as e:
         try:
             raise e
