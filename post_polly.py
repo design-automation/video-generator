@@ -69,7 +69,7 @@ def sub_process(typ, folder, vids_obj):
             else:
                 comp_path = composite_PNGs(lang, folder, vid_name, description)
 
-            S3_path = re.sub("-", "/", vid_args["title"]) + ".mp4" 
+            S3_path = "%s_%s.mp4" % (re.sub("-", "/", vid_args["title"]), lang)
             upload_s3(comp_path, S3_bucket, S3_path)
             post_id_dict[lang] = S3_path
             print("\nUploaded to S3")
