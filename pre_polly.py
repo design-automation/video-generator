@@ -1,12 +1,10 @@
 from _checks import *
 from _get_by_type import *
 from _video_JSON import VidJSON, VidsJSON
-from _to_github import *
 import glob
 import argparse
 import os
 
-SKIP = True
 VIDEOS_JSON_FILE = "videos.json"
 VIDEOS_JSON_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),VIDEOS_JSON_FILE)
 FOLDERS = ["VIDEOS\\", "PPTX\\"]
