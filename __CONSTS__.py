@@ -1,5 +1,5 @@
 COURSE_PATH = "input\\Course\\"
-LANGUAGES = ["uk", "zh"] # available: ["us", "uk", "zh", "pt", "es"]
+LANGUAGES = ["uk", "zh"] # available: refer to keys of VOICES below
 VOICES = dict(
     us = dict(
             lang_code = "en-US", # usable for translate api
@@ -25,5 +25,20 @@ VOICES = dict(
             lang_code = "cmn-CN",
             neural = False,
             ids = ["Zhiyu"]
+        ),
+    fr = dict(
+            lang_code = "fr-FR",
+            neural = False,
+            ids = ["Celine", "Léa", "Mathieu"]
+        ),
+    de = dict(
+            lang_code = "de-DE",
+            neural = False,
+            ids = ["Marlene", "Vicki", "Hans"]
+        ),
+    nl = dict(
+            lang_code = "nl-NL",
+            neural = False,
+            ids = ["Lotte", "Ruben"]
         )
 )
