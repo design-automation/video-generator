@@ -46,7 +46,7 @@ Listed below are essential packages used in the script
                 |                 `-- Unit (Target folder)
                 `-- Section
                         `-- Subsection
-                                `-- Unit (Target folder)
+                                  `-- Unit (Target folder)
     ```
 1. Video settings
     * Resolution: (width, height) in px
@@ -86,7 +86,7 @@ Listed below are essential packages used in the script
     * script will use provided srt files when available
     * follows the same naming convention as shown above
     * for optimum results, ensure srt sequences are full sentences and use the start time to determine points where speech should start
-    * note that translated srt files that will be replaced if the core `pptx` or `mp4` file, or `_en.srt` file has been modified
+    * note that translated srt files that will **not** be replaced with a new translation when the core `pptx` or `mp4` file, or `_en.srt` file has been modified. Text-to-speech is based on said srt file and may not be up to date with the new modifications. To generate a new foreign-language srt, delete the language srt file.
         ```
         `-- input
             `-- Course
