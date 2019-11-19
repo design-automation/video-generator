@@ -30,6 +30,7 @@ Listed below are essential packages used in the script
 * [unoconv](https://github.com/unoconv/unoconv)
 * [bs4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
 * [lxml](https://pypi.org/project/lxml/)
+* [pyyaml](https://pyyaml.org/wiki/PyYAML)
 
 ## Input
 ### Settings
