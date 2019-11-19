@@ -247,7 +247,7 @@ def cut_MP4(mp4_obj, srt_obj): # returns mp4s in subfolder
         new_clip.write_videofile(output_path, audio=False)
 
 def to_Polly(srt_obj, voice_id, neural):# returns mp3s in subfolder
-    session = Session(aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+    session = Session(aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, region_name="us-east-1")
     language = srt_obj.get_language()
     output_fdr = srt_obj.get_folder() + "\\" + srt_obj.get_name()[:-3] +"\\" + OUTPUT_FDR + "_%s\\" % language
     os.makedirs(output_fdr, exist_ok=True)
