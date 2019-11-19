@@ -13,6 +13,7 @@ from botocore.exceptions import BotoCoreError, ClientError
 from contextlib import closing
 from _get_by_type import *
 from __CONSTS__ import VOICES, VIDEO_RES, TITLE_PERIOD, IMAGEMAGICK_BINARY
+from __AWS__ import aws_access_key_id, aws_secret_access_key
 
 OUTPUT_FDR = "output"
 PAUSE_PERIOD = 0.7 #seconds
@@ -246,7 +247,7 @@ def cut_MP4(mp4_obj, srt_obj): # returns mp4s in subfolder
         new_clip.write_videofile(output_path, audio=False)
 
 def to_Polly(srt_obj, voice_id, neural):# returns mp3s in subfolder
-    session = Session()
+    session = Session(aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
     language = srt_obj.get_language()
     output_fdr = srt_obj.get_folder() + "\\" + srt_obj.get_name()[:-3] +"\\" + OUTPUT_FDR + "_%s\\" % language
     os.makedirs(output_fdr, exist_ok=True)
