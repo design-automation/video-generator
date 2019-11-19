@@ -59,7 +59,7 @@ def main():
                             print("\nNo change for %s\\%s\n" % (vid_obj.get_base_dir(), vid_obj.get_file_name()))
                             continue # no change
                         # change == 1
-                        success = _generate_video(vid_obj, lang)
+                        success = _generate_video(vid_obj, lang, change)
                         if not success:
                             break
                     if change == 0:
@@ -73,20 +73,20 @@ def main():
 def _generate_all(vid_obj):
     success = False
     for lang in LANGUAGES:
-        success = _generate_video(vid_obj, lang)
+        success = _generate_video(vid_obj, lang, 0)
         if not success:
             print("\nError occured. Process Terminated.")
             break
     return success
 
-def _generate_video(vid_obj, language):
+def _generate_video(vid_obj, language, change):
     try:
         vid_args = vid_obj.get_vid_args()
         vid_name = vid_args["title"]
         vid_ext = vid_obj.get_ext()
         out_folder = "%s\\%s" % (vid_obj.get_base_dir(), vid_obj.get_file_name())
         os.makedirs(out_folder, exist_ok=True)
-        if vid_ext == "pptx" and (language=="uk" or language=="us"): # break once
+        if vid_ext == "pptx" and (language=="uk" or language=="us" or change == 1): # break once
             pptx_to_ingreds(vid_obj.get_pre_polly_path(), out_folder)
 
         srt_path = vid_obj.get_srt_path(language)
@@ -94,7 +94,7 @@ def _generate_video(vid_obj, language):
             srt_path = vid_obj.get_srt_path("en")
         srt_obj = ToPollySRT(srt_path,language)
 
-        if vid_ext == "mp4" and (language=="uk" or language=="us"): # break once
+        if vid_ext == "mp4" and (language=="uk" or language=="us" or change == 1): # break once
             mp4_obj = ToPollyMP4(vid_obj.get_pre_polly_path())
             cut_MP4(mp4_obj,srt_obj)
 
