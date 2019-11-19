@@ -12,6 +12,7 @@ from boto3 import Session
 from botocore.exceptions import BotoCoreError, ClientError
 from contextlib import closing
 from _get_by_type import *
+from __CONSTS__ import VOICES
 
 IMAGEMAGICK_BINARY = os.getenv('IMAGEMAGICK_BINARY', 'C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe')
 OUTPUT_FDR = "output"
@@ -33,39 +34,13 @@ VIDEO_RES = (1080,720)
 
 TITLE_PERIOD = 3 #seconds
 PAUSE_PERIOD = 0.7 #seconds
-VOICES = dict(
-    us = dict(
-            lang_code = "en-US", # usable for translate api
-            neural = True,
-            ids = ["Joanna", "Kendra", "Kimberly", "Salli", "Joey", "Matthew"]
-        ),
-    uk = dict(
-            lang_code = "en-GB",
-            neural = True,
-            ids = ["Amy", "Emma", "Brian"]
-        ),
-    pt = dict(
-            lang_code = "pt-BR",
-            neural = True,
-            ids = ["Camila"]
-        ),
-    es = dict(
-            lang_code = "es-US",
-            neural = True,
-            ids = ["Lupe"]
-        ),
-    zh = dict(
-            lang_code = "cmn-CN",
-            neural = False,
-            ids = ["Zhiyu"]
-        )
-)
 
 class ToPollyMP4:
-    def __init__(self, folder):
-        self.__path = get_paths_by_typ(folder, "mp4")[0]
-        self.__name = re.search(r"\\[\d+]\\(.*).mp4",self.__path).group(1)
-        self.__folder = folder
+    def __init__(self, mp4_path):
+        self.__path = mp4_path
+        (root,ext) = os.path.splitext(mp4_path)
+        self.__name = os.path.basename(root)
+        self.__folder = os.path.dirname(mp4_path)
     def get_folder(self):
         return self.__folder
     def get_path(self): # gets path to MP4 in folder
@@ -74,14 +49,15 @@ class ToPollyMP4:
         return self.__name
 
 class ToPollySRT:
-    def __init__(self, folder, languages):
-        self.__voices = {lang: VOICES[lang] for lang in languages}
-        self.__path = get_paths_by_typ(folder, "srt")[0]
-        self.__name = re.search(r"\\[\d+]\\(.*).srt",self.__path).group(1)
+    def __init__(self, srt_path, language):
+        self.__language = language
+        self.__voices = {language: VOICES[language]}
+        self.__path = srt_path
+        (root,ext) = os.path.splitext(srt_path)
+        self.__name = os.path.basename(root)
         self.__seq_dict = self.__seq_dict(self.__path)
-        self.__folder = folder
+        self.__folder = os.path.dirname(srt_path)
         self.__n_seq
-
     def get_full_dict(self): #for errors
         return self.__seq_dict
     def get_name(self):
@@ -91,34 +67,51 @@ class ToPollySRT:
     def get_seq(self, language, n):
         lang = language
         if lang == "CUT":
-            lang = list(self.__voices.keys())[0]
+            lang = self.__language
         return self.__seq_dict[lang][n]
     def get_n_seq(self):
         return self.__n_seq
     def get_folder(self):
         return self.__folder
-    def get_languages(self):
+    def get_voices(self):
         return self.__voices
-    def set_seq_end(self, language, seq_n, seconds):
+    def get_language(self):
+        return self.__language
+    def set_seq_end(self, seq_n, seconds):
+        language = self.__language
         start_secs = _to_seconds(self.__seq_dict[language][seq_n]["script_start"])
         end_secs = start_secs + seconds
         self.__seq_dict[language][seq_n]["script_end"] = _to_time_str(end_secs)
-    def update_script(self, language, seq_n, script):
+    def update_script(self, seq_n, script):
+        language = self.__language
         self.__seq_dict[language][seq_n]["script"] = script
-    def update_SRT(self, language): 
-        self.__rebuild_dict(language)
-        tar_path = self.__folder + "..\\..\\POST_SRT\\" + self.__name + language + ".srt"
+    def update_SRT(self): 
+        language = self.__language
+        lang_append = language
+        if lang_append == "uk" or lang_append == "us":
+            lang_append = "en"
+        else:
+            self.__write_base_lang(lang_append)
+        self.__rebuild_dict()    
+        tar_path = self.__folder + "\\"+ self.__name[:-3] + "_sub_" + lang_append + ".srt"
+        
         with open(tar_path, "wt", encoding="utf-8") as srt_f:
             for seq_n in self.__seq_dict[language]:
                 if seq_n != 1:
-                    self.__update_seq_start(language, seq_n)
-                srt_f.write(self.__seq_for_SRT(language, seq_n))
+                    self.__update_seq_start(seq_n)
+                srt_f.write(self.__seq_for_SRT(seq_n))
         print("\nUpdated SRT (%s) created at %s" % (self.__path, tar_path))
+    def __write_base_lang(self, language):
+        with open(self.__folder + "\\"+ self.__name[:-3] + "_" + language + ".srt", "wt", encoding="utf-8") as srt_f:
+            for seq_n in self.__seq_dict[language]:
+                if seq_n != 1:
+                    self.__update_seq_start(seq_n)
+                srt_f.write(self.__seq_for_SRT(seq_n))
     def __seq_dict(self,srt_file): # cut SRT into timestamp dict
         seq_dict = {lang:{} for lang in self.__voices}
         contents = []
         seq_n = 1
-        with open(srt_file, "rt") as f:
+        with open(srt_file, "rt", encoding="utf-8") as f:
             for line in f:
                 contents.append(line)
             for line_i in range(0,len(contents)):
@@ -137,7 +130,8 @@ class ToPollySRT:
             self.__n_seq = seq_n - 1 #-1
         return seq_dict
 
-    def __rebuild_dict(self, language):
+    def __rebuild_dict(self):
+        language = self.__language
         new_dict = {}
         n_seq_i = 1
 
@@ -145,8 +139,8 @@ class ToPollySRT:
         for seq_i in self.__seq_dict[language]:
             seq_script = self.__seq_dict[language][seq_i]["script"]
             ori_len = len(seq_script)
-            print("script start: " + self.__seq_dict[language][seq_i]["script_start"])
-            print("script end: " + self.__seq_dict[language][seq_i]["script_end"])
+            if seq_script == "":
+                continue
             ori_start = _to_seconds(self.__seq_dict[language][seq_i]["script_start"]) + TITLE_PERIOD - BASE_START
             ori_end = _to_seconds(self.__seq_dict[language][seq_i]["script_end"]) + TITLE_PERIOD - BASE_START
             ori_period = ori_end - ori_start
@@ -156,9 +150,6 @@ class ToPollySRT:
             prev_end = ori_start
             for script in script_splt:
                 splt_len = len(script)
-                if script == "":
-                    ori_len = 1
-                    splt_len = 1
                 splt_period = splt_len/ori_len * ori_period
                 new_start = prev_end
                 new_end = new_start + splt_period + PAUSE_PERIOD
@@ -173,11 +164,13 @@ class ToPollySRT:
         # self.__n_seq = n_seq_i - 1
         self.__seq_dict[language] = new_dict          
     
-    def __seq_for_SRT(self, language, seq_n):
+    def __seq_for_SRT(self, seq_n):
+        language = self.__language
         time_stamp = "%s --> %s"% (self.__seq_dict[language][seq_n]["script_start"], self.__seq_dict[language][seq_n]["script_end"])
         return "%s\n%s\n%s\n\n" % (str(seq_n), time_stamp, self.__seq_dict[language][seq_n]["script"])
     
-    def __update_seq_start(self, language, seq_n):
+    def __update_seq_start(self, seq_n):
+        language = self.__language
         prev_end = _to_seconds(self.__seq_dict[language][seq_n-1]["script_end"])
         curr_start = _to_seconds(self.__seq_dict[language][seq_n]["script_start"])
         if prev_end > curr_start:
@@ -253,7 +246,7 @@ def _file_idx(file_name):
 
 def cut_MP4(mp4_obj, srt_obj): # returns mp4s in subfolder
     clip = VideoFileClip(mp4_obj.get_path())
-    output_fdr = mp4_obj.get_folder() + OUTPUT_FDR + "_VIDEOS\\"
+    output_fdr = mp4_obj.get_folder() + "\\" + mp4_obj.get_name() +"\\" + OUTPUT_FDR + "_VIDEOS\\"
     os.makedirs(output_fdr, exist_ok=True)
     num_seq = srt_obj.get_n_seq()
     for seq_i in range(1, num_seq + 1):#range(0, num_seq)
@@ -270,17 +263,18 @@ def cut_MP4(mp4_obj, srt_obj): # returns mp4s in subfolder
         output_path = output_fdr + file_name
         new_clip.write_videofile(output_path, audio=False)
 
-def to_Polly(srt_obj, language, voice_id, neural):# returns mp3s in subfolder
+def to_Polly(srt_obj, voice_id, neural):# returns mp3s in subfolder
     session = Session()
-    output_fdr = srt_obj.get_folder() + OUTPUT_FDR + "_%s\\" % language
+    language = srt_obj.get_language()
+    output_fdr = srt_obj.get_folder() + "\\" + srt_obj.get_name()[:-3] +"\\" + OUTPUT_FDR + "_%s\\" % language
     os.makedirs(output_fdr, exist_ok=True)
     aud_i = 0
     for seq_i in range(1, srt_obj.get_n_seq()+1): #range(0, srt_obj.get_n_seq())
         script = srt_obj.get_seq(language, seq_i)["script"]
         if script!="":
-            if language!="uk" and language!="us":
+            if srt_obj.get_name()[-2:] == "en" and (language!="uk" and language!="us"): # translate
                 script = _translate(session, script, language)
-                srt_obj.update_script(language, seq_i, script)
+                srt_obj.update_script(seq_i, script)
             file_name = srt_obj.get_name() + "-" + str(seq_i).zfill(3) + ".mp3"
             output_path = output_fdr + file_name
             print("\nCommunicating to AWS Polly")
@@ -289,30 +283,30 @@ def to_Polly(srt_obj, language, voice_id, neural):# returns mp3s in subfolder
             aud_i += 1
             print("Polly MP3 saved at %s" % (aud_out))
             polly_aud = AudioFileClip(aud_out)
-            srt_obj.set_seq_end(language, seq_i, polly_aud.duration)
+            srt_obj.set_seq_end(seq_i, polly_aud.duration)
             polly_aud.reader.close_proc()
         else:
-            srt_obj.set_seq_end(language, seq_i, PAUSE_PERIOD)
-    srt_obj.update_SRT(language)
+            srt_obj.set_seq_end(seq_i, PAUSE_PERIOD)
+    srt_obj.update_SRT()
 
 def composite_MP4(language, folder, vid_name, title):
-    return _composite_video("YT", language, folder, vid_name, title)
+    return _composite_video("MP4", language, folder, vid_name, title)
 
 def composite_PNGs(language, folder, vid_name, title):    
     return _composite_video("PPTX", language, folder, vid_name, title)
 
 def _composite_video(typ, language, folder, vid_name, title):
     fade_color = [255,255,255]
-    aud_clips = sorted(glob.glob(folder + OUTPUT_FDR + "_%s\\" % language + "*.mp3"), key=_file_idx)
+    aud_clips = sorted(glob.glob(folder + "\\" + OUTPUT_FDR + "_%s\\" % language + "*.mp3"), key=_file_idx)
     aud_dict = {int(_file_idx(aud_clips[i])):aud_clips[i] for i in range(0, len(aud_clips))}
-    print(aud_dict)
+
     if language!="uk" and language!="us":
         title += "\n(%s)" % language
     title_clip = TextClip(txt=title, size=VIDEO_RES, method="label", font="Ubuntu-Mono", color="black", bg_color="white", fontsize=103).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
     vid_list = [title_clip]
 
-    if typ == "YT":
-        vid_clips = sorted(glob.glob(folder + OUTPUT_FDR + "_VIDEOS\\" + "*.mp4"), key=_file_idx)
+    if typ == "MP4":
+        vid_clips = sorted(glob.glob(folder + "\\" + OUTPUT_FDR + "_VIDEOS\\" + "*.mp4"), key=_file_idx)
         for i in range(0,len(vid_clips)):
             vid_clip = VideoFileClip(vid_clips[i])
             vid_idx = int(_file_idx(vid_clips[i]))
@@ -324,7 +318,7 @@ def _composite_video(typ, language, folder, vid_name, title):
             else:
                 vid_list.append(vid_clip.set_audio(aud_clip))
     else:
-        slide_pngs = sorted(glob.glob(folder + "images\\" + "*.png"), key=_file_idx)
+        slide_pngs = sorted(glob.glob(folder + "\\images\\" + "*.png"), key=_file_idx)
         for i in range(0,len(slide_pngs)):
             slide_clip = ImageClip(slide_pngs[i])
             slides_idx = int(_file_idx(slide_pngs[i])) + 1
@@ -341,10 +335,10 @@ def _composite_video(typ, language, folder, vid_name, title):
                 vid_list.append(slide_clip.fadein(duration=1, initial_color=fade_color))
             else:
                 vid_list.append(slide_clip)
-    print(vid_list)
+
     composite = concatenate_videoclips(vid_list).resize(height=720)
     composite.fps = 30
-    composite_path = folder + vid_name + "_%s_comp.mp4" % language
+    composite_path = folder + "\\" + vid_name + "_%s_comp.mp4" % language
     composite.write_videofile(composite_path)
 
     print("Job Complete")

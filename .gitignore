@@ -4,7 +4,7 @@ test/
 ## YouTube client secret and user auth token
 client_secret.json
 auth_user_file.json
-__CONSTS__.py
+__AWS__.py
 
 ##pycache
 __pycache__/

@@ -43,7 +43,7 @@ class VIDEO_OBJ:
         self.__description=""
         self.__voice_id=""
         self.__meta=dict(
-            WARNING="DO NOT DELETE meta OR MODIFY ANY meta KEY OTHER THAN pre_polly_id",
+            WARNING="DO NOT DELETE meta OR MODIFY ANY meta KEY",
             video_i=0,
             status="",
             pptx_rel_path="",

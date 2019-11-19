@@ -36,7 +36,7 @@ def _pptXML_to_SRT(folder_path):
             srt_f.write("%s\n" % slide_dict[str(i)])
             srt_f.write("\n")
 
-def _libreXML_to_SRT(folder_path):
+def _libreXML_to_SRT(folder_path, tar_fdr):
     DEFAULT_TIME_BREAK = 5 #seconds
     xml_file = glob.glob(folder_path + "\\*.xml")[0]
     file_name = re.sub("\.xml", "", os.path.basename(xml_file))
@@ -53,13 +53,13 @@ def _libreXML_to_SRT(folder_path):
             except AttributeError:
                 notes = ""
             slide_dict[str(slide_i + 1)] = notes
-    with open(folder_path + "\\" + file_name+".srt", "wt", encoding="utf-8") as srt_f:
+    with open(tar_fdr + "\\" + file_name+"_en.srt", "wt", encoding="utf-8") as srt_f:
         for i in range(1, n_slides + 1):
             srt_f.write("%s\n" % str(i))
             srt_f.write("%s --> %s\n" % (_to_time_str((i-1)*DEFAULT_TIME_BREAK), _to_time_str((i)*DEFAULT_TIME_BREAK)))
             srt_f.write("%s\n" % slide_dict[str(i)])
             srt_f.write("\n")
-
+    
 def pptx_to_ingreds(pptx_path, tar_folder):
     pptx_abs_path =  os.path.abspath(pptx_path)
     folder = os.path.abspath(tar_folder)
@@ -78,5 +78,5 @@ def pptx_to_ingreds(pptx_path, tar_folder):
     subprocess.run(['magick', 'convert', os.path.abspath(os.path.join(folder, "%s.pdf" % file_name)), "-resize", sz, os.path.abspath(os.path.join(image_fdr, "%s.png" % file_name))]) 
 
     print("Generating SRT from xml")
-    _libreXML_to_SRT(folder)
+    _libreXML_to_SRT(folder, os.path.dirname(pptx_path))
 
