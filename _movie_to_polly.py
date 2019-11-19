@@ -12,27 +12,9 @@ from boto3 import Session
 from botocore.exceptions import BotoCoreError, ClientError
 from contextlib import closing
 from _get_by_type import *
-from __CONSTS__ import VOICES
+from __CONSTS__ import VOICES, VIDEO_RES, TITLE_PERIOD, IMAGEMAGICK_BINARY
 
-IMAGEMAGICK_BINARY = os.getenv('IMAGEMAGICK_BINARY', 'C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe')
 OUTPUT_FDR = "output"
-VIDEO_RES = (1080,720)
-# example folder structure:
-# |_VIDEOS
-#   |_TOPIC1
-#     |_output_en
-#       | # en polly mp3s
-#     |_output_cn
-#       | # cn polly mp3s
-#     |_output_VIDEOS
-#       | # cut mp4
-#     | *.json
-#     | *.mp4
-#     | *.srt
-#     | *_comp_en.mp4
-#     | *_comp_cn.mp4
-
-TITLE_PERIOD = 3 #seconds
 PAUSE_PERIOD = 0.7 #seconds
 
 class ToPollyMP4:

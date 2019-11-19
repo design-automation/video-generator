@@ -1,5 +1,5 @@
 # video-generator
-A [two-part workflow](#Workflow) to generate videos using Amazon Polly and Translate. Each part is executed by a separate script ([pre_polly.py](pre_polly.py) and [post_polly.py](post_polly.py)) and can be run on separate machines.
+A workflow to generate videos using Amazon Polly and Translate. This script serves to complement [edx-generator](https://github.com/design-automation/edx-generator) by processing videos stored in the input folder of an unit.
 
 The aim is:
 * to shorten a video creation timeframe by employing modern text-to-speech services by [AWS Polly](https://aws.amazon.com/polly/)
@@ -17,13 +17,13 @@ Listed below are essential packages used in the script
     * conversion of .pdf to .png
 * [Libre Office](https://www.libreoffice.org/)
     * used by unoconv to convert pptx to pdf
+    * used by unoconv to convert pptx to xml
 * [GhostScript](https://www.ghostscript.com/)
     * required by unoconv to facilitate conversion to pdf
 
 ### pip packages
 * [boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)
     * AWS python SDK
-    * **AWS config has been set up on machine**
     * Services used: [Polly](https://aws.amazon.com/polly/), [Translate](https://aws.amazon.com/translate/), and [S3](https://aws.amazon.com/s3/)
 * [moviepy](https://zulko.github.io/moviepy/)
 * [youtube_dl](https://pypi.org/project/youtube_dl/)
@@ -31,228 +31,119 @@ Listed below are essential packages used in the script
 * [bs4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
 * [lxml](https://pypi.org/project/lxml/)
 
-## Workflow
-The two scripts are designed for two users:
-1. Content creator [(How-to)](#Execution)
-    * [pre_polly.py](pre_polly.py)
-    * Requires only "bare-bones" Python 3 installed on device and basic Git Knowledge to pull and push changes
-    * Instructions for created content should be structured in [.json files](#JSON-Instruction-Files) and stored in SUBFOLDERS in their respective folders
+## Input
+### Settings
+> [`__CONSTS__.py`](__CONSTS__.py)
+1. Correct Path to IMAGEMAGICK exe is required for script to work
+1. Relative Course Path (from root folder) where units will be checked. Script iterates **3 levels deep** to get to the units from the Course Path
+    ```
+    `-- input
+        `-- Course (Starts here)
+                |-- Section
+                |       |-- Subsection
+                |       |         `-- Unit (Target folder)
+                |       `-- Subsection
+                |                 `-- Unit (Target folder)
+                `-- Section
+                        `-- Subsection
+                                `-- Unit (Target folder)
+    ```
+1. Video settings
+    * Resolution: (width, height) in px
+    * Title Period: Period in which the title is shown (in seconds)
+1. Audio settings
+    * Languages: Languages which will be used to generate the videos
+    * Voices: Based on list available on [AWS Polly Documentation](https://docs.aws.amazon.com/polly/latest/dg/voicelist.html)
+        * Take note whether neural voice is available for the voice
+        * voice key is used for [AWS Translate](https://docs.aws.amazon.com/translate/latest/dg/what-is.html)
+### Course Units
+1. MP4 file with srt
+    * srt sequence should start at index 1 and be appended with `_language`
+    * for optimum results, ensure srt sequences are full sentences and use the start time to determine points where speech should start
         ```
-        |_PPTX
-          |_subfolder
-            |_.pptx file
-            |_.json
-        |_VIDEOS
-          |_subfolder
-            |_.json
+        `-- input
+            `-- Course
+                    `-- Section
+                        `-- Subsection
+                                    `-- Unit
+                                        |-- mp4_file_name_en.srt
+                                        |-- mp4_file_name.mp4
+                                        `-- mp4_file_name.md               
         ```
-    * Recorded videos are uploaded onto YouTube where the transciption UI can facilitate the closed captioning process. Reduces the need for storage of pre-processed videos, its srt, along with installation of closed captioning software.
-        * Note that transciptions should be in paragraph chunks for optimal translation and text-to-speech results.
-        * Creator defines key segments of a video where points are to be made.
-    * PPTX files are stored in a subfolder along with its accompanying instructions file. Script for each slide should be written in their respective presentor notes sections.
-2. [Machine with Requirements setup](#Requirements)
-    * Pull Changes by Content creator to get the latest [videos.json file](#JSON-Instruction-Files)
-    * Goes through the subfolders marked in the file to generate each video. Videos and their accompanying srt files are downloaded while pptx files are converted into .png and .srt files.
-    * SRT files:
-        * are used to be splice pre-processed video as they mark key instructional points where audio will be generated and added
-        * are translated before being sent to AWS Polly to be generated.
-        * The length of the returned mp3 from Polly is used to regenerate the SRT and stretch a video segment if necessary.
-    * PPTX files:
-        * Video created from slides are still images stretched to meet the length of the audio generated by Polly
-    * Segmented videos are stringed back together with audio and uploaded onto S3
+1. pptx file
+    * transcripts are to be written in presenter notes
+    * for optimum results, ensure presenter notes are in full sentences
+        ```
+        `-- input
+            `-- Course
+                    `-- Section
+                        `-- Subsection
+                                    `-- Unit
+                                        |-- pptx_file_name.pptx
+                                        `-- pptx_file_name.md
+        ```
+1. Accompanying language-specific srt files
+    * script will use provided srt files when available
+    * follows the same naming convention as shown above
+    * for optimum results, ensure srt sequences are full sentences and use the start time to determine points where speech should start
+    * note that translated srt files that will be replaced if the core `pptx` or `mp4` file, or `_en.srt` file has been modified
+        ```
+        `-- input
+            `-- Course
+                    `-- Section
+                        `-- Subsection
+                                    `-- Unit
+                                        |-- pptx_file_name_fr.srt <--
+                                        |-- pptx_file_name_zh.srt <--
+                                        |-- pptx_file_name.pptx
+                                        `-- pptx_file_name.md
+        ```
 
-## JSON Instruction Files
-*video*.json
-> An accompanying instruction file for each pptx and video.
-
-    ## Before Execution of pre_polly.py
-    ## ================================
-        video.json = {
-            "title" : "COURSE-YEAR-TYPEunit.component.version",
-            "description" : "VIDEO TITLE",
-            "voice_id" : [int] 1-4 (if voices are to be varied for each language) **
-        }
-
-
-    ## After First Execution of pre_polly.py
-    ## ================================
-        video.json = {
-            "title" : "COURSE-YEAR-TYPEunit.component.version",
-            "description" : "VIDEO TITLE",
-            "voice_id" : [int] 1-4 (if voices are to be varied for each language) **
-            "meta": {
-                "WARNING": "DO NOT DELETE meta OR MODIFY ANY meta KEY OTHER THAN pre_polly_id",
-                "video_i": 0,
-                "status": "pre",
-                "pptx_rel_path": "",
-                "last_edit": <from epoch>,
-                "pre_polly_id": "",
-                "post_polly_id": {}
-            }
-        }
-
-    ## After Update with YouTube id
-    ## ================================
-        video.json = {
-            "title" : "COURSE-YEAR-TYPEunit.component.version",
-            "description" : "VIDEO TITLE",
-            "voice_id" : [int] 1-4 (if voices are to be varied for each language) **
-            "meta": {
-                "WARNING": "DO NOT DELETE meta OR MODIFY ANY meta KEY OTHER THAN pre_polly_id",
-                "video_i": 0,
-                "status": "video",
-                "pptx_rel_path": "",
-                "last_edit": <from epoch>,
-                "pre_polly_id": "YOUTUBE ID HERE",
-                "post_polly_id": {}
-            }
-        }
-
-videos.json
->An instructional file used to communicate changes done to content, so unnecessary rebuilding of videos can be avoided.
-    
-    ## After First Execution of pre_polly.py
-    ## ================================
-        videos.json = {
-            "log" : {
-                status: [string] "pre",
-                changes: int[] indexes,
-                nxt_vid_i: [int] n + 1
-            },
-            "body" : {
-                0 : video_dict (from video.json)
-                1 : video_dict
-                    .
-                    .
-                    .
-                n : video_dict
-            }
-        }
-
-    ## After Successful Execution of post_polly.py
-    ## ================================
-        videos.json = {
-            "log" : {
-                status: "post"
-                changes: [],
-                nxt_vid_i: [int] n + 1
-            },
-            "body" : {
-                0 : video_dict (from video.json)
-                1 : video_dict
-                    .
-                    .
-                    .
-                n : video_dict
-            }
-        }
-
-## Execution
-> Part i.
-1. After accompanying *video*.json [(in specified json format)](#JSON-Instruction-Files) has been created for each component, execute:
+## Output
+1. `videos.json` file
+    * This file serves as a log to keep track of last modified time for all the pptx, mp4, and their md and srt files.
+    * **deletion of videos.json or renaming of files will result in regeneration of the videos**
     ```
-    python pre_polly.py
+    `-- input
+        `-- Course
+                `-- Section
+                        `-- Subsection
+                                `-- Unit
+                                    `-- videos.json <--
     ```
-1. A videos.json file should be created in the base directory and each *video*.json file should be updated with a "meta" key-value pair which houses key data regarding the status of the files.
-1. Content Creator can proceed to upload a video and set the transcriptions.
-1. Content Creator should return to the individual *video*.json file and update the pre_polly_id with the YouTube id. It is **necessary** for the srt to have been created with the uploaded video
-1. Once complete, execute
+1. language specific sub files
+    * The sequences are split at punctuation marks and shortened for a smoother performance
+    * **They should not be reused for audio generation as the sentences will be incomplete**
     ```
-    python pre_polly.py
+    `-- input
+        `-- Course
+                `-- Section
+                        `-- Subsection
+                                `-- Unit
+                                    |-- example.mp4
+                                    |-- example_en.srt
+                                    `-- example_sub_en.srt <--
     ```
-1. videos.json should be updated.
-1. By pushing changes to a git repository, pptx and their json, along with videos.json should be uploaded.
-> Part ii.
-1. Execute:
+1. translated srt files
+    * The sequences are translated as-is from the original en srt file or pptx notes.
+    * This file may be edited to regenerate the video of its language
     ```
-    python post_polly.py
+    `-- input
+        `-- Course
+                `-- Section
+                        `-- Subsection
+                                `-- Unit
+                                    |-- example.mp4
+                                    |-- example_en.srt
+                                    `-- example_zh.srt <--
     ```
+## Example
+[Section 1> Subsection 2 > Unit 1](input\Course\Section_Week_1\Subsection_2_Shorts\Unit_1_Text_Imgs_and_Videos)
+## Execute
+1. Rename [`__AWS__.template.py`](__AWS__.template.py) to `__AWS__.py`
+    * Include AWS Access Key, Secret Access Key, and S3 Bucket name in renamed file
+1. Set Path to MAGICK.exe file in [`__CONSTS__.py`](__CONSTS__.py)
+1. Execute
     ```
-    python post_polly.py --clean
+    python vid_generator.py
     ```
-    The latter automatically cleans the generated component media files stashed in VIDEOS folder during the process.
-
-## Example Terminal Log breakdown
-
-[full file](example_log.txt)
-
-```
-PS D:\video-generator> python pre_polly.py
-D:\video-generator\videos.json does not exist. New file will be created at location.
-Pre-Polly Process Complete. Change log: Change log:
-        0: FRESH
-        1: FRESH
-```
-**First execution of pre_polly.py**\
-Folders with json files are assigned an id and saved into the body of videos.json file\
-In this example: 0 is a video file while 1 is a pptx file. Content in VIDEOS folder are always checked before PPTX
-
-```
-PS D:\video-generator> python pre_polly.py
-Pre-Polly Process Complete. Change log: No changes detected.
-        0: UPDATE
-```
-**Update of YouTube id in individual json file**\
-No change for PPTX json file
-
-```
-[youtube] Tpfl2CbVZVI: Downloading webpage
-.
-.
-[ffmpeg] Converting subtitles
-.
-```
-**Downloading of YouTube Video and SRT**\
-SRT files are converted from .vtt by FFMPEG automatically
-```
-Moviepy - Building video VIDEOS\0\output_VIDEOS\0_Ct2.7.1-001.mp4.
-Moviepy - Writing video VIDEOS\0\output_VIDEOS\0_Ct2.7.1-001.mp4
-
-Moviepy - Done !
-```
-**Split videos into chunks**\
-Video chunks defined by start time of each srt sequence
-```
-Emma
-
-Communicating to AWS Polly
-Polly MP3 saved at VIDEOS\0\output_uk\0_Ct2.7.1.en-001.mp3
-```
-**SRT files are translated and sent to Polly for mp3**\
-List of neural voices are defined for some languages in [_movie_to_polly.py](_movie_to_polly.py)\
-Languages have been fixed to "uk" and "zh" (English and Mandarin) in post_polly.py\
-Selected voice is defined by the voice id in the instruction json file, working on a modulo of the list length.
-
-```
-script start: 00:00:00,380
-script end: 00:00:06,400
-script start: 00:00:07,720
-script end: 00:00:19,500
-.
-.
-.
-Updated SRT (VIDEOS\0\0_Ct2.7.1.en.srt) created at VIDEOS\0\..\..\POST_SRT\0_Ct2.7.1.enuk.srt
-```
-**SRT file is rebuilt**\
-Split along punctuations and based on:
-`(number of characters in split segment)/(number of characters in sent chunk) * returned audio length + 0.7`\
-0.7 seconds worked out to be a good separator for pauses to synchronise the transcriptions.
-
-```
-PPTX to VIDEO PROCESS
-Converting pptx file to pdf
-Converting pptx file to xml
-Generating Images from pdf file
-convert: profile 'icc': 'RGB ': RGB color space not permitted on grayscale PNG `D:\OneDrive\NUS\Work\mobiusEdX\video-generator\VIDEOS\1\images\test.png' @ warning/png.c/MagickPNGWarningHandler/1748.
-Generating SRT from xml
-```
-**PPTX to png and srt**
-pptx needs to be converted to pdf first by unoconv before converting to png to the video dimensions by IMAGEMAGICK. Presenter notes from each slide is converted into srt sequences spaced 5 seconds apart.
-
-```
-Cleanup skipped. Include --clean to remove processed files.
-
-Post-Polly Process Complete. Changes Made: 2
-```
-**Termination**\
-Process files are kept by default. "Changes made" indicates the number of videos generated. Should there be any failures, the failed video ids should remain in the `changes_lst` key in the videos.json file. Failure is likely caused by no srt with video, or no pre-polly id defined. 

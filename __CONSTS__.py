@@ -1,4 +1,15 @@
+import os
+## ImageMagick Binary location
+IMAGEMAGICK_BINARY = os.getenv('IMAGEMAGICK_BINARY', 'C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe')
+
+## Course Relative Path
 COURSE_PATH = "input\\Course\\"
+
+## Video settings
+VIDEO_RES = (1080,720)
+TITLE_PERIOD = 3 #seconds
+
+## Audio settings
 LANGUAGES = ["uk", "zh"] # available: refer to keys of VOICES below
 VOICES = dict(
     us = dict(
