@@ -138,7 +138,7 @@ Listed below are essential packages used in the script
                                     `-- example_zh.srt <--
     ```
 ## Example
-[Section 1> Subsection 2 > Unit 1](input\Course\Section_Week_1\Subsection_2_Shorts\Unit_1_Text_Imgs_and_Videos)
+[Section 1> Subsection 2 > Unit 1](input/Course/Section_Week_1/Subsection_2_Shorts/Unit_1_Text_Imgs_and_Videos)
 ## Execute
 1. Rename [`__AWS__.template.py`](__AWS__.template.py) to `__AWS__.py`
     * Include AWS Access Key, Secret Access Key, and S3 Bucket name in renamed file
