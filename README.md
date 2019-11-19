@@ -26,6 +26,7 @@ Listed below are essential packages used in the script
     * AWS python SDK
     * Services used: [Polly](https://aws.amazon.com/polly/), [Translate](https://aws.amazon.com/translate/), and [S3](https://aws.amazon.com/s3/)
 * [moviepy](https://zulko.github.io/moviepy/)
+    * WINDOWS USERS: provide the path to the ImageMagick binary called `magick.exe` in `moviepy/config_defaults.py`
 * [youtube_dl](https://pypi.org/project/youtube_dl/)
 * [unoconv](https://github.com/unoconv/unoconv)
 * [bs4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
@@ -36,6 +37,7 @@ Listed below are essential packages used in the script
 ### Settings
 > [`__CONSTS__.py`](__CONSTS__.py)
 1. Correct Path to IMAGEMAGICK exe is required for script to work
+1. Set Path to LibreOffice and copy unoconv file into it
 1. Relative Course Path (from root folder) where units will be checked. Script iterates **3 levels deep** to get to the units from the Course Path
     ```
     `-- input
@@ -144,6 +146,9 @@ Listed below are essential packages used in the script
 1. Rename [`__AWS__.template.py`](__AWS__.template.py) to `__AWS__.py`
     * Include AWS Access Key, Secret Access Key, and S3 Bucket name in renamed file
 1. Set Path to MAGICK.exe file in [`__CONSTS__.py`](__CONSTS__.py)
+1. Set Path to LibreOffice\program in [`__CONSTS__.py`](__CONSTS__.py) and copy `unoconv` (no ext) into `path\to\LibreOffice\program\`
+1. Add to Environment Variable `Path` with value `path\to\LibreOffice\program\`
+1. Add to Environment Variable `Path` with value `path\to\ImageMagick-XXXX`
 1. Execute
     ```
     python vid_generator.py

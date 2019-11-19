@@ -5,11 +5,7 @@ import re
 
 from bs4 import BeautifulSoup
 from _movie_to_polly import _to_time_str, VIDEO_RES
-
-# 1.
-PATH_TO_LIBRE_OFFICE_PROGRAM = "D:\\mscInstallations\\LibreOffice\\program\\"
-# 2. set env path to LibreOffice
-# 3. Ensure imagemagick (with necesary env variables set) and ghostscript are installed
+from __CONSTS__ import PATH_TO_LIBRE_OFFICE_PROGRAM
 
 def _pptXML_to_SRT(folder_path):
     DEFAULT_TIME_BREAK = 5 #seconds
