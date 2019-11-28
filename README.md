@@ -38,22 +38,25 @@ Listed below are essential packages used in the script
 > [`__CONSTS__.py`](__CONSTS__.py)
 1. Correct Path to IMAGEMAGICK exe is required for script to work
 1. Set Path to LibreOffice and copy unoconv file into it
-1. Relative Course Path (from root folder) where units will be checked. Script iterates **3 levels deep** to get to the units from the Course Path
-    ```
-    `-- input
-        `-- Course (Starts here)
-                |-- Section
-                |       |-- Subsection
-                |       |         `-- Unit (Target folder)
-                |       `-- Subsection
-                |                 `-- Unit (Target folder)
-                `-- Section
-                        `-- Subsection
-                                  `-- Unit (Target folder)
-    ```
+1. Course Settings
+    * edx course: course name which will appended to the front of the video name when video is uploaded onto S3. S3 object will appear under a folder-like structure on AWS console.
+    * Course path: Relative Course Path (from root folder) where units will be checked. Script iterates **3 levels deep** to get to the units from the Course Path
+        ```
+        `-- input
+            `-- Course (Starts here)
+                    |-- Section
+                    |       |-- Subsection
+                    |       |         `-- Unit (Target folder)
+                    |       `-- Subsection
+                    |                 `-- Unit (Target folder)
+                    `-- Section
+                            `-- Subsection
+                                    `-- Unit (Target folder)
+        ```
 1. Video settings
     * Resolution: (width, height) in px
     * Title Period: Period in which the title is shown (in seconds)
+    * Font: Font to be used for video title
 1. Audio settings
     * Languages: Languages which will be used to generate the videos
     * Voices: Based on list available on [AWS Polly Documentation](https://docs.aws.amazon.com/polly/latest/dg/voicelist.html)

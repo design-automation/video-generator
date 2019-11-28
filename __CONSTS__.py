@@ -5,7 +5,7 @@ IMAGEMAGICK_BINARY = os.getenv('IMAGEMAGICK_BINARY', 'C:\\Program Files\\ImageMa
 ## LibreOffice program file location
 PATH_TO_LIBRE_OFFICE_PROGRAM = "D:\\mscInstallations\\LibreOffice\\program\\"
 
-## Course Relative Path
+## Course Settings
 EDX_COURSE = 'SCT04'
 COURSE_PATH = "input\\Course\\"
 
