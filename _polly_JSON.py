@@ -20,11 +20,11 @@ def yaml_to_dict(path):
     return ret_dict
 
 '''
-title
+video_file_name
 display_name
 voice
 meta
-    md
+    yaml
         path
         last_edit
     pre_polly
@@ -39,16 +39,16 @@ meta
 '''
 class VIDEO_OBJ:
     def __init__(self):
-        self.__title=""
+        self.__video_file_name=""
         self.__display_name=""
         self.__voice=""
         self.__meta=dict(
-            md={}, # markdown last edit
+            yaml={}, # markdown last edit
             pre_polly={}, # pptx/mp4 last edit
             srt={}
         )
     def as_dict(self):
-        return dict(title=self.__title, display_name=self.__display_name, voice=self.__voice, meta=self.__meta)
+        return dict(video_file_name=self.__video_file_name, display_name=self.__display_name, voice=self.__voice, meta=self.__meta)
 
 class COMPONENT:
     def __init__(self, name, _dir, ext):
@@ -69,7 +69,7 @@ class Video:
         self.__ext = ext[1:]
         self.__base_dir = os.path.dirname(path)
         self.__dict = VIDEO_OBJ().as_dict()
-        self.__dict["meta"]["md"] = COMPONENT(self.__name, self.__base_dir, "md").as_dict()
+        self.__dict["meta"]["yaml"] = COMPONENT(self.__name, self.__base_dir, "yaml").as_dict()
         self.__dict["meta"]["pre_polly"] = COMPONENT(self.__name, self.__base_dir, self.__ext).as_dict()
         self.__dict["meta"]["srt"] = {}
         for lang in LANGUAGES:
@@ -79,17 +79,17 @@ class Video:
             srt_name = self.__name + "_%s" % lang_append
             srt_component = COMPONENT(srt_name, self.__base_dir, "srt").as_dict()
             self.__dict["meta"]["srt"][lang_append] = srt_component  
-        self.__md_update()
-    def __md_update(self):
-        md_path = self.get_md_path()
-        vid_dict = yaml_to_dict(md_path)
+        self.__yaml_update()
+    def __yaml_update(self):
+        yaml_path = self.get_yaml_path()
+        vid_dict = yaml_to_dict(yaml_path)
         for key in self.__dict:
             try:
                 self.__dict[key] = vid_dict[key]
             except KeyError:
                 pass
-    def set_md_edit(self, value):
-        self.__dict["meta"]["md"]["last_edit"] = value
+    def set_yaml_edit(self, value):
+        self.__dict["meta"]["yaml"]["last_edit"] = value
     def set_pre_polly_edit(self, value):
         self.__dict["meta"]["pre_polly"]["last_edit"] = value
     def set_srt_edit(self, language, value):
@@ -103,10 +103,10 @@ class Video:
         return self.__name
     def get_ext(self):
         return self.__ext
-    def get_md_edit(self):
-        return self.__dict["meta"]["md"]["last_edit"]
-    def get_md_path(self):
-        return self.__dict["meta"]["md"]["path"]  
+    def get_yaml_edit(self):
+        return self.__dict["meta"]["yaml"]["last_edit"]
+    def get_yaml_path(self):
+        return self.__dict["meta"]["yaml"]["path"]  
     def get_pre_polly_edit(self):
         return self.__dict["meta"]["pre_polly"]["last_edit"]
     def get_pre_polly_path(self):
@@ -141,9 +141,9 @@ class VidsJSON:
         return vids_dict
     def set_vid_obj(self, vid_obj):
         self.__dict[vid_obj.get_file_name()] = vid_obj.to_dict()
-    def get_md_edit(self, id):
+    def get_yaml_edit(self, id):
         try:
-            return self.__dict[id]["meta"]["md"]["last_edit"]
+            return self.__dict[id]["meta"]["yaml"]["last_edit"]
         except KeyError:
             return -1 
     def get_pre_polly_edit(self, id):

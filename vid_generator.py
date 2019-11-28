@@ -33,13 +33,13 @@ def main():
                 for vid_file in vid_files:
                     vid_obj = Video(vid_file)
                     id = vid_obj.get_file_name()
-                    md_curr_edit = vid_obj.get_md_edit()
-                    md_last_edit = vids_obj.get_md_edit(id)
+                    yaml_curr_edit = vid_obj.get_yaml_edit()
+                    yaml_last_edit = vids_obj.get_yaml_edit(id)
                     pp_curr_edit = vid_obj.get_pre_polly_edit()
                     pp_last_edit = vids_obj.get_pre_polly_edit(id)
                     change = -1
                     success = False
-                    if md_curr_edit > md_last_edit or pp_curr_edit > pp_last_edit:
+                    if yaml_curr_edit > yaml_last_edit or pp_curr_edit > pp_last_edit:
                         change = 0  # gen all languages
                     for lang in LANGUAGES:
                         lang_curr_modified = vid_obj.get_srt_edit(lang)
@@ -82,7 +82,7 @@ def _generate_all(vid_obj):
 def _generate_video(vid_obj, language, change):
     try:
         vid_args = vid_obj.get_vid_args()
-        vid_name = vid_args["title"]
+        vid_name = vid_args["video_file_name"]
         vid_ext = vid_obj.get_ext()
         out_folder = "%s\\%s" % (vid_obj.get_base_dir(), vid_obj.get_file_name())
         os.makedirs(out_folder, exist_ok=True)
@@ -113,7 +113,7 @@ def _generate_video(vid_obj, language, change):
         else:
             comp_path = composite_PNGs(language, out_folder, vid_name, description)
 
-        S3_path = "%s/%s_%s.mp4" % (EDX_COURSE, re.sub("-", "/", vid_args["title"]), language)
+        S3_path = "%s/%s_%s.mp4" % (EDX_COURSE, re.sub("-", "/", vid_args["video_file_name"]), language)
         upload_s3(comp_path, S3_bucket, S3_path)
         print("\nUploaded to S3")
 
