@@ -6,11 +6,13 @@ IMAGEMAGICK_BINARY = os.getenv('IMAGEMAGICK_BINARY', 'C:\\Program Files\\ImageMa
 PATH_TO_LIBRE_OFFICE_PROGRAM = "D:\\mscInstallations\\LibreOffice\\program\\"
 
 ## Course Relative Path
+EDX_COURSE = 'SCT04'
 COURSE_PATH = "input\\Course\\"
 
 ## Video settings
 VIDEO_RES = (1080,720)
 TITLE_PERIOD = 3 #seconds
+FONT = "Ubuntu-Mono"
 
 ## Audio settings
 LANGUAGES = ["uk", "zh"] # available: refer to keys of VOICES below
