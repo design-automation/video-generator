@@ -60,6 +60,16 @@ Listed below are essential packages used in the script
         * Take note whether neural voice is available for the voice
         * voice key is used for [AWS Translate](https://docs.aws.amazon.com/translate/latest/dg/what-is.html)
 ### Course Units
+1. yaml file
+    * A **.yaml** file with same file name is required to accompany every .pptx and .mp4 file
+        * video_file_name: file name for generated video
+        * display_name: text for generated title
+        * voice: voice to use for each language; Mapped to index of array in [`__CONSTS__.py`](__CONSTS__.py)
+        ```
+        video_file_name: FILE_NAME
+        display_name: VIDEO TITLE
+        voice: 1
+        ```
 1. MP4 file with srt
     * srt sequence should start at index 1 and be appended with `_language`
     * for optimum results, ensure srt sequences are full sentences and use the start time to determine points where speech should start
@@ -71,7 +81,7 @@ Listed below are essential packages used in the script
                                     `-- Unit
                                         |-- mp4_file_name_en.srt
                                         |-- mp4_file_name.mp4
-                                        `-- mp4_file_name.md               
+                                        `-- mp4_file_name.yaml               
         ```
 1. pptx file
     * transcripts are to be written in presenter notes
@@ -83,7 +93,7 @@ Listed below are essential packages used in the script
                         `-- Subsection
                                     `-- Unit
                                         |-- pptx_file_name.pptx
-                                        `-- pptx_file_name.md
+                                        `-- pptx_file_name.yaml
         ```
 1. Accompanying language-specific srt files
     * script will use provided srt files when available
@@ -99,12 +109,12 @@ Listed below are essential packages used in the script
                                         |-- pptx_file_name_fr.srt <--
                                         |-- pptx_file_name_zh.srt <--
                                         |-- pptx_file_name.pptx
-                                        `-- pptx_file_name.md
+                                        `-- pptx_file_name.yaml
         ```
 
 ## Output
 1. `videos.json` file
-    * This file serves as a log to keep track of last modified time for all the pptx, mp4, and their md and srt files.
+    * This file serves as a log to keep track of last modified time for all the pptx, mp4, and their yaml and srt files.
     * **deletion of videos.json or renaming of files will result in regeneration of the videos**
     ```
     `-- input
