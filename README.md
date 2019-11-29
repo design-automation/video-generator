@@ -13,7 +13,7 @@ Listed below are essential packages used in the script
 
 ### Manual Installations
 * [Image Magick](https://www.imagemagick.org/script/index.php)
-    * 7.0.9-5-Q16 (breaks with latest: Q8)
+    * [7.0.9-5-Q16 (breaks with latest: Q8)](INSTALL\ImageMagick-7.0.9-5-Q16-x64-dll.exe)
     * used by moviepy in the video creation process
     * conversion of .pdf to .png
 * [Libre Office](https://www.libreoffice.org/)
@@ -156,7 +156,7 @@ Listed below are essential packages used in the script
                                     `-- example_zh.srt <--
     ```
 ## Example
-[Section 1> Subsection 2 > Unit 1](input/Course/Section_Week_1/Subsection_2_Shorts/Unit_1_Text_Imgs_and_Videos)
+[w1 > s1 > u1](input\Course\w1\s1\u1)
 ## Execute
 1. Rename [`__AWS__.template.py`](__AWS__.template.py) to `__AWS__.py`
     * Include AWS Access Key, Secret Access Key, and S3 Bucket name in renamed file
