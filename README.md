@@ -13,6 +13,7 @@ Listed below are essential packages used in the script
 
 ### Manual Installations
 * [Image Magick](https://www.imagemagick.org/script/index.php)
+    * 7.0.9-5-Q16 (breaks with latest: Q8)
     * used by moviepy in the video creation process
     * conversion of .pdf to .png
 * [Libre Office](https://www.libreoffice.org/)
@@ -26,7 +27,8 @@ Listed below are essential packages used in the script
     * AWS python SDK
     * Services used: [Polly](https://aws.amazon.com/polly/), [Translate](https://aws.amazon.com/translate/), and [S3](https://aws.amazon.com/s3/)
 * [moviepy](https://zulko.github.io/moviepy/)
-    * WINDOWS USERS: provide the path to the ImageMagick binary called `magick.exe` in `moviepy/config_defaults.py`
+    * version 1.0.0
+    * WINDOWS USERS: provide the path to the ImageMagick binary called `magick.exe` in `PATH/TO/PYTHON/lib/site-packages/moviepy/config_defaults.py`
 * [youtube_dl](https://pypi.org/project/youtube_dl/)
 * [unoconv](https://github.com/unoconv/unoconv)
 * [bs4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
