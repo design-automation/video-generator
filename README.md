@@ -162,7 +162,7 @@ Listed below are essential packages used in the script
     * Include AWS Access Key, Secret Access Key, and S3 Bucket name in renamed file
 1. Set Path to MAGICK.exe file in [`__CONSTS__.py`](__CONSTS__.py)
 1. Set Path to LibreOffice\program in [`__CONSTS__.py`](__CONSTS__.py) and copy `unoconv` (no ext) into `path\to\LibreOffice\program\`
-1. Add to Environment Variable `Path` with value `path\to\LibreOffice\program\`
+1. Add to Environment Variable `Path` with value `path\to\LibreOffice\program`
 1. Add to Environment Variable `Path` with value `path\to\ImageMagick-XXXX`
 1. Execute
     ```

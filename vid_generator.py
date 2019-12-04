@@ -113,7 +113,11 @@ def _generate_video(vid_obj, language, change):
         else:
             comp_path = composite_PNGs(language, out_folder, vid_name, description)
 
-        S3_path = "%s/%s_%s.mp4" % (EDX_COURSE, re.sub("-", "/", vid_args["video_file_name"]), language)
+        lang_append = language
+        if language == "us" or language == "uk":
+            lang_append = "en"
+        
+        S3_path = "%s/%s_%s.mp4" % (EDX_COURSE, re.sub("-", "/", vid_args["video_file_name"]), lang_append)
         upload_s3(comp_path, S3_bucket, S3_path)
         print("\nUploaded to S3")
 
