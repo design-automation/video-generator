@@ -313,6 +313,15 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
     vid_list = []
     for seq_i in range(1, srt_obj.get_n_seq() + 1): # seq 1 is title
         script = srt_obj.get_seq(language, seq_i)["script"]
+        fadeout = False
+        try:
+            nxt_script = srt_obj.get_seq(language, seq_i + 1)["script"]
+        except KeyError:
+            nxt_script = ""
+            pass
+        if nxt_script != "" and nxt_script[0] == "{":
+            fadeout = True
+
         if script != "" and script[0] == "{":
             title = json.loads(script)["display_name"]
             if seq_i == 1 and language!="uk" and language!="us":
@@ -328,6 +337,8 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
                 aud_clip = AudioFileClip(aud_dict[vid_idx])
                 if (vid_clip.duration < aud_clip.duration):
                     vid_clip = vid_clip.set_duration(aud_clip.duration)
+                if fadeout:
+                    vid_clip = vid_clip.fadeout(duration=1, final_color=fade_color)
                 vid_list.append(vid_clip.set_audio(aud_clip))
                 
             else:
@@ -342,6 +353,8 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
                 except KeyError:
                     slide_clip = slide_clip.set_duration(PAUSE_PERIOD)
                     pass
+                if fadeout:
+                    slide_clip = slide_clip.fadeout(duration=1, final_color=fade_color)
                 vid_list.append(slide_clip)
             fadein = False
 

@@ -27,16 +27,16 @@
         "meta": {
             "pre_polly": {
                 "path": "input\\Course\\w1\\s1\\u1\\03_Hello_world_PPT_video.pptx",
-                "last_edit": 1575521248.8896353
+                "last_edit": 1575545590.9608388
             },
             "srt": {
                 "en": {
                     "path": "input\\Course\\w1\\s1\\u1\\03_Hello_world_PPT_video_en.srt",
-                    "last_edit": 1575544708.804559
+                    "last_edit": 1575545650.0910463
                 },
                 "zh": {
                     "path": "input\\Course\\w1\\s1\\u1\\03_Hello_world_PPT_video_zh.srt",
-                    "last_edit": 1575544718.4020176
+                    "last_edit": 1575545683.8139274
                 }
             }
         }

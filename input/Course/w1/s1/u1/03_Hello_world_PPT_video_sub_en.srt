@@ -15,6 +15,10 @@ Skipping next comment
 123 
 
 5
-00:00:08,140 --> 00:00:09,870
+00:00:23,000 --> 00:00:26,000
+BREAK TITLEEE
+
+6
+00:00:26,000 --> 00:00:27,730
 Skipped previous comment 
 
