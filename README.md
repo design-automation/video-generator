@@ -65,16 +65,20 @@ Listed below are essential packages used in the script
         * Take note whether neural voice is available for the voice
         * voice key is used for [AWS Translate](https://docs.aws.amazon.com/translate/latest/dg/what-is.html)
 ### Course Units
-1. yaml file
-    * A **.yaml** file with same file name is required to accompany every .pptx and .mp4 file
+1. Video Settings within SRT/PPTX notes
+    * Must be located in the first sequence/slide
+    * Follows string JSON format:
         * video_file_name: file name for generated video
         * display_name: text for generated title
         * voice: voice to use for each language; Mapped to index of array in [`__CONSTS__.py`](__CONSTS__.py)
         ```
-        video_file_name: FILE_NAME
-        display_name: VIDEO TITLE
-        voice: 1
+        {
+            "video_file_name": "FILE_NAME",
+            "display_name": "VIDEO TITLE",
+            "voice": "1"
+        }
         ```
+    * `{"display_name":"break title"}` may be used to insert a title within a video
 1. MP4 file with srt
     * srt sequence should start at index 1 and be appended with `_language`
     * for optimum results, ensure srt sequences are full sentences and use the start time to determine points where speech should start
