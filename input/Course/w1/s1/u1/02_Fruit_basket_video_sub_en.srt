@@ -1,0 +1,208 @@
+1
+00:00:00,000 --> 00:00:03,000
+Fruit basket
+
+2
+00:00:03,380 --> 00:00:09,822
+Mobius uses indentation for block delimitation and it's done automatically when a line is added to the procedure.
+
+3
+00:00:09,822 --> 00:00:09,822
+
+
+4
+00:00:10,720 --> 00:00:15,019
+For control structures like conditions and loops which can be nested in one another,
+
+5
+00:00:15,019 --> 00:00:17,783
+similar to how you add a statement to a specific line,
+
+6
+00:00:17,783 --> 00:00:21,826
+ensure the line is selected and click on the interested statement to add it in.
+
+7
+00:00:21,826 --> 00:00:21,826
+
+
+8
+00:00:24,160 --> 00:00:32,003
+This video will also discuss the logic of basic nested control statements: nesting conditions within conditions and conditions within loops.
+
+9
+00:00:32,003 --> 00:00:32,003
+
+
+10
+00:00:33,480 --> 00:00:36,008
+Loop nesting will be discussed next week.
+
+11
+00:00:36,008 --> 00:00:36,008
+
+
+12
+00:00:37,540 --> 00:00:41,076
+Conditions can be nested within another condition block.
+
+13
+00:00:41,076 --> 00:00:41,076
+
+
+14
+00:00:41,076 --> 00:00:48,767
+Its execution follows logic tree and can be used when we are expecting multiple states for the inputs and returning a different output for each condition.
+
+15
+00:00:48,767 --> 00:00:48,767
+
+
+16
+00:00:50,540 --> 00:00:51,341
+For example,
+
+17
+00:00:51,341 --> 00:00:53,945
+suppose we have a basket of red apples,
+
+18
+00:00:53,945 --> 00:00:54,814
+green apples,
+
+19
+00:00:54,814 --> 00:00:56,082
+oranges and lemons.
+
+20
+00:00:56,082 --> 00:00:56,082
+
+
+21
+00:00:57,940 --> 00:01:01,457
+We want to sort them separately into individual baskets.
+
+22
+00:01:01,457 --> 00:01:01,457
+
+
+23
+00:01:02,700 --> 00:01:07,105
+We may start off the condition check by identifying whether the food is an apple.
+
+24
+00:01:07,105 --> 00:01:07,105
+
+
+25
+00:01:07,140 --> 00:01:07,788
+If it is,
+
+26
+00:01:07,788 --> 00:01:09,445
+we check for its color.
+
+27
+00:01:09,445 --> 00:01:09,445
+
+
+28
+00:01:10,400 --> 00:01:11,380
+If it is red,
+
+29
+00:01:11,380 --> 00:01:13,644
+we put it in the first basket.
+
+30
+00:01:13,644 --> 00:01:14,323
+If green,
+
+31
+00:01:14,323 --> 00:01:15,908
+in the second basket.
+
+32
+00:01:15,908 --> 00:01:15,908
+
+
+33
+00:01:16,000 --> 00:01:16,627
+Otherwise,
+
+34
+00:01:16,627 --> 00:01:18,259
+if the fruit is an orange,
+
+35
+00:01:18,259 --> 00:01:19,891
+place in the third basket.
+
+36
+00:01:19,891 --> 00:01:19,891
+
+
+37
+00:01:20,480 --> 00:01:21,418
+At this point,
+
+38
+00:01:21,418 --> 00:01:23,227
+if a fruit fails the check,
+
+39
+00:01:23,227 --> 00:01:25,237
+place it in the fourth basket.
+
+40
+00:01:25,237 --> 00:01:26,711
+That's for the lemons.
+
+41
+00:01:26,711 --> 00:01:26,711
+
+
+42
+00:01:27,260 --> 00:01:30,699
+The block we had ended with earlier only checks for single fruit,
+
+43
+00:01:30,699 --> 00:01:33,134
+but what we want is to check an entire basket!
+
+44
+00:01:33,134 --> 00:01:33,134
+
+
+45
+00:01:34,100 --> 00:01:34,760
+Essentially,
+
+46
+00:01:34,760 --> 00:01:38,170
+this sorting block should be run on every fruit in the basket.
+
+47
+00:01:38,170 --> 00:01:38,170
+
+
+48
+00:01:39,220 --> 00:01:39,882
+To do this,
+
+49
+00:01:39,882 --> 00:01:44,279
+we will loop through the basket at one fruit at a time and run the check.
+
+50
+00:01:44,279 --> 00:01:44,279
+
+
+51
+00:01:44,980 --> 00:01:50,033
+You will just be placing the condition block we have created earlier into a loop to do so.
+
+52
+00:01:50,033 --> 00:01:50,033
+
+

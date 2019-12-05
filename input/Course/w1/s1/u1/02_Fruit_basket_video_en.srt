@@ -1,32 +1,36 @@
 1
+00:00:00,000 --> 00:00:00,380
+{"video_file_name": "02_Fruit_basket_video", "display_name": "Fruit basket", "voice": "3"}
+
+2
 00:00:00,380 --> 00:00:04,800
 Mobius uses indentation for block
 delimitation and it's done automatically
 when a line is added to the procedure.
 
-2
+3
 00:00:07,720 --> 00:00:12,160
 For control structures like conditions and loops which can be nested in one another,
 similar to how you add a statement to a specific line,
 ensure the line is selected and click on the
 interested statement to add it in.
 
-3
+4
 00:00:21,160 --> 00:00:23,620
 This video will also discuss the logic of
 basic nested control statements:
 nesting conditions within conditions and conditions within loops.
 
-4
+5
 00:00:30,480 --> 00:00:33,000
 Loop nesting
 will be discussed next week.
 
-5
+6
 00:00:34,540 --> 00:00:37,020
 Conditions can be nested within another condition block.
 
-6
+7
 00:00:37,640 --> 00:00:39,920
 Its execution follows logic tree
 and can be used when we are expecting
@@ -34,56 +38,56 @@ multiple states for the inputs and
 returning a different output for each
 condition.
 
-7
+8
 00:00:47,540 --> 00:00:48,860
 For example, suppose we have a
 basket of red apples, green apples,
 oranges and lemons.
 
-8
+9
 00:00:54,940 --> 00:00:57,980
 We want to sort them separately into individual baskets.
 
-9
+10
 00:00:59,700 --> 00:01:01,620
 We may start off the condition check by
 identifying whether the food is an apple.
 
-10
+11
 00:01:04,140 --> 00:01:06,640
 If it is, we check for its color.
 
-11
+12
 00:01:07,400 --> 00:01:12,420
 If it is red, we put it in the first basket. If
 green, in the second basket.
 
-12
+13
 00:01:13,000 --> 00:01:17,180
 Otherwise, if the fruit is an orange, place in the third basket.
 
-13
+14
 00:01:17,480 --> 00:01:19,560
 At this point, if a fruit fails the check,
 place it in the fourth basket. That's
 for the lemons.
 
-14
+15
 00:01:24,260 --> 00:01:27,460
 The block we had ended with earlier only checks for single fruit,
 but what we want is to check an entire basket!
 
-15
+16
 00:01:31,100 --> 00:01:33,500
 Essentially, this sorting block should be
 run on every fruit in the basket.
 
-16
+17
 00:01:36,220 --> 00:01:38,500
 To do this, we will loop through the basket at
 one fruit at a time and run the check.
 
-17
+18
 00:01:41,980 --> 00:01:47,460
 You will just be placing the condition block we have created earlier into a loop to do so.
 

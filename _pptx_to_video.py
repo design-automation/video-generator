@@ -8,7 +8,7 @@ from _movie_to_polly import _to_time_str, VIDEO_RES
 from __CONSTS__ import PATH_TO_LIBRE_OFFICE_PROGRAM
 
 def _pptXML_to_SRT(folder_path):
-    DEFAULT_TIME_BREAK = 5 #seconds
+    DEFAULT_TIME_BREAK = 3 #seconds
     xml_file = glob.glob(folder_path + "*.xml")[0]
 
     file_name = re.sub("\.xml", "", os.path.basename(xml_file))
@@ -48,6 +48,7 @@ def _libreXML_to_SRT(folder_path, tar_fdr):
                 notes = slide.find("span", attrs={"class", "T8"}).text
             except AttributeError:
                 notes = ""
+            notes = notes.replace("“","\"").replace("”","\"")
             slide_dict[str(slide_i + 1)] = notes
     with open(tar_fdr + "\\" + file_name+"_en.srt", "wt", encoding="utf-8") as srt_f:
         for i in range(1, n_slides + 1):

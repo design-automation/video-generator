@@ -1,6 +1,5 @@
 from _checks import *
 from _get_by_type import *
-# from _video_JSON import VidJSON, VidsJSON
 from _polly_JSON import VidsJSON, Video
 import glob
 import argparse
@@ -33,13 +32,11 @@ def main():
                 for vid_file in vid_files:
                     vid_obj = Video(vid_file)
                     id = vid_obj.get_file_name()
-                    yaml_curr_edit = vid_obj.get_yaml_edit()
-                    yaml_last_edit = vids_obj.get_yaml_edit(id)
                     pp_curr_edit = vid_obj.get_pre_polly_edit()
                     pp_last_edit = vids_obj.get_pre_polly_edit(id)
                     change = -1
                     success = False
-                    if yaml_curr_edit > yaml_last_edit or pp_curr_edit > pp_last_edit:
+                    if pp_curr_edit > pp_last_edit:
                         change = 0  # gen all languages
                     for lang in LANGUAGES:
                         lang_curr_modified = vid_obj.get_srt_edit(lang)
@@ -81,37 +78,40 @@ def _generate_all(vid_obj):
 
 def _generate_video(vid_obj, language, change):
     try:
-        vid_args = vid_obj.get_vid_args()
-        vid_name = vid_args["video_file_name"]
         vid_ext = vid_obj.get_ext()
         out_folder = "%s\\%s" % (vid_obj.get_base_dir(), vid_obj.get_file_name())
         os.makedirs(out_folder, exist_ok=True)
         if vid_ext == "pptx" and (language=="uk" or language=="us" or change == 1): # break once
-            pptx_to_ingreds(vid_obj.get_pre_polly_path(), out_folder)
+            pptx_to_ingreds(vid_obj.get_pre_polly_path(), out_folder) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         srt_path = vid_obj.get_srt_path(language)
         if vid_obj.get_srt_edit(language) == -1:
             srt_path = vid_obj.get_srt_path("en")
         srt_obj = ToPollySRT(srt_path,language)
 
+        vid_obj.set_vid_args(srt_obj)
+        vid_args = vid_obj.get_vid_args()
+        vid_name = vid_args["video_file_name"]
+
         if vid_ext == "mp4" and (language=="uk" or language=="us" or change == 1): # break once
             mp4_obj = ToPollyMP4(vid_obj.get_pre_polly_path())
-            cut_MP4(mp4_obj,srt_obj)
+            cut_MP4(mp4_obj,srt_obj) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         voice_id = int(vid_args["voice"])
-        description = vid_args["display_name"]
+        
         AVAIL_VOICES = srt_obj.get_voices()
         neural = AVAIL_VOICES[language]["neural"]
         lang_code = AVAIL_VOICES[language]["lang_code"]
         avail_voice_ids = AVAIL_VOICES[language]["ids"]
         polly_voice_id = avail_voice_ids[voice_id % len(avail_voice_ids)]
         print("\n%s" % polly_voice_id)
-        to_Polly(srt_obj, polly_voice_id, neural) #!!!
 
         if vid_ext == "mp4":
-            comp_path = composite_MP4(language, out_folder, vid_name, description)
+            to_Polly(srt_obj, polly_voice_id, neural)
+            comp_path = composite_MP4(language, out_folder, vid_name, srt_obj)
         else:
-            comp_path = composite_PNGs(language, out_folder, vid_name, description)
+            to_Polly(srt_obj, polly_voice_id, neural, True)
+            comp_path = composite_PNGs(language, out_folder, vid_name, srt_obj)
 
         lang_append = language
         if language == "us" or language == "uk":

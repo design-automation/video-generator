@@ -1,6 +1,5 @@
 import os
 import json
-import yaml
 from __CONSTS__ import LANGUAGES
 
 def _json_to_dict(path):
@@ -12,21 +11,11 @@ def _json_to_dict(path):
 def dict_to_json(vid_dict, path):
     with open(path, "w", encoding="utf-8") as json_f:
         json.dump(vid_dict, json_f, ensure_ascii=False, indent=4)
-
-def yaml_to_dict(path):
-    ret_dict = {}
-    with open(path, "rt") as yaml_f:
-        ret_dict = yaml.safe_load(yaml_f)
-    return ret_dict
-
 '''
 video_file_name
 display_name
 voice
 meta
-    yaml
-        path
-        last_edit
     pre_polly
         path
         last_edit
@@ -43,7 +32,6 @@ class VIDEO_OBJ:
         self.__display_name=""
         self.__voice=""
         self.__meta=dict(
-            yaml={}, # markdown last edit
             pre_polly={}, # pptx/mp4 last edit
             srt={}
         )
@@ -69,7 +57,6 @@ class Video:
         self.__ext = ext[1:]
         self.__base_dir = os.path.dirname(path)
         self.__dict = VIDEO_OBJ().as_dict()
-        self.__dict["meta"]["yaml"] = COMPONENT(self.__name, self.__base_dir, "yaml").as_dict()
         self.__dict["meta"]["pre_polly"] = COMPONENT(self.__name, self.__base_dir, self.__ext).as_dict()
         self.__dict["meta"]["srt"] = {}
         for lang in LANGUAGES:
@@ -79,19 +66,15 @@ class Video:
             srt_name = self.__name + "_%s" % lang_append
             srt_component = COMPONENT(srt_name, self.__base_dir, "srt").as_dict()
             self.__dict["meta"]["srt"][lang_append] = srt_component  
-        self.__yaml_update()
-    def __yaml_update(self):
-        yaml_path = self.get_yaml_path()
-        vid_dict = yaml_to_dict(yaml_path)
-        for key in self.__dict:
-            try:
-                self.__dict[key] = vid_dict[key]
-            except KeyError:
-                pass
-    def set_yaml_edit(self, value):
-        self.__dict["meta"]["yaml"]["last_edit"] = value
     def set_pre_polly_edit(self, value):
         self.__dict["meta"]["pre_polly"]["last_edit"] = value
+    def set_vid_args(self, srt_obj):
+        script = srt_obj.get_seq("_NA_", 1)["script"]
+        arg_dict = json.loads(script)
+        self.__dict["video_file_name"] = arg_dict["video_file_name"]
+        self.__dict["display_name"] = arg_dict["display_name"]
+        self.__dict["voice"] = arg_dict["voice"]
+
     def set_srt_edit(self, language, value):
         lang = language
         if language == "us" or language == "uk":
@@ -103,10 +86,6 @@ class Video:
         return self.__name
     def get_ext(self):
         return self.__ext
-    def get_yaml_edit(self):
-        return self.__dict["meta"]["yaml"]["last_edit"]
-    def get_yaml_path(self):
-        return self.__dict["meta"]["yaml"]["path"]  
     def get_pre_polly_edit(self):
         return self.__dict["meta"]["pre_polly"]["last_edit"]
     def get_pre_polly_path(self):
@@ -141,11 +120,6 @@ class VidsJSON:
         return vids_dict
     def set_vid_obj(self, vid_obj):
         self.__dict[vid_obj.get_file_name()] = vid_obj.to_dict()
-    def get_yaml_edit(self, id):
-        try:
-            return self.__dict[id]["meta"]["yaml"]["last_edit"]
-        except KeyError:
-            return -1 
     def get_pre_polly_edit(self, id):
         try:
             return self.__dict[id]["meta"]["pre_polly"]["last_edit"]

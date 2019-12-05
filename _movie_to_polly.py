@@ -6,6 +6,7 @@ import math
 import datetime
 import time
 import shutil
+import json
 
 from moviepy.editor import *
 from boto3 import Session
@@ -49,7 +50,7 @@ class ToPollySRT:
         return self.__path
     def get_seq(self, language, n):
         lang = language
-        if lang == "CUT":
+        if lang == "_NA_":
             lang = self.__language
         return self.__seq_dict[lang][n]
     def get_n_seq(self):
@@ -60,6 +61,15 @@ class ToPollySRT:
         return self.__voices
     def get_language(self):
         return self.__language
+    def title_seq(self, seq_n):
+        language = self.__language
+        title_start = _to_seconds(self.__seq_dict[language][seq_n]["script_start"])
+        for i in range(seq_n, self.get_n_seq() + 1):
+            try:
+                next_start = _to_seconds(self.__seq_dict[language][i + 1]["script_start"])
+                self.__seq_dict[language][i + 1]["script_start"] = _to_time_str(next_start - title_start + TITLE_PERIOD)
+            except KeyError:
+                pass
     def set_seq_end(self, seq_n, seconds):
         language = self.__language
         start_secs = _to_seconds(self.__seq_dict[language][seq_n]["script_start"])
@@ -75,20 +85,20 @@ class ToPollySRT:
             lang_append = "en"
         else:
             self.__write_base_lang(lang_append)
-        self.__rebuild_dict()    
+        new_dict = self.__rebuild_dict()    
         tar_path = self.__folder + "\\"+ self.__name[:-3] + "_sub_" + lang_append + ".srt"
         
         with open(tar_path, "wt", encoding="utf-8") as srt_f:
-            for seq_n in self.__seq_dict[language]:
+            for seq_n in new_dict:
                 if seq_n != 1:
-                    self.__update_seq_start(seq_n)
-                srt_f.write(self.__seq_for_SRT(seq_n))
+                    new_dict = self.update_seq_start(seq_n, new_dict)
+                srt_f.write(self.__seq_for_SRT(seq_n, new_dict))
         print("\nUpdated SRT (%s) created at %s" % (self.__path, tar_path))
     def __write_base_lang(self, language):
         with open(self.__folder + "\\"+ self.__name[:-3] + "_" + language + ".srt", "wt", encoding="utf-8") as srt_f:
             for seq_n in self.__seq_dict[language]:
                 if seq_n != 1:
-                    self.__update_seq_start(seq_n)
+                    self.update_seq_start(seq_n)
                 srt_f.write(self.__seq_for_SRT(seq_n))
     def __seq_dict(self,srt_file): # cut SRT into timestamp dict
         seq_dict = {lang:{} for lang in self.__voices}
@@ -124,40 +134,50 @@ class ToPollySRT:
             ori_len = len(seq_script)
             if seq_script == "":
                 continue
-            ori_start = _to_seconds(self.__seq_dict[language][seq_i]["script_start"]) + TITLE_PERIOD - BASE_START
-            ori_end = _to_seconds(self.__seq_dict[language][seq_i]["script_end"]) + TITLE_PERIOD - BASE_START
+            ori_start = _to_seconds(self.__seq_dict[language][seq_i]["script_start"]) - BASE_START #+ TITLE_PERIOD 
+            ori_end = _to_seconds(self.__seq_dict[language][seq_i]["script_end"])- BASE_START #+ TITLE_PERIOD 
             ori_period = ori_end - ori_start
-            script_splt = _split_script(seq_script, language)
+            script_splt = [seq_script]
+            if seq_script[0] != "{" :
+                script_splt = _split_script(seq_script, language)
             n_script_splt = len(script_splt)
-            ori_period -= (n_script_splt - 1) * PAUSE_PERIOD
             prev_end = ori_start
             for script in script_splt:
+                script_ = script
                 splt_len = len(script)
                 splt_period = splt_len/ori_len * ori_period
                 new_start = prev_end
-                new_end = new_start + splt_period + PAUSE_PERIOD
+                if script!="" and script[0] == "{":
+                    script_ = json.loads(script)["display_name"]
+                new_end = new_start + splt_period
                 seq_dict = dict(
-                    script=script,
+                    script=script_,
                     script_start=_to_time_str(new_start),
                     script_end=_to_time_str(new_end)
                 )
                 new_dict[n_seq_i] = seq_dict
                 prev_end = new_end
                 n_seq_i += 1
-        # self.__n_seq = n_seq_i - 1
-        self.__seq_dict[language] = new_dict          
+        return new_dict          
     
-    def __seq_for_SRT(self, seq_n):
+    def __seq_for_SRT(self, seq_n, op_dict=None):
         language = self.__language
-        time_stamp = "%s --> %s"% (self.__seq_dict[language][seq_n]["script_start"], self.__seq_dict[language][seq_n]["script_end"])
-        return "%s\n%s\n%s\n\n" % (str(seq_n), time_stamp, self.__seq_dict[language][seq_n]["script"])
+        if op_dict == None:
+            op_dict = self.__seq_dict[language]
+        time_stamp = "%s --> %s"% (op_dict[seq_n]["script_start"], op_dict[seq_n]["script_end"])
+        return "%s\n%s\n%s\n\n" % (str(seq_n), time_stamp, op_dict[seq_n]["script"])
     
-    def __update_seq_start(self, seq_n):
+    def update_seq_start(self, seq_n, op_dict=None, owrite=False):
         language = self.__language
-        prev_end = _to_seconds(self.__seq_dict[language][seq_n-1]["script_end"])
-        curr_start = _to_seconds(self.__seq_dict[language][seq_n]["script_start"])
-        if prev_end > curr_start:
-            self.__seq_dict[language][seq_n]["script_start"] = _to_time_str(float(prev_end))
+        if op_dict == None:
+            op_dict = self.__seq_dict[language]
+        prev_end = _to_seconds(op_dict[seq_n-1]["script_end"])
+        curr_start = _to_seconds(op_dict[seq_n]["script_start"])
+        if prev_end > curr_start or owrite:
+            op_dict[seq_n]["script_start"] = _to_time_str(float(prev_end))
+            if owrite:
+                self.__seq_dict[language][seq_n]["script_start"] = _to_time_str(float(prev_end)) 
+        return op_dict
 
 def _split_script(script, language): # to create separate split functions for different languages !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if language == "uk" or language == "us":
@@ -233,12 +253,12 @@ def cut_MP4(mp4_obj, srt_obj): # returns mp4s in subfolder
     os.makedirs(output_fdr, exist_ok=True)
     num_seq = srt_obj.get_n_seq()
     for seq_i in range(1, num_seq + 1):#range(0, num_seq)
-        script_start = srt_obj.get_seq("CUT", seq_i)["script_start"]
+        script_start = srt_obj.get_seq("_NA_", seq_i)["script_start"]
         new_clip = None
         if seq_i == num_seq:#num_seq-1
             new_clip = clip.subclip(script_start)
         else:
-            next_start = srt_obj.get_seq("CUT", seq_i + 1)["script_start"]
+            next_start = srt_obj.get_seq("_NA_", seq_i + 1)["script_start"]
             new_clip = clip.subclip(script_start, next_start)
         
         prev_end = script_start
@@ -246,7 +266,7 @@ def cut_MP4(mp4_obj, srt_obj): # returns mp4s in subfolder
         output_path = output_fdr + file_name
         new_clip.write_videofile(output_path, audio=False)
 
-def to_Polly(srt_obj, voice_id, neural):# returns mp3s in subfolder
+def to_Polly(srt_obj, voice_id, neural, pptx=False):# returns mp3s in subfolder
     session = Session(aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, region_name="us-east-1")
     language = srt_obj.get_language()
     output_fdr = srt_obj.get_folder() + "\\" + srt_obj.get_name()[:-3] +"\\" + OUTPUT_FDR + "_%s\\" % language
@@ -254,72 +274,78 @@ def to_Polly(srt_obj, voice_id, neural):# returns mp3s in subfolder
     aud_i = 0
     for seq_i in range(1, srt_obj.get_n_seq()+1): #range(0, srt_obj.get_n_seq())
         script = srt_obj.get_seq(language, seq_i)["script"]
-        if script!="":
+        if script!="" and script[0]!="{":
             if srt_obj.get_name()[-2:] == "en" and (language!="uk" and language!="us"): # translate
-                script = _translate(session, script, language)
+                script = _translate(session, script, language) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 srt_obj.update_script(seq_i, script)
             file_name = srt_obj.get_name() + "-" + str(seq_i).zfill(3) + ".mp3"
             output_path = output_fdr + file_name
             print("\nCommunicating to AWS Polly")
-            _polly(session=session, output_fdr=output_fdr, file_name=file_name, script=script, voice_id=voice_id , neural=neural)
+            _polly(session=session, output_fdr=output_fdr, file_name=file_name, script=script, voice_id=voice_id , neural=neural) # !!!!!!!!!
             aud_out = glob.glob(output_fdr + "*.mp3")[aud_i]
             aud_i += 1
             print("Polly MP3 saved at %s" % (aud_out))
             polly_aud = AudioFileClip(aud_out)
+            if pptx:
+                srt_obj.update_seq_start(seq_n=seq_i, op_dict=None, owrite=pptx)
             srt_obj.set_seq_end(seq_i, polly_aud.duration)
             polly_aud.reader.close_proc()
         else:
-            srt_obj.set_seq_end(seq_i, PAUSE_PERIOD)
+            seq_end = PAUSE_PERIOD
+            if script[0]=="{":
+                seq_end = TITLE_PERIOD
+                srt_obj.title_seq(seq_i)
+            srt_obj.set_seq_end(seq_i, seq_end)
+
     srt_obj.update_SRT()
 
-def composite_MP4(language, folder, vid_name, title):
-    return _composite_video("MP4", language, folder, vid_name, title)
+def composite_MP4(language, folder, vid_name, srt_obj):
+    return _composite_video("MP4", language, folder, vid_name, srt_obj)
 
-def composite_PNGs(language, folder, vid_name, title):    
-    return _composite_video("PPTX", language, folder, vid_name, title)
+def composite_PNGs(language, folder, vid_name, srt_obj):    
+    return _composite_video("PPTX", language, folder, vid_name, srt_obj)
 
-def _composite_video(typ, language, folder, vid_name, title):
+def _composite_video(typ, language, folder, vid_name, srt_obj):
     fade_color = [255,255,255]
     aud_clips = sorted(glob.glob(folder + "\\" + OUTPUT_FDR + "_%s\\" % language + "*.mp3"), key=_file_idx)
     aud_dict = {int(_file_idx(aud_clips[i])):aud_clips[i] for i in range(0, len(aud_clips))}
 
-    if language!="uk" and language!="us":
-        title += "\n(%s)" % language
-    title_clip = TextClip(txt=title, size=VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=103).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
-    vid_list = [title_clip]
+    vid_list = []
+    for seq_i in range(1, srt_obj.get_n_seq() + 1): # seq 1 is title
+        script = srt_obj.get_seq(language, seq_i)["script"]
+        if script != "" and script[0] == "{":
+            title = json.loads(script)["display_name"]
+            if seq_i == 1 and language!="uk" and language!="us":
+                title += "\n(%s)" % language
+            title_clip = TextClip(txt=title, size=VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=103).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
+            vid_list.append(title_clip)
+        else:
+            if typ == "MP4":
+                vid_clips = sorted(glob.glob(folder + "\\" + OUTPUT_FDR + "_VIDEOS\\" + "*.mp4"), key=_file_idx)
 
-    if typ == "MP4":
-        vid_clips = sorted(glob.glob(folder + "\\" + OUTPUT_FDR + "_VIDEOS\\" + "*.mp4"), key=_file_idx)
-        for i in range(0,len(vid_clips)):
-            vid_clip = VideoFileClip(vid_clips[i])
-            vid_idx = int(_file_idx(vid_clips[i]))
-            aud_clip = AudioFileClip(aud_dict[vid_idx])
-            if (vid_clip.duration < aud_clip.duration):
-                vid_clip = vid_clip.set_duration(aud_clip.duration)
-            if i==0:
-                vid_list.append(vid_clip.set_audio(aud_clip).fadein(duration=1, initial_color=fade_color))
-            else:
+                vid_clip = VideoFileClip(vid_clips[seq_i-1])
+                vid_idx = int(_file_idx(vid_clips[seq_i-1]))
+                aud_clip = AudioFileClip(aud_dict[vid_idx])
+                if (vid_clip.duration < aud_clip.duration):
+                    vid_clip = vid_clip.set_duration(aud_clip.duration)
                 vid_list.append(vid_clip.set_audio(aud_clip))
-    else:
-        slide_pngs = sorted(glob.glob(folder + "\\images\\" + "*.png"), key=_file_idx)
-        for i in range(0,len(slide_pngs)):
-            slide_clip = ImageClip(slide_pngs[i])
-            slides_idx = int(_file_idx(slide_pngs[i])) + 1
-            try:
-                aud_clip = AudioFileClip(aud_dict[slides_idx])
-                buffer = 0
-                if aud_clip.duration > 5:
-                    buffer = PAUSE_PERIOD
-                slide_clip = slide_clip.set_duration(aud_clip.duration + buffer).set_audio(aud_clip)
-            except KeyError:
-                slide_clip = slide_clip.set_duration(PAUSE_PERIOD)
-                pass
-            if i==0:
-                vid_list.append(slide_clip.fadein(duration=1, initial_color=fade_color))
+                
             else:
-                vid_list.append(slide_clip)
+                slide_pngs = sorted(glob.glob(folder + "\\images\\" + "*.png"), key=_file_idx)
 
-    composite = concatenate_videoclips(vid_list).resize(height=720)
+                slide_clip = ImageClip(slide_pngs[seq_i-1])
+                slides_idx = int(_file_idx(slide_pngs[seq_i-1])) + 1
+                try:
+                    aud_clip = AudioFileClip(aud_dict[slides_idx])
+                    buffer = PAUSE_PERIOD
+                    slide_clip = slide_clip.set_duration(aud_clip.duration + buffer).set_audio(aud_clip)
+                except KeyError:
+                    slide_clip = slide_clip.set_duration(PAUSE_PERIOD)
+                    pass
+                vid_list.append(slide_clip)
+            fadein = False
+
+    composite = concatenate_videoclips(vid_list).resize(height=VIDEO_RES[1])
     composite.fps = 30
     composite_path = folder + "\\" + vid_name + "_%s_comp.mp4" % language
     composite.write_videofile(composite_path)
