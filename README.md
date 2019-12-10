@@ -11,6 +11,10 @@ The aim is:
 ## Requirements
 Listed below are essential packages used in the script
 
+### To Download
+* [unoconv](https://github.com/unoconv/unoconv)
+    * Download as zip. unoconv file (without ext) required in subsequent installation steps
+
 ### Manual Installations
 * [Image Magick](https://www.imagemagick.org/script/index.php)
     * [7.0.9-5-Q16 (breaks with latest: Q8)](INSTALL\ImageMagick-7.0.9-5-Q16-x64-dll.exe)
@@ -29,7 +33,6 @@ Listed below are essential packages used in the script
 * [moviepy](https://zulko.github.io/moviepy/)
     * version 1.0.0
     * WINDOWS USERS: provide the path to the ImageMagick binary called `magick.exe` in `PATH/TO/PYTHON/lib/site-packages/moviepy/config_defaults.py`
-* [unoconv](https://github.com/unoconv/unoconv)
 * [bs4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
 * [lxml](https://pypi.org/project/lxml/)
 * [pyyaml](https://pyyaml.org/wiki/PyYAML)
