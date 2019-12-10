@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" "http://www.w3.org/Math/DTD/mathml2/xhtml-math11-f.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><!--This file was converted to xhtml by LibreOffice - see https://cgit.freedesktop.org/libreoffice/core/tree/filter/source/xslt for the code.--><head profile="http://dublincore.org/documents/dcmi-terms/"><meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8"/><title xml:lang="en-US">Hello world</title><meta name="DCTERMS.title" content="Hello world" xml:lang="en-US"/><meta name="DCTERMS.language" content="en-US" scheme="DCTERMS.RFC4646"/><meta name="DCTERMS.source" content="http://xml.openoffice.org/odf2xhtml"/><meta name="DCTERMS.creator" content="Derek Pung"/><meta name="DCTERMS.issued" content="2019-11-14T03:34:07" scheme="DCTERMS.W3CDTF"/><meta name="DCTERMS.contributor" content="Derek Pung"/><meta name="DCTERMS.modified" content="2019-12-10T04:14:24" scheme="DCTERMS.W3CDTF"/><meta name="DCTERMS.provenance" content="" xml:lang="en-US"/><meta name="DCTERMS.subject" content="," xml:lang="en-US"/><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" hreflang="en"/><link rel="schema.DCTERMS" href="http://purl.org/dc/terms/" hreflang="en"/><link rel="schema.DCTYPE" href="http://purl.org/dc/dcmitype/" hreflang="en"/><link rel="schema.DCAM" href="http://purl.org/dc/dcam/" hreflang="en"/><style type="text/css">
+    @page {  }
+    table { border-collapse:collapse; border-spacing:0; empty-cells:show }
+    td, th { vertical-align:top; font-size:12pt;}
+    h1, h2, h3, h4, h5, h6 { clear:both;}
+    ol, ul { margin:0; padding:0;}
+    li { list-style: none; margin:0; padding:0;}
+    /* "li span.odfLiEnd" - IE 7 issue*/
+    li span. { clear: both; line-height:0; width:0; height:0; margin:0; padding:0; }
+    span.footnodeNumber { padding-right:1em; }
+    span.annotation_style_by_filter { font-size:95%; font-family:Arial; background-color:#fff000;  margin:0; border:0; padding:0;  }
+    span.heading_numbering { margin-right: 0.8rem; }* { margin:0;}
+    .gr1 { font-size:18pt; font-style:normal; font-weight:normal; line-height:100%; margin-bottom:0cm; margin-left:0cm; margin-right:0cm; margin-top:0cm; padding-bottom:0.125cm; padding-left:0.25cm; padding-right:0.25cm; padding-top:0.125cm; text-indent:0cm; text-shadow:none; font-family:Liberation Sans; text-decoration:none ! important; min-height:1.397cm;}
+    .gr2 { font-size:18pt; font-style:normal; font-weight:normal; line-height:100%; margin-bottom:0cm; margin-left:0cm; margin-right:0cm; margin-top:0cm; padding-bottom:0.125cm; padding-left:0.25cm; padding-right:0.25cm; padding-top:0.125cm; text-indent:0cm; text-shadow:none; font-family:Liberation Sans; text-decoration:none ! important; min-height:1.397cm;}
+    .gr3 { font-size:24pt; font-family:Liberation Serif; }
+    .P1 { font-size:14pt; }
+    .P10 { margin-top:0cm; margin-bottom:0cm; line-height:90%; text-align:left ! important; writing-mode:lr-tb; font-size:44pt; }
+    .P11 { text-align:left ! important; font-size:44pt; }
+    .P12 { margin-left:0cm; margin-right:0cm; margin-top:0.353cm; margin-bottom:0cm; line-height:90%; text-align:left ! important; text-indent:0cm; writing-mode:lr-tb; font-size:28pt; }
+    .P13 { margin-left:0cm; margin-right:0cm; margin-top:0.176cm; margin-bottom:0cm; line-height:90%; text-align:left ! important; text-indent:0cm; writing-mode:lr-tb; font-size:28pt; }
+    .P14 { text-align:left ! important; font-size:28pt; }
+    .P15 { margin-top:0cm; margin-bottom:0cm; line-height:90%; text-align:center ! important; writing-mode:lr-tb; color:#000000; font-family:Calibri Light; font-size:60pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .P16 { margin-left:0cm; margin-right:0cm; margin-top:0.353cm; margin-bottom:0cm; line-height:90%; text-align:center ! important; text-indent:0cm; writing-mode:lr-tb; color:#000000; font-family:Calibri; font-size:24pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .P17 { margin-top:0cm; margin-bottom:0cm; line-height:100%; text-align:left ! important; }
+    .P18 { text-align:left ! important; font-size:18pt; }
+    .P19 { margin-top:0cm; margin-bottom:0cm; line-height:100%; text-align:right ! important; font-size:14pt; }
+    .P2 { font-size:14pt; }
+    .P20 { margin-top:0cm; margin-bottom:0cm; line-height:90%; text-align:center ! important; writing-mode:lr-tb; }
+    .P21 { margin-top:0cm; margin-bottom:0cm; line-height:90%; text-align:left ! important; writing-mode:lr-tb; }
+    .P22 { margin-left:0cm; margin-right:0cm; margin-top:0.353cm; margin-bottom:0cm; line-height:90%; text-align:left ! important; text-indent:0cm; writing-mode:lr-tb; color:#000000; font-family:Calibri; font-size:28pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .P23 { margin-top:0cm; margin-bottom:0cm; line-height:100%; text-align:left ! important; font-size:18pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .P24 { margin-top:0cm; margin-bottom:0cm; line-height:90%; text-align:left ! important; writing-mode:lr-tb; color:#000000; font-family:Calibri Light; font-size:44pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .P25 { margin-left:0cm; margin-right:0cm; margin-top:0cm; margin-bottom:0cm; line-height:100%; text-align:left ! important; text-indent:0cm; writing-mode:lr-tb; }
+    .P3 { text-align:right ! important; font-size:14pt; }
+    .P4 { text-align:right ! important; font-size:14pt; }
+    .P5 { margin-top:0cm; margin-bottom:0cm; line-height:90%; text-align:center ! important; writing-mode:lr-tb; font-size:60pt; }
+    .P6 { text-align:left ! important; font-size:60pt; }
+    .P7 { margin-left:0cm; margin-right:0cm; margin-top:0cm; margin-bottom:0cm; line-height:100%; text-align:left ! important; text-indent:0cm; writing-mode:lr-tb; font-size:14pt; }
+    .P8 { text-align:left ! important; font-size:12pt; }
+    .P9 { margin-left:0cm; margin-right:0cm; margin-top:0cm; margin-bottom:0cm; line-height:100%; text-align:right ! important; text-indent:0cm; writing-mode:lr-tb; font-size:14pt; }
+    .T1 { color:#000000; font-family:Calibri Light; font-size:60pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .T2 { color:#8b8b8b; font-family:Calibri; font-size:12pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .T3 { color:#000000; font-family:Calibri Light; font-size:44pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .T4 { color:#000000; font-family:Calibri; font-size:28pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .T5 { color:#000000; font-family:Calibri; font-size:24pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .T6 { color:#000000; font-family:Calibri; font-size:20pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .T7 { color:#000000; font-family:Calibri; font-size:18pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .T8 { font-size:20pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .T9 { font-size:12pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    /* ODF styles with no properties representable as CSS */
+    .dp1 .dp2 .dp3 .dp4  { }
+    </style></head><body style="max-width:21.59cm;margin-top:0cm; margin-bottom:0cm; margin-left:0cm; margin-right:0cm; "><!--Next 'div' was a 'draw:page'.--><div id="page1" class="dp3"><!--Next '
+            div' is a draw:frame.
+        --><div style="height:6.631cm;width:25.399cm; padding:0; " id="Title_1" class="P15"><!--Next 'div' was a 'draw:text-box'.--><div style=""/></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:4.598cm;width:25.399cm; padding:0; " id="Subtitle_2" class="P16"><!--Next 'div' was a 'draw:text-box'.--><div style=""/></div><!--Next 'div' added for floating.--><div style="position:relative; left:-21.166cm;"><!--Next '
+            div' is a draw:frame.
+        --><div style="height:10cm;width:15.239cm; padding:0; " id="Notes_Placeholder_2" class="P18"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P17"><span class="T8">{“display_name”: “Test without video_file_name and voice”}</span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:1.273cm;width:8.254cm; padding:0; " id="Slide_Number_Placeholder_3" class="P8"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P19"><span class="T9"><span title="page-number">&lt;number&gt;</span></span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:1.273cm;width:8.254cm; padding:0; " id="Slide_Number_Placeholder_3" class="P8"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P19"><span class="T9"><span title="page-number">&lt;number&gt;</span></span></p></div></div></div></div><div style="clear:both; line-height:0; width:0; height:0; margin:0; padding:0;"> </div><!--Next 'div' was a 'draw:page'.--><div id="page2" class="dp3"><!--Next '
+            div' is a draw:frame.
+        --><div style="height:6.631cm;width:25.399cm; padding:0; " id="Title_1" class="P6"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P20"><span class="T1">Hello world</span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:4.598cm;width:25.399cm; padding:0; " id="Subtitle_2" class="P16"><!--Next 'div' was a 'draw:text-box'.--><div style=""/></div><!--Next 'div' added for floating.--><div style="position:relative; left:-21.166cm;"><!--Next '
+            div' is a draw:frame.
+        --><div style="height:10cm;width:15.239cm; padding:0; " id="Notes_Placeholder_2" class="P18"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P17"><span class="T8">Voice should be default to 0 and file name default to file name of ppt</span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:1.273cm;width:8.254cm; padding:0; " id="Slide_Number_Placeholder_3" class="P8"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P19"><span class="T9"><span title="page-number">&lt;number&gt;</span></span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:1.273cm;width:8.254cm; padding:0; " id="Slide_Number_Placeholder_3" class="P8"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P19"><span class="T9"><span title="page-number">&lt;number&gt;</span></span></p></div></div></div></div><div style="clear:both; line-height:0; width:0; height:0; margin:0; padding:0;"> </div><!--Next 'div' was a 'draw:page'.--><div id="blank" class="dp3"><!--Next '
+            div' is a draw:frame.
+        --><div style="height:3.681cm;width:29.209cm; padding:0; " id="Title_1" class="P11"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P21"><span class="T3">blank</span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:12.086cm;width:29.209cm; padding:0; " id="Content_Placeholder_2" class="P22"><!--Next 'div' was a 'draw:text-box'.--><div style=""/></div><!--Next 'div' added for floating.--><div style="position:relative; left:-26.881cm;"><!--Next '
+            div' is a draw:frame.
+        --><div style="height:10cm;width:15.239cm; padding:0; " id="Notes_Placeholder_2" class="P18"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P17"><span class="T8">Skipping next comment</span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:1.273cm;width:8.254cm; padding:0; " id="Slide_Number_Placeholder_3" class="P8"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P19"><span class="T9"><span title="page-number">&lt;number&gt;</span></span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:1.273cm;width:8.254cm; padding:0; " id="Slide_Number_Placeholder_3" class="P8"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P19"><span class="T9"><span title="page-number">&lt;number&gt;</span></span></p></div></div></div></div><div style="clear:both; line-height:0; width:0; height:0; margin:0; padding:0;"> </div><!--Next 'div' was a 'draw:page'.--><div id="Skipped_this" class="dp3"><!--Next '
+            div' is a draw:frame.
+        --><div style="height:3.681cm;width:29.209cm; padding:0; " id="Title_1" class="P11"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P21"><span class="T3">Skipped this</span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:12.086cm;width:29.209cm; padding:0; " id="Content_Placeholder_2" class="P22"><!--Next 'div' was a 'draw:text-box'.--><div style=""/></div><!--Next 'div' added for floating.--><div style="position:relative; left:-26.881cm;"><!--Next '
+            div' is a draw:frame.
+        --><div style="height:10cm;width:15.239cm; padding:0; " id="Notes_Placeholder_2" class="P23"><!--Next 'div' was a 'draw:text-box'.--><div style=""/></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:1.273cm;width:8.254cm; padding:0; " id="Slide_Number_Placeholder_3" class="P8"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P19"><span class="T9"><span title="page-number">&lt;number&gt;</span></span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:1.273cm;width:8.254cm; padding:0; " id="Slide_Number_Placeholder_3" class="P8"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P19"><span class="T9"><span title="page-number">&lt;number&gt;</span></span></p></div></div></div></div><div style="clear:both; line-height:0; width:0; height:0; margin:0; padding:0;"> </div><!--Next 'div' was a 'draw:page'.--><div id="page5" class="dp3"><!--Next '
+            div' is a draw:frame.
+        --><div style="height:3.681cm;width:29.209cm; padding:0; " id="Title_1" class="P24"><!--Next 'div' was a 'draw:text-box'.--><div style=""/></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:12.086cm;width:29.209cm; padding:0; " id="Content_Placeholder_2" class="P22"><!--Next 'div' was a 'draw:text-box'.--><div style=""/></div><!--Next 'div' added for floating.--><div style="position:relative; left:-26.881cm;"><!--Next '
+            div' is a draw:frame.
+        --><div style="height:10cm;width:15.239cm; padding:0; " id="Notes_Placeholder_2" class="P18"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P25"><span class="T8">{“display_name”: “BREAK TITLEEE”}</span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:1.273cm;width:8.254cm; padding:0; " id="Slide_Number_Placeholder_3" class="P8"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P19"><span class="T9"><span title="page-number">&lt;number&gt;</span></span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:1.273cm;width:8.254cm; padding:0; " id="Slide_Number_Placeholder_3" class="P8"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P19"><span class="T9"><span title="page-number">&lt;number&gt;</span></span></p></div></div></div></div><div style="clear:both; line-height:0; width:0; height:0; margin:0; padding:0;"> </div><!--Next 'div' was a 'draw:page'.--><div id="Bye_world" class="dp3"><!--Next '
+            div' is a draw:frame.
+        --><div style="height:3.681cm;width:29.209cm; padding:0; " id="Title_1" class="P11"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P21"><span class="T3">Bye world</span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:12.086cm;width:29.209cm; padding:0; " id="Content_Placeholder_2" class="P22"><!--Next 'div' was a 'draw:text-box'.--><div style=""/></div><!--Next 'div' added for floating.--><div style="position:relative; left:-26.881cm;"><!--Next '
+            div' is a draw:frame.
+        --><div style="height:10cm;width:15.239cm; padding:0; " id="Notes_Placeholder_2" class="P18"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P17"><span class="T8">Skipped previous comment</span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:1.273cm;width:8.254cm; padding:0; " id="Slide_Number_Placeholder_3" class="P8"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P19"><span class="T9"><span title="page-number">&lt;number&gt;</span></span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:1.273cm;width:8.254cm; padding:0; " id="Slide_Number_Placeholder_3" class="P8"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P19"><span class="T9"><span title="page-number">&lt;number&gt;</span></span></p></div></div></div></div><div style="clear:both; line-height:0; width:0; height:0; margin:0; padding:0;"> </div></body></html>

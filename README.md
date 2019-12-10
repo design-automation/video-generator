@@ -123,7 +123,7 @@ Listed below are essential packages used in the script
 
 ## Output
 1. `videos.json` file
-    * This file serves as a log to keep track of last modified time for all the pptx, mp4, and their yaml and srt files.
+    * This file serves as a log to keep track of last modified time for all the pptx, mp4, and their srt files.
     * **deletion of videos.json or renaming of files will result in regeneration of the videos**
     ```
     `-- input

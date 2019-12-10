@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" "http://www.w3.org/Math/DTD/mathml2/xhtml-math11-f.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><!--This file was converted to xhtml by LibreOffice - see https://cgit.freedesktop.org/libreoffice/core/tree/filter/source/xslt for the code.--><head profile="http://dublincore.org/documents/dcmi-terms/"><meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8"/><title xml:lang="en-US">PowerPoint Presentation</title><meta name="DCTERMS.title" content="PowerPoint Presentation" xml:lang="en-US"/><meta name="DCTERMS.language" content="en-US" scheme="DCTERMS.RFC4646"/><meta name="DCTERMS.source" content="http://xml.openoffice.org/odf2xhtml"/><meta name="DCTERMS.creator" content="Derek Pung"/><meta name="DCTERMS.issued" content="2019-12-10T04:37:49" scheme="DCTERMS.W3CDTF"/><meta name="DCTERMS.contributor" content="Derek Pung"/><meta name="DCTERMS.modified" content="2019-12-10T04:57:25" scheme="DCTERMS.W3CDTF"/><meta name="DCTERMS.provenance" content="" xml:lang="en-US"/><meta name="DCTERMS.subject" content="," xml:lang="en-US"/><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" hreflang="en"/><link rel="schema.DCTERMS" href="http://purl.org/dc/terms/" hreflang="en"/><link rel="schema.DCTYPE" href="http://purl.org/dc/dcmitype/" hreflang="en"/><link rel="schema.DCAM" href="http://purl.org/dc/dcam/" hreflang="en"/><style type="text/css">
+    @page {  }
+    table { border-collapse:collapse; border-spacing:0; empty-cells:show }
+    td, th { vertical-align:top; font-size:12pt;}
+    h1, h2, h3, h4, h5, h6 { clear:both;}
+    ol, ul { margin:0; padding:0;}
+    li { list-style: none; margin:0; padding:0;}
+    /* "li span.odfLiEnd" - IE 7 issue*/
+    li span. { clear: both; line-height:0; width:0; height:0; margin:0; padding:0; }
+    span.footnodeNumber { padding-right:1em; }
+    span.annotation_style_by_filter { font-size:95%; font-family:Arial; background-color:#fff000;  margin:0; border:0; padding:0;  }
+    span.heading_numbering { margin-right: 0.8rem; }* { margin:0;}
+    .gr1 { font-size:18pt; font-style:normal; font-weight:normal; line-height:100%; margin-bottom:0cm; margin-left:0cm; margin-right:0cm; margin-top:0cm; padding-bottom:0.125cm; padding-left:0.25cm; padding-right:0.25cm; padding-top:0.125cm; text-indent:0cm; text-shadow:none; font-family:Liberation Sans; text-decoration:none ! important; min-height:1.397cm;}
+    .gr2 { font-size:18pt; font-style:normal; font-weight:normal; line-height:100%; margin-bottom:0cm; margin-left:0cm; margin-right:0cm; margin-top:0cm; padding-bottom:0.125cm; padding-left:0.25cm; padding-right:0.25cm; padding-top:0.125cm; text-indent:0cm; text-shadow:none; font-family:Liberation Sans; text-decoration:none ! important; min-height:1.397cm;}
+    .gr3 { font-size:24pt; font-family:Liberation Serif; }
+    .P1 { font-size:14pt; }
+    .P10 { margin-top:0cm; margin-bottom:0cm; line-height:90%; text-align:center ! important; writing-mode:lr-tb; color:#000000; font-family:Calibri Light; font-size:60pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .P11 { margin-left:0cm; margin-right:0cm; margin-top:0.353cm; margin-bottom:0cm; line-height:90%; text-align:center ! important; text-indent:0cm; writing-mode:lr-tb; color:#000000; font-family:Calibri; font-size:24pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .P12 { margin-top:0cm; margin-bottom:0cm; line-height:100%; text-align:left ! important; }
+    .P13 { text-align:left ! important; font-size:18pt; }
+    .P14 { margin-top:0cm; margin-bottom:0cm; line-height:100%; text-align:right ! important; font-size:14pt; }
+    .P2 { font-size:14pt; }
+    .P3 { text-align:right ! important; font-size:14pt; }
+    .P4 { text-align:right ! important; font-size:14pt; }
+    .P5 { margin-top:0cm; margin-bottom:0cm; line-height:90%; text-align:center ! important; writing-mode:lr-tb; font-size:60pt; }
+    .P6 { text-align:left ! important; font-size:60pt; }
+    .P7 { margin-left:0cm; margin-right:0cm; margin-top:0cm; margin-bottom:0cm; line-height:100%; text-align:left ! important; text-indent:0cm; writing-mode:lr-tb; font-size:14pt; }
+    .P8 { text-align:left ! important; font-size:12pt; }
+    .P9 { margin-left:0cm; margin-right:0cm; margin-top:0cm; margin-bottom:0cm; line-height:100%; text-align:right ! important; text-indent:0cm; writing-mode:lr-tb; font-size:14pt; }
+    .T1 { color:#000000; font-family:Calibri Light; font-size:60pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .T2 { color:#8b8b8b; font-family:Calibri; font-size:12pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .T3 { font-size:20pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    .T4 { font-size:12pt; letter-spacing:normal; font-style:normal; text-decoration:none ! important; font-weight:normal; }
+    /* ODF styles with no properties representable as CSS */
+    .dp1 .dp2 .dp3 .dp4  { }
+    </style></head><body style="max-width:21.59cm;margin-top:0cm; margin-bottom:0cm; margin-left:0cm; margin-right:0cm; "><!--Next 'div' was a 'draw:page'.--><div id="page1" class="dp3"><!--Next '
+            div' is a draw:frame.
+        --><div style="height:6.631cm;width:25.399cm; padding:0; " id="Title_1" class="P10"><!--Next 'div' was a 'draw:text-box'.--><div style=""/></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:4.598cm;width:25.399cm; padding:0; " id="Subtitle_2" class="P11"><!--Next 'div' was a 'draw:text-box'.--><div style=""/></div><!--Next 'div' added for floating.--><div style="position:relative; left:-21.166cm;"><!--Next '
+            div' is a draw:frame.
+        --><div style="height:10cm;width:15.239cm; padding:0; " id="Notes_Placeholder_2" class="P13"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P12"><span class="T3">{“disp_name”: “key should be ‘display_name’. Error should be raised”}</span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:1.273cm;width:8.254cm; padding:0; " id="Slide_Number_Placeholder_3" class="P8"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P14"><span class="T4"><span title="page-number">&lt;number&gt;</span></span></p></div></div><!--Next '
+            div' is a draw:frame.
+        --><div style="height:1.273cm;width:8.254cm; padding:0; " id="Slide_Number_Placeholder_3" class="P8"><!--Next 'div' was a 'draw:text-box'.--><div style=""><p class="P14"><span class="T4"><span title="page-number">&lt;number&gt;</span></span></p></div></div></div></div><div style="clear:both; line-height:0; width:0; height:0; margin:0; padding:0;"> </div></body></html>

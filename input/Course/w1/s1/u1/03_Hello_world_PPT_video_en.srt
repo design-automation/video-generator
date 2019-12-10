@@ -1,10 +1,10 @@
 1
 00:00:00,000 --> 00:00:05,000
-{"video_file_name": "03_Hello_world_PPT_video", "display_name": "Hello world", "voice": "3"}
+{"display_name": "Test without video_file_name and voice"}
 
 2
 00:00:05,000 --> 00:00:10,000
-This is a test
+Voice should be default to 0 and file name default to file name of ppt
 
 3
 00:00:10,000 --> 00:00:15,000
@@ -12,7 +12,7 @@ Skipping next comment
 
 4
 00:00:15,000 --> 00:00:20,000
-123
+
 
 5
 00:00:20,000 --> 00:00:25,000

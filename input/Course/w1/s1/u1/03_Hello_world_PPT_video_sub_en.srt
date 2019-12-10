@@ -1,24 +1,20 @@
 1
 00:00:00,000 --> 00:00:03,000
-Hello world
+Test without video_file_name and voice
 
 2
-00:00:03,000 --> 00:00:04,540
-This is a test 
+00:00:03,000 --> 00:00:07,490
+Voice should be default to 0 and file name default to file name of ppt 
 
 3
-00:00:04,540 --> 00:00:06,290
+00:00:07,490 --> 00:00:09,240
 Skipping next comment 
 
 4
-00:00:06,290 --> 00:00:08,140
-123 
-
-5
 00:00:23,000 --> 00:00:26,000
 BREAK TITLEEE
 
-6
+5
 00:00:26,000 --> 00:00:27,730
 Skipped previous comment 
 

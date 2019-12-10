@@ -40,12 +40,13 @@ def _libreXML_to_SRT(folder_path, tar_fdr):
     n_slides = 0
     with open (xml_file, "rt", encoding="utf-8") as xml_f:
         soup = BeautifulSoup(xml_f, "xml")
-        all_slides = soup.findAll("div", attrs={"class": "dp3"})
+        all_slides = soup.findAll("div", id=re.compile(r'page*'))
         n_slides = len(all_slides)
         for slide_i in range(0, n_slides):
             slide = all_slides[slide_i]
             try:
-                notes = slide.find("span", attrs={"class", "T8"}).text
+                notes = slide.find("div", id=re.compile(r'Notes*')).find("span").text
+                print(notes)
             except AttributeError:
                 notes = ""
             notes = notes.replace("“","\"").replace("”","\"")

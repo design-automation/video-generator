@@ -71,9 +71,14 @@ class Video:
     def set_vid_args(self, srt_obj):
         script = srt_obj.get_seq("_NA_", 1)["script"]
         arg_dict = json.loads(script)
-        self.__dict["video_file_name"] = arg_dict["video_file_name"]
-        self.__dict["display_name"] = arg_dict["display_name"]
-        self.__dict["voice"] = arg_dict["voice"]
+        for key_name in arg_dict:
+            self.__dict[key_name] = arg_dict[key_name]
+        if self.__dict["video_file_name"] == "":
+            self.__dict["video_file_name"] = self.__name
+        if self.__dict["voice"] == "":
+            self.__dict["voice"] = "0"
+        if self.__dict["display_name"] == "":
+            raise Exception("Attribute \"display_name\" not found")
 
     def set_srt_edit(self, language, value):
         lang = language

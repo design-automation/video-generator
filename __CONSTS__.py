@@ -13,6 +13,8 @@ COURSE_PATH = "input\\Course\\"
 VIDEO_RES = (1080,720)
 TITLE_PERIOD = 3 #seconds
 FONT = "Ubuntu-Mono"
+IDEAL_LENGTH = 12
+REL_FONT_SZ = 103
 
 ## Audio settings
 LANGUAGES = ["uk", "zh"] # available: refer to keys of VOICES below
