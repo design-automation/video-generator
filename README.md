@@ -29,7 +29,6 @@ Listed below are essential packages used in the script
 * [moviepy](https://zulko.github.io/moviepy/)
     * version 1.0.0
     * WINDOWS USERS: provide the path to the ImageMagick binary called `magick.exe` in `PATH/TO/PYTHON/lib/site-packages/moviepy/config_defaults.py`
-* [youtube_dl](https://pypi.org/project/youtube_dl/)
 * [unoconv](https://github.com/unoconv/unoconv)
 * [bs4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
 * [lxml](https://pypi.org/project/lxml/)
