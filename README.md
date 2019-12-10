@@ -59,6 +59,8 @@ Listed below are essential packages used in the script
     * Resolution: (width, height) in px
     * Title Period: Period in which the title is shown (in seconds)
     * Font: Font to be used for video title
+    * Title ideal length: length in characters
+    * Relative Font size = Font size to use if title is equal or less than ideal length. Else ideal_length/title_length * rel_font_size
 1. Audio settings
     * Languages: Languages which will be used to generate the videos
     * Voices: Based on list available on [AWS Polly Documentation](https://docs.aws.amazon.com/polly/latest/dg/voicelist.html)
