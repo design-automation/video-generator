@@ -13,7 +13,7 @@ from boto3 import Session
 from botocore.exceptions import BotoCoreError, ClientError
 from contextlib import closing
 from _get_by_type import *
-from __CONSTS__ import VOICES, VIDEO_RES, TITLE_PERIOD, IMAGEMAGICK_BINARY, FONT, FONT_SZ, IDEAL_LENGTH
+from __CONSTS__ import VOICES, VIDEO_RES, TITLE_PERIOD, FONT, FONT_SZ, IDEAL_LENGTH
 from __AWS__ import aws_access_key_id, aws_secret_access_key
 
 OUTPUT_FDR = "output"

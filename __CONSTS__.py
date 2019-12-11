@@ -1,12 +1,7 @@
 import os
-## ImageMagick Binary location
-IMAGEMAGICK_BINARY = os.getenv('IMAGEMAGICK_BINARY', 'C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe')
-
-## LibreOffice program file location
-PATH_TO_LIBRE_OFFICE_PROGRAM = "D:\\mscInstallations\\LibreOffice\\program\\"
 
 ## Course Settings
-EDX_COURSE = 'SCT04'
+EDX_COURSE = 'procedural_modelling'
 COURSE_PATH = ""
 
 ## Video settings
