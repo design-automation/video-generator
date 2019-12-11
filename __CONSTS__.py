@@ -7,7 +7,7 @@ PATH_TO_LIBRE_OFFICE_PROGRAM = "D:\\mscInstallations\\LibreOffice\\program\\"
 
 ## Course Settings
 EDX_COURSE = 'SCT04'
-COURSE_PATH = "D:\\OneDrive\\NUS\\Work\\mobiusEdX\\spatial-computational-thinking-mooc\\mooc1-procedural-modelling\\Course\\"
+COURSE_PATH = ""
 
 ## Video settings
 VIDEO_RES = (1080,720)

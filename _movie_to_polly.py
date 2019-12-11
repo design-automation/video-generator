@@ -304,14 +304,15 @@ def break_title(title):
     if title_len <= IDEAL_LENGTH:
         return title
     else:
-        words = title.split()
+        words = title.split(" ")
         ret_title = ""
         curr_line_len = 0
         for word in words:
             if ((curr_line_len + len(word)) >= IDEAL_LENGTH) and curr_line_len != 0:
                 ret_title += "\n"
                 curr_line_len = 0
-            ret_title += word
+            ret_title += " " + word
+            curr_line_len += len(word)
         return ret_title
 
 def composite_MP4(language, folder, vid_name, srt_obj):
@@ -338,10 +339,10 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
             fadeout = True
 
         if script != "" and script[0] == "{":
-            title = json.loads(script)["display_name"]
+            title = break_title(json.loads(script)["display_name"])
             if seq_i == 1 and language!="uk" and language!="us":
                 title += "\n(%s)" % language
-            title_clip = TextClip(txt=break_title(title), size=VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=FONT_SZ).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
+            title_clip = TextClip(txt=title, size=VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=FONT_SZ).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
             vid_list.append(title_clip)
         else:
             if typ == "MP4":
