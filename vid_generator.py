@@ -4,16 +4,23 @@ from _polly_JSON import VidsJSON, Video
 import glob
 import argparse
 import os
-from __CONSTS__ import LANGUAGES, COURSE_PATH, EDX_COURSE, S3_bucket, S3_folder
+from __CONSTS__ import LANGUAGES
 from _pptx_to_video import pptx_to_ingreds
 from _to_S3 import upload_s3
 from _movie_to_polly import *
 import traceback
+#--------------------------------------------------------------------------------------------------
+import sys, os
+import __CONSTS__
+sys.path.insert(1, os.path.relpath(sys.argv[1]))
+from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER
+#--------------------------------------------------------------------------------------------------
+
 
 def main():
     change_log = {}
     end_msg = "To-Polly Process Complete."  
-    SECTIONS = glob.glob("%s*\\" % COURSE_PATH)
+    SECTIONS = glob.glob("%sCourse\\*\\" % sys.argv[1])
     # loop through sections in MOOC path
     for section in SECTIONS:
         SUBSECTIONS = glob.glob("%s*\\" % section)
@@ -116,8 +123,8 @@ def _generate_video(vid_obj, language, change):
         if language == "us" or language == "uk":
             lang_append = "en"
         
-        S3_path = "%s/%s/%s_%s.mp4" % (EDX_COURSE, S3_folder, re.sub("-", "/", vid_args["video_file_name"]), lang_append)
-        upload_s3(comp_path, S3_bucket, S3_path)
+        S3_path = "%s/%s/%s_%s.mp4" % (S3_MOOC_FOLDER, S3_VIDEOS_FOLDER, re.sub("-", "/", vid_args["video_file_name"]), lang_append)
+        upload_s3(comp_path, S3_BUCKET, S3_path)
         print("\nUploaded to S3")
 
         vid_obj.set_srt_edit(language, os.path.getmtime(vid_obj.get_srt_path(language)))

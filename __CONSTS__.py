@@ -1,13 +1,5 @@
 import os
 
-## Course Settings
-EDX_COURSE = 'procedural_modelling'
-COURSE_PATH = ""
-
-#S3
-S3_bucket = "mooc-s3cf"
-S3_folder = "videos"
-
 ## Video settings
 VIDEO_RES = (1080,720)
 TITLE_PERIOD = 3 #seconds
