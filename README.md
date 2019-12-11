@@ -40,10 +40,8 @@ Listed below are essential packages used in the script
 ## Input
 ### Settings
 > [`__CONSTS__.py`](__CONSTS__.py)
-1. Correct Path to IMAGEMAGICK exe is required for script to work
-1. Set Path to LibreOffice and copy unoconv file into it
 1. Course Settings
-    * edx course: course name which will appended to the front of the video name when video is uploaded onto S3. S3 object will appear under a folder-like structure on AWS console.
+    * Course Path should be set in a `__RUN__.bat` file. Refer to [Execute Section #6](#Execute)
     * Course path: Relative Course Path (from root folder) where units will be checked. Script iterates **3 levels deep** to get to the units from the Course Path
         ```
         `-- input
@@ -57,6 +55,18 @@ Listed below are essential packages used in the script
                             `-- Subsection
                                     `-- Unit (Target folder)
         ```
+    * Expects a `__SETTINGS__.py` sibling folder
+        ```
+        `-- input
+            |-- Course
+            |
+            `-- __SETTINGS__.py
+        ```
+        * File should include the following CONSTANTS:
+            * S3_BUCKET
+            * S3_MOOC_FOLDER
+            * S3_VIDEOS_FOLDER
+        * Videos will be uploaded onto: `S3_BUCKET\S3_MOOC_FOLDER\S3_VIDEOS_FOLDER`
 1. Video settings
     * Resolution: (width, height) in px
     * Title Period: Period in which the title is shown (in seconds)
@@ -167,11 +177,13 @@ Listed below are essential packages used in the script
 [w1 > s1 > u1](input\Course\w1\s1\u1)
 ## Execute
 1. Rename [`__AWS__.template.py`](__AWS__.template.py) to `__AWS__.py`
-    * Include AWS Access Key, Secret Access Key, and S3 Bucket name in renamed file
-1. Set Path to MAGICK.exe file in [`__CONSTS__.py`](__CONSTS__.py)
-1. Set Path to LibreOffice\program in [`__CONSTS__.py`](__CONSTS__.py) and copy `unoconv` (no ext) into `path\to\LibreOffice\program\`
-1. Add to Environment Variable `Path` with value `path\to\LibreOffice\program`
+    * Include AWS Access Key and Secret Access Key in renamed file
+1. Add to Environment Variable `LIBRE_OFFICE_PROGRAM` with value `path\to\LibreOffice\program` 
+1. Copy `unoconv` (no ext) into `path\to\LibreOffice\program\`
 1. Add to Environment Variable `Path` with value `path\to\ImageMagick-XXXX`
+1. Add to Environment Variable `IMAGEMAGICK_BINARY` with value `path\to\ImageMagick-XXXX\magick.exe`
+1. Rename [`__RUN__.template.bat`](__RUN__.template.bat) to `__RUN__.bat`
+    * set path to `Course` folder
 1. Execute
     ```
     python vid_generator.py
