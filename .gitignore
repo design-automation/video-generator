@@ -10,3 +10,5 @@ __AWS__.py
 __pycache__/
 
 error_log.json
+
+__CONSTS_LOCAL__.py
