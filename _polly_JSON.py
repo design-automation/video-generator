@@ -1,5 +1,8 @@
 import os
 import json
+import subprocess
+import re
+
 from __CONSTS__ import LANGUAGES
 
 def _json_to_dict(path):
@@ -43,7 +46,7 @@ class COMPONENT:
         self.__path = _dir + "\\" + name + ".%s" % ext
         self.__last_edit = -1
         try:
-            self.__last_edit = os.path.getmtime(self.__path)
+            self.__last_edit = float(re.search(r"(\d+)", subprocess.run(args=["git", "log" , "-1", "--pretty='format:%ct'", self.__path], cwd=os.path.dirname(self.__path), capture_output=True, text=True).stdout).group(1))
         except Exception:
             print("%s does not exist" % self.__path)
             self.__last_edit = -1
