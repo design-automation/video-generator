@@ -9,6 +9,10 @@ PATH_TO_LIBRE_OFFICE_PROGRAM = "D:\\mscInstallations\\LibreOffice\\program\\"
 EDX_COURSE = 'SCT04'
 COURSE_PATH = ""
 
+#S3
+S3_bucket = "mooc-s3cf"
+S3_folder = "videos"
+
 ## Video settings
 VIDEO_RES = (1080,720)
 TITLE_PERIOD = 3 #seconds
