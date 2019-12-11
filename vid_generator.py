@@ -4,8 +4,7 @@ from _polly_JSON import VidsJSON, Video
 import glob
 import argparse
 import os
-from __CONSTS__ import LANGUAGES, COURSE_PATH, EDX_COURSE
-from __AWS__ import  S3_bucket
+from __CONSTS__ import LANGUAGES, COURSE_PATH, EDX_COURSE, S3_bucket, S3_folder
 from _pptx_to_video import pptx_to_ingreds
 from _to_S3 import upload_s3
 from _movie_to_polly import *
@@ -117,7 +116,7 @@ def _generate_video(vid_obj, language, change):
         if language == "us" or language == "uk":
             lang_append = "en"
         
-        S3_path = "%s/%s_%s.mp4" % (EDX_COURSE, re.sub("-", "/", vid_args["video_file_name"]), lang_append)
+        S3_path = "%s/%s/%s_%s.mp4" % (EDX_COURSE, S3_folder, re.sub("-", "/", vid_args["video_file_name"]), lang_append)
         upload_s3(comp_path, S3_bucket, S3_path)
         print("\nUploaded to S3")
 
