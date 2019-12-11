@@ -13,7 +13,7 @@ from boto3 import Session
 from botocore.exceptions import BotoCoreError, ClientError
 from contextlib import closing
 from _get_by_type import *
-from __CONSTS__ import VOICES, VIDEO_RES, TITLE_PERIOD, IMAGEMAGICK_BINARY, FONT, REL_FONT_SZ, IDEAL_LENGTH
+from __CONSTS__ import VOICES, VIDEO_RES, TITLE_PERIOD, IMAGEMAGICK_BINARY, FONT, FONT_SZ, IDEAL_LENGTH
 from __AWS__ import aws_access_key_id, aws_secret_access_key
 
 OUTPUT_FDR = "output"
@@ -299,6 +299,21 @@ def to_Polly(srt_obj, voice_id, neural, pptx=False):# returns mp3s in subfolder
 
     srt_obj.update_SRT()
 
+def break_title(title):
+    title_len = len(title)
+    if title_len <= IDEAL_LENGTH:
+        return title
+    else:
+        words = title.split()
+        ret_title = ""
+        curr_line_len = 0
+        for word in words:
+            if ((curr_line_len + len(word)) >= IDEAL_LENGTH) and curr_line_len != 0:
+                ret_title += "\n"
+                curr_line_len = 0
+            ret_title += word
+        return ret_title
+
 def composite_MP4(language, folder, vid_name, srt_obj):
     return _composite_video("MP4", language, folder, vid_name, srt_obj)
 
@@ -326,12 +341,7 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
             title = json.loads(script)["display_name"]
             if seq_i == 1 and language!="uk" and language!="us":
                 title += "\n(%s)" % language
-            rel_length = len(title)/IDEAL_LENGTH
-            if rel_length > 1:
-                rel_length = 1/rel_length
-            else:
-                rel_length = 1
-            title_clip = TextClip(txt=title, size=VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize= rel_length * REL_FONT_SZ).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
+            title_clip = TextClip(txt=break_title(title), size=VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=FONT_SZ).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
             vid_list.append(title_clip)
         else:
             if typ == "MP4":
