@@ -72,7 +72,7 @@ def pptx_to_ingreds(pptx_path, tar_folder):
     subprocess.run(['%spython.exe' % PATH_TO_LIBRE_OFFICE_PROGRAM, '%sunoconv' % PATH_TO_LIBRE_OFFICE_PROGRAM, '-f', "xml", "-o", "%s\\%s.xml" % (folder, file_name), pptx_abs_path])
 
     print("Generating Images from pdf file")
-    subprocess.run(['magick', 'convert', os.path.abspath(os.path.join(folder, "%s.pdf" % file_name)), "-resize", sz, os.path.abspath(os.path.join(image_fdr, "%s.png" % file_name))]) 
+    subprocess.run(['magick', 'convert', "-density", "300x300", os.path.abspath(os.path.join(folder, "%s.pdf" % file_name)), "-resize", sz, os.path.abspath(os.path.join(image_fdr, "%s.png" % file_name))])
 
     print("Generating SRT from xml")
     _libreXML_to_SRT(folder, os.path.dirname(pptx_path))
