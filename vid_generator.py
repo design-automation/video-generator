@@ -10,8 +10,7 @@ from _to_S3 import upload_s3
 from _movie_to_polly import *
 import traceback
 #--------------------------------------------------------------------------------------------------
-import sys, os
-import __CONSTS__
+import sys
 sys.path.insert(1, os.path.relpath(sys.argv[1]))
 from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER
 #--------------------------------------------------------------------------------------------------
