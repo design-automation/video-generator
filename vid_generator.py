@@ -14,7 +14,6 @@ from _get_by_type import *
 from _polly_JSON import VidsJSON, Video
 import glob
 import argparse
-import os
 from __CONSTS__ import LANGUAGES
 from _pptx_to_video import pptx_to_ingreds
 from _to_S3 import upload_s3
@@ -26,18 +25,18 @@ def main():
 
     change_log = {}
     end_msg = "To-Polly Process Complete."  
-    SECTIONS = glob.glob(os.path.join(INPUT_PATH, 'Course', '*'))    #"%sCourse\\*\\" % sys.argv[1]) 
+    SECTIONS = glob.glob(os.path.join(INPUT_PATH, 'Course', '*\\'))
 
     # loop through sections in MOOC path
     # SECTIONS
     for section in SECTIONS:
         print('- ', section)
-        SUBSECTIONS = glob.glob(os.path.join(section, '*'))           # "%s*\\" % section)
+        SUBSECTIONS = glob.glob(os.path.join(section, '*\\'))
 
         # SUBSECTIONS
         for subsection in SUBSECTIONS:
             print('-- ', subsection)
-            UNITS = glob.glob(os.path.join(subsection, '*'))          # "%s*\\" % subsection)
+            UNITS = glob.glob(os.path.join(subsection, '*\\'))
 
             # UNITS
             for unit in UNITS:

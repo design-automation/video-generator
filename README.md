@@ -35,7 +35,6 @@ Listed below are essential packages used in the script
     * WINDOWS USERS: provide the path to the ImageMagick binary called `magick.exe` in `PATH/TO/PYTHON/lib/site-packages/moviepy/config_defaults.py`
 * [bs4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
 * [lxml](https://pypi.org/project/lxml/)
-* [pyyaml](https://pyyaml.org/wiki/PyYAML)
 
 ## Input
 ### Settings

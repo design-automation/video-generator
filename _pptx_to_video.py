@@ -65,6 +65,7 @@ def pptx_to_ingreds(pptx_path, tar_folder):
     sz = "%sx%s" % VIDEO_RES
 
     print("Converting pptx file to pdf")
+
     subprocess.run(['%spython.exe' % os.getenv('LIBRE_OFFICE_PROGRAM'), '%sunoconv' % os.getenv('LIBRE_OFFICE_PROGRAM'), '-f', "pdf", "-o", "%s\\%s.pdf" % (folder, file_name),  pptx_abs_path])
 
     print("Converting pptx file to xml")
