@@ -186,5 +186,5 @@ Listed below are essential packages used in the script
     * set path to `Course` folder
 1. Execute
     ```
-    python vid_generator.py
+    .\__RUN__.bat
     ```
