@@ -1,3 +1,14 @@
+import sys, os
+#--------------------------------------------------------------------------------------------------
+if len(sys.argv) != 2:
+    raise Exception('Usage: python ./vid_generator.py input_path')
+if not os.path.exists(sys.argv[1]):
+    raise Exception('Path does not exist: ' + sys.argv[1])
+if not os.path.exists(os.path.join(sys.argv[1], '__SETTINGS__.py')):
+    raise Exception('Path does not contain __SETTINGS__.py: ' + sys.argv[1])
+INPUT_PATH = os.path.normpath(sys.argv[1])
+sys.path.append(INPUT_PATH)
+#--------------------------------------------------------------------------------------------------
 from _checks import *
 from _get_by_type import *
 from _polly_JSON import VidsJSON, Video
@@ -9,23 +20,29 @@ from _pptx_to_video import pptx_to_ingreds
 from _to_S3 import upload_s3
 from _movie_to_polly import *
 import traceback
-#--------------------------------------------------------------------------------------------------
-import sys
-sys.path.insert(1, os.path.relpath(sys.argv[1]))
 from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER
 #--------------------------------------------------------------------------------------------------
-
-
 def main():
+
     change_log = {}
     end_msg = "To-Polly Process Complete."  
-    SECTIONS = glob.glob("%sCourse\\*\\" % sys.argv[1])
+    SECTIONS = glob.glob(os.path.join(INPUT_PATH, 'Course', '*'))    #"%sCourse\\*\\" % sys.argv[1]) 
+
     # loop through sections in MOOC path
+    # SECTIONS
     for section in SECTIONS:
-        SUBSECTIONS = glob.glob("%s*\\" % section)
+        print('- ', section)
+        SUBSECTIONS = glob.glob(os.path.join(section, '*'))           # "%s*\\" % section)
+
+        # SUBSECTIONS
         for subsection in SUBSECTIONS:
-            UNITS = glob.glob("%s*\\" % subsection)
+            print('-- ', subsection)
+            UNITS = glob.glob(os.path.join(subsection, '*'))          # "%s*\\" % subsection)
+
+            # UNITS
             for unit in UNITS:
+                print('--- ', unit)
+
                 unit = unit[:-1]
                 vid_files = get_paths_by_typ(unit, "pptx")
                 vid_files.extend(get_paths_by_typ(unit, "mp4"))
@@ -34,7 +51,11 @@ def main():
                 json_path = os.path.join(unit, "videos.json")
                 FRESH = not vids_json_exists(json_path,True)
                 vids_obj = VidsJSON(json_path, FRESH)
+
+                # VIDEOS
                 for vid_file in vid_files:
+                    print('---- ', vid_file)
+
                     vid_obj = Video(vid_file)
                     id = vid_obj.get_file_name()
                     pp_curr_edit = vid_obj.get_pre_polly_edit()
@@ -70,8 +91,10 @@ def main():
                         vids_obj.set_vid_obj(vid_obj)
                     if change != -1:
                         shutil.rmtree(vid_obj.get_base_dir() + "\\" + vid_obj.get_file_name())
-                vids_obj.to_JSON()
 
+                # write to JSON file
+                vids_obj.to_JSON()
+#--------------------------------------------------------------------------------------------------
 def _generate_all(vid_obj):
     success = False
     for lang in LANGUAGES:
@@ -80,7 +103,7 @@ def _generate_all(vid_obj):
             print("\nError occured. Process Terminated.")
             break
     return success
-
+#--------------------------------------------------------------------------------------------------
 def _generate_video(vid_obj, language, change):
     try:
         vid_ext = vid_obj.get_ext()
@@ -137,5 +160,5 @@ def _generate_video(vid_obj, language, change):
         
         traceback.print_exc()
         return False
-
+#--------------------------------------------------------------------------------------------------
 main()
