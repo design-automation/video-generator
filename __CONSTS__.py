@@ -8,17 +8,11 @@ IDEAL_LENGTH = 12
 FONT_SZ = 103
 
 ## Audio settings
-LANGUAGES = ["uk", "zh"] # available: refer to keys of VOICES below
 VOICES = dict(
-    us = dict(
-            lang_code = "en-US", # usable for translate api
+    en = dict(
+            lang_code = ["en-UK", "en-US"], #[0-2] UK
             neural = True,
-            ids = ["Joanna", "Kendra", "Kimberly", "Salli", "Joey", "Matthew"]
-        ),
-    uk = dict(
-            lang_code = "en-GB",
-            neural = True,
-            ids = ["Amy", "Emma", "Brian"]
+            ids = ["Amy", "Emma", "Brian", "Joanna", "Kendra", "Kimberly", "Salli", "Joey", "Matthew"]
         ),
     pt = dict(
             lang_code = "pt-BR",

@@ -14,12 +14,11 @@ from _get_by_type import *
 from _polly_JSON import VidsJSON, Video
 import glob
 import argparse
-from __CONSTS__ import LANGUAGES
 from _pptx_to_video import pptx_to_ingreds
 from _to_S3 import upload_s3
 from _movie_to_polly import *
 import traceback
-from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER
+from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES
 #--------------------------------------------------------------------------------------------------
 def main():
 
@@ -59,31 +58,34 @@ def main():
                     id = vid_obj.get_file_name()
                     pp_curr_edit = vid_obj.get_pre_polly_edit()
                     pp_last_edit = vids_obj.get_pre_polly_edit(id)
+                    vids_obj_edit = vids_obj.get_last_edit()
                     change = -1
                     success = False
-                    if pp_curr_edit > pp_last_edit:
+                    if pp_curr_edit > pp_last_edit and pp_curr_edit > vids_obj_edit:
+                        print("\nChange detected for %s. Generating videos for all languages.\n" % vid_obj.get_pre_polly_path())
                         change = 0  # gen all languages
-                    for lang in LANGUAGES:
-                        lang_curr_modified = vid_obj.get_srt_edit(lang)
-                        lang_last_modified = vids_obj.get_srt_edit(lang,id)
-                        if lang_curr_modified > lang_last_modified:
-                            if lang == "uk" or lang == "us":
-                                change = 0
+                    else:
+                        for lang in LANGUAGES:
+                            lang_curr_modified = vid_obj.get_srt_edit(lang)
+                            lang_last_modified = vids_obj.get_srt_edit(lang,id)
+                            if lang_curr_modified > lang_last_modified and lang_curr_modified > vids_obj_edit:
+                                if lang == "en":
+                                    change = 0
+                                    break
+                                else:
+                                    change = 1 # gen specific language
+                            elif lang_curr_modified == -1:
+                                if lang == "en" and vid_obj.get_ext == "mp4":
+                                    raise Exception (vid_obj.get_file_name() + "_en.srt does not exist")
+                                else:
+                                    change = 1
+                            else:
+                                print("\nNo change for %s\\%s_%s.srt\n" % (vid_obj.get_base_dir(), vid_obj.get_file_name(), lang))
+                                continue # no change
+                            # change == 1
+                            success = _generate_video(vid_obj, lang, change)
+                            if not success:
                                 break
-                            else:
-                                change = 1 # gen specific language
-                        elif lang_curr_modified == -1:
-                            if (lang == "uk" or lang == "us") and vid_obj.get_ext == "mp4":
-                                raise Exception (vid_obj.get_file_name() + "_en.srt does not exist")
-                            else:
-                                change = 1
-                        else:
-                            print("\nNo change for %s\\%s\n" % (vid_obj.get_base_dir(), vid_obj.get_file_name()))
-                            continue # no change
-                        # change == 1
-                        success = _generate_video(vid_obj, lang, change)
-                        if not success:
-                            break
                     if change == 0:
                         success = _generate_all(vid_obj)
                     if success:
@@ -104,11 +106,12 @@ def _generate_all(vid_obj):
     return success
 #--------------------------------------------------------------------------------------------------
 def _generate_video(vid_obj, language, change):
+    print("\nGenerating %s video for %s\n" % (language, vid_obj.get_pre_polly_path()))
     try:
         vid_ext = vid_obj.get_ext()
         out_folder = "%s\\%s" % (vid_obj.get_base_dir(), vid_obj.get_file_name())
         os.makedirs(out_folder, exist_ok=True)
-        if vid_ext == "pptx" and (language=="uk" or language=="us" or change == 1): # break once
+        if vid_ext == "pptx" and (language=="en" or change == 1): # break once
             pptx_to_ingreds(vid_obj.get_pre_polly_path(), out_folder) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         srt_path = vid_obj.get_srt_path(language)
@@ -120,7 +123,7 @@ def _generate_video(vid_obj, language, change):
         vid_args = vid_obj.get_vid_args()
         vid_name = vid_args["video_file_name"]
 
-        if vid_ext == "mp4" and (language=="uk" or language=="us" or change == 1): # break once
+        if vid_ext == "mp4" and (language=="en" or change == 1): # break once
             mp4_obj = ToPollyMP4(vid_obj.get_pre_polly_path())
             cut_MP4(mp4_obj,srt_obj) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -139,12 +142,8 @@ def _generate_video(vid_obj, language, change):
         else:
             to_Polly(srt_obj, polly_voice_id, neural, True)
             comp_path = composite_PNGs(language, out_folder, vid_name, srt_obj)
-
-        lang_append = language
-        if language == "us" or language == "uk":
-            lang_append = "en"
-        
-        S3_path = "%s/%s/%s_%s.mp4" % (S3_MOOC_FOLDER, S3_VIDEOS_FOLDER, re.sub("-", "/", vid_args["video_file_name"]), lang_append)
+      
+        S3_path = "%s/%s/%s_%s.mp4" % (S3_MOOC_FOLDER, S3_VIDEOS_FOLDER, re.sub("-", "/", vid_args["video_file_name"]), language)
         upload_s3(comp_path, S3_BUCKET, S3_path)
         print("\nUploaded to S3")
 

@@ -3,7 +3,7 @@ import json
 import subprocess
 import re
 
-from __CONSTS__ import LANGUAGES
+from __SETTINGS__ import LANGUAGES
 
 def _json_to_dict(path):
     json_dict = {}
@@ -63,12 +63,9 @@ class Video:
         self.__dict["meta"]["pre_polly"] = COMPONENT(self.__name, self.__base_dir, self.__ext).as_dict()
         self.__dict["meta"]["srt"] = {}
         for lang in LANGUAGES:
-            lang_append = lang
-            if lang == "uk" or lang == "us":
-                lang_append = "en"
-            srt_name = self.__name + "_%s" % lang_append
+            srt_name = self.__name + "_%s" % lang
             srt_component = COMPONENT(srt_name, self.__base_dir, "srt").as_dict()
-            self.__dict["meta"]["srt"][lang_append] = srt_component  
+            self.__dict["meta"]["srt"][lang] = srt_component  
     def set_pre_polly_edit(self, value):
         self.__dict["meta"]["pre_polly"]["last_edit"] = value
     def set_vid_args(self, srt_obj):
@@ -84,10 +81,7 @@ class Video:
             raise Exception("Attribute \"display_name\" not found")
 
     def set_srt_edit(self, language, value):
-        lang = language
-        if language == "us" or language == "uk":
-            lang = "en"
-        self.__dict["meta"]["srt"][lang]["last_edit"] = value
+        self.__dict["meta"]["srt"][language]["last_edit"] = value
     def get_base_dir(self):
         return self.__base_dir
     def get_file_name(self):
@@ -99,15 +93,9 @@ class Video:
     def get_pre_polly_path(self):
         return self.__dict["meta"]["pre_polly"]["path"]
     def get_srt_edit(self, language):
-        lang = language
-        if language == "us" or language == "uk":
-            lang = "en"
-        return self.__dict["meta"]["srt"][lang]["last_edit"]
+        return self.__dict["meta"]["srt"][language]["last_edit"]
     def get_srt_path(self, language):
-        lang = language
-        if language == "us" or language == "uk":
-            lang = "en"
-        return self.__dict["meta"]["srt"][lang]["path"]
+        return self.__dict["meta"]["srt"][language]["path"]
     def get_vid_args(self):
         sh_cpy = dict(self.__dict)
         del sh_cpy["meta"]
@@ -119,12 +107,14 @@ class VidsJSON:
     def __init__(self, path, fresh):
         self.__path = path
         self.__dict = self.__to_dict(path, fresh)
+        self.__last_edit = -1
     def __to_dict(self, path, fresh):
         vids_dict = None
         if fresh:
             vids_dict = {}
         else:
             vids_dict = _json_to_dict(path)
+            self.__last_edit = float(re.search(r"(\d+)", subprocess.run(args=["git", "log" , "-1", "--pretty='format:%ct'", self.__path], cwd=os.path.dirname(self.__path), capture_output=True, text=True).stdout).group(1))
         return vids_dict
     def set_vid_obj(self, vid_obj):
         self.__dict[vid_obj.get_file_name()] = vid_obj.to_dict()
@@ -134,12 +124,11 @@ class VidsJSON:
         except KeyError:
             return -1
     def get_srt_edit(self, language, id):
-        lang=language
-        if language == "us" or language == "uk":
-            lang = "en"
         try:
-            return self.__dict[id]["meta"]["srt"][lang]["last_edit"]
+            return self.__dict[id]["meta"]["srt"][language]["last_edit"]
         except KeyError:
             return -1
+    def get_last_edit(self):
+        return self.__last_edit
     def to_JSON(self):
         return dict_to_json(self.__dict, self.__path)

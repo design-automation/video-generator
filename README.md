@@ -45,14 +45,14 @@ Listed below are essential packages used in the script
         ```
         `-- input
             `-- Course (Starts here)
-                    |-- Section
-                    |       |-- Subsection
-                    |       |         `-- Unit (Target folder)
-                    |       `-- Subsection
-                    |                 `-- Unit (Target folder)
-                    `-- Section
-                            `-- Subsection
-                                    `-- Unit (Target folder)
+                |-- Section
+                |   |-- Subsection
+                |   |         `-- Unit (Target folder)
+                |   `-- Subsection
+                |       `-- Unit (Target folder)
+                `-- Section
+                    `-- Subsection
+                        `-- Unit (Target folder)
         ```
     * Expects a `__SETTINGS__.py` sibling folder
         ```
@@ -65,6 +65,7 @@ Listed below are essential packages used in the script
             * S3_BUCKET
             * S3_MOOC_FOLDER
             * S3_VIDEOS_FOLDER
+            * LANGUAGES
         * Videos will be uploaded onto: `S3_BUCKET\S3_MOOC_FOLDER\S3_VIDEOS_FOLDER`
 1. Video settings
     * Resolution: (width, height) in px
@@ -98,12 +99,12 @@ Listed below are essential packages used in the script
         ```
         `-- input
             `-- Course
-                    `-- Section
-                        `-- Subsection
-                                    `-- Unit
-                                        |-- mp4_file_name_en.srt
-                                        |-- mp4_file_name.mp4
-                                        `-- mp4_file_name.yaml               
+                `-- Section
+                    `-- Subsection
+                        `-- Unit
+                            |-- mp4_file_name_en.srt
+                            |-- mp4_file_name.mp4
+                            `-- mp4_file_name.yaml               
         ```
 1. pptx file
     * transcripts are to be written in presenter notes
@@ -111,11 +112,11 @@ Listed below are essential packages used in the script
         ```
         `-- input
             `-- Course
-                    `-- Section
-                        `-- Subsection
-                                    `-- Unit
-                                        |-- pptx_file_name.pptx
-                                        `-- pptx_file_name.yaml
+                `-- Section
+                    `-- Subsection
+                        `-- Unit
+                            |-- pptx_file_name.pptx
+                            `-- pptx_file_name.yaml
         ```
 1. Accompanying language-specific srt files
     * script will use provided srt files when available
@@ -125,13 +126,13 @@ Listed below are essential packages used in the script
         ```
         `-- input
             `-- Course
-                    `-- Section
-                        `-- Subsection
-                                    `-- Unit
-                                        |-- pptx_file_name_fr.srt <--
-                                        |-- pptx_file_name_zh.srt <--
-                                        |-- pptx_file_name.pptx
-                                        `-- pptx_file_name.yaml
+                `-- Section
+                    `-- Subsection
+                        `-- Unit
+                            |-- pptx_file_name_fr.srt <--
+                            |-- pptx_file_name_zh.srt <--
+                            |-- pptx_file_name.pptx
+                            `-- pptx_file_name.yaml
         ```
 
 ## Output
@@ -141,10 +142,10 @@ Listed below are essential packages used in the script
     ```
     `-- input
         `-- Course
-                `-- Section
-                        `-- Subsection
-                                `-- Unit
-                                    `-- videos.json <--
+            `-- Section
+                `-- Subsection
+                    `-- Unit
+                        `-- videos.json <--
     ```
 1. language specific sub files
     * The sequences are split at punctuation marks and shortened for a smoother performance
@@ -152,12 +153,12 @@ Listed below are essential packages used in the script
     ```
     `-- input
         `-- Course
-                `-- Section
-                        `-- Subsection
-                                `-- Unit
-                                    |-- example.mp4
-                                    |-- example_en.srt
-                                    `-- example_sub_en.srt <--
+            `-- Section
+                `-- Subsection
+                    `-- Unit
+                        |-- example.mp4
+                        |-- example_en.srt
+                        `-- example_sub_en.srt <--
     ```
 1. translated srt files
     * The sequences are translated as-is from the original en srt file or pptx notes.
@@ -165,12 +166,12 @@ Listed below are essential packages used in the script
     ```
     `-- input
         `-- Course
-                `-- Section
-                        `-- Subsection
-                                `-- Unit
-                                    |-- example.mp4
-                                    |-- example_en.srt
-                                    `-- example_zh.srt <--
+            `-- Section
+                `-- Subsection
+                    `-- Unit
+                        |-- example.mp4
+                        |-- example_en.srt
+                        `-- example_zh.srt <--
     ```
 ## Example
 [w1 > s1 > u1](input\Course\w1\s1\u1)

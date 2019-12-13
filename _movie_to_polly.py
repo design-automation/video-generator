@@ -80,13 +80,10 @@ class ToPollySRT:
         self.__seq_dict[language][seq_n]["script"] = script
     def update_SRT(self): 
         language = self.__language
-        lang_append = language
-        if lang_append == "uk" or lang_append == "us":
-            lang_append = "en"
-        else:
-            self.__write_base_lang(lang_append)
+        if language != "en":
+            self.__write_base_lang(language)
         new_dict = self.__rebuild_dict()    
-        tar_path = self.__folder + "\\"+ self.__name[:-3] + "_sub_" + lang_append + ".srt"
+        tar_path = self.__folder + "\\"+ self.__name[:-3] + "_sub_" + language + ".srt"
         
         with open(tar_path, "wt", encoding="utf-8") as srt_f:
             for seq_n in new_dict:
@@ -180,7 +177,7 @@ class ToPollySRT:
         return op_dict
 
 def _split_script(script, language): # to create separate split functions for different languages !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    if language == "uk" or language == "us":
+    if language == "en":
         return _split_script_en(script)
     elif language == "zh":
         return _split_script_zh(script)
@@ -275,7 +272,7 @@ def to_Polly(srt_obj, voice_id, neural, pptx=False):# returns mp3s in subfolder
     for seq_i in range(1, srt_obj.get_n_seq()+1): #range(0, srt_obj.get_n_seq())
         script = srt_obj.get_seq(language, seq_i)["script"]
         if script!="" and script[0]!="{":
-            if srt_obj.get_name()[-2:] == "en" and (language!="uk" and language!="us"): # translate
+            if srt_obj.get_name()[-2:] == "en" and language!="en": # translate
                 script = _translate(session, script, language) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 srt_obj.update_script(seq_i, script)
             file_name = srt_obj.get_name() + "-" + str(seq_i).zfill(3) + ".mp3"
@@ -340,7 +337,7 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
 
         if script != "" and script[0] == "{":
             title = break_title(json.loads(script)["display_name"])
-            if seq_i == 1 and language!="uk" and language!="us":
+            if seq_i == 1 and language!="en":
                 title += "\n(%s)" % language
             title_clip = TextClip(txt=title, size=VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=FONT_SZ).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
             vid_list.append(title_clip)
