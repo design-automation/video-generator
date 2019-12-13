@@ -66,10 +66,10 @@ def pptx_to_ingreds(pptx_path, tar_folder):
 
     print("Converting pptx file to pdf")
 
-    subprocess.run(['%spython.exe' % os.getenv('LIBRE_OFFICE_PROGRAM'), '%sunoconv' % os.getenv('LIBRE_OFFICE_PROGRAM'), '-f', "pdf", "-o", "%s\\%s.pdf" % (folder, file_name),  pptx_abs_path])
+    subprocess.run([os.path.join(os.getenv('LIBRE_OFFICE_PROGRAM'), 'python.exe'), os.path.join(os.getenv('LIBRE_OFFICE_PROGRAM'), 'unoconv'), '-f', "pdf", "-o", "%s\\%s.pdf" % (folder, file_name),  pptx_abs_path])
 
     print("Converting pptx file to xml")
-    subprocess.run(['%spython.exe' % os.getenv('LIBRE_OFFICE_PROGRAM'), '%sunoconv' % os.getenv('LIBRE_OFFICE_PROGRAM'), '-f', "xml", "-o", "%s\\%s.xml" % (folder, file_name), pptx_abs_path])
+    subprocess.run([os.path.join(os.getenv('LIBRE_OFFICE_PROGRAM'), 'python.exe'), os.path.join(os.getenv('LIBRE_OFFICE_PROGRAM'), '-f', "xml", "-o", "%s\\%s.xml" % (folder, file_name), pptx_abs_path])
 
     print("Generating Images from pdf file")
     subprocess.run(['magick', 'convert', "-density", "300x300", os.path.abspath(os.path.join(folder, "%s.pdf" % file_name)), "-resize", sz, os.path.abspath(os.path.join(image_fdr, "%s.png" % file_name))])
