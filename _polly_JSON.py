@@ -114,7 +114,10 @@ class VidsJSON:
             vids_dict = {}
         else:
             vids_dict = _json_to_dict(path)
-            self.__last_edit = float(re.search(r"(\d+)", subprocess.run(args=["git", "log" , "-1", "--pretty='format:%ct'", self.__path], cwd=os.path.dirname(self.__path), capture_output=True, text=True).stdout).group(1))
+            try:
+                self.__last_edit = float(re.search(r"(\d+)", subprocess.run(args=["git", "log" , "-1", "--pretty='format:%ct'", self.__path], cwd=os.path.dirname(self.__path), capture_output=True, text=True).stdout).group(1))
+            except AttributeError:
+                pass
         return vids_dict
     def set_vid_obj(self, vid_obj):
         self.__dict[vid_obj.get_file_name()] = vid_obj.to_dict()
