@@ -48,7 +48,7 @@ class COMPONENT:
         try:
             self.__last_edit = float(re.search(r"(\d+)", subprocess.run(args=["git", "log" , "-1", "--pretty='format:%ct'", self.__path], cwd=os.path.dirname(self.__path), capture_output=True, text=True).stdout).group(1))
         except Exception:
-            print("%s does not exist" % self.__path)
+            print("%s NEW FILE" % self.__path)
             self.__last_edit = -1
     def as_dict(self):
         return dict(path=self.__path, last_edit=self.__last_edit)

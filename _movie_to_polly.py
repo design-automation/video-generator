@@ -52,6 +52,7 @@ class ToPollySRT:
         lang = language
         if lang == "_NA_":
             lang = self.__language
+        print(self.__path)
         return self.__seq_dict[lang][n]
     def get_n_seq(self):
         return self.__n_seq
@@ -105,7 +106,7 @@ class ToPollySRT:
             for line in f:
                 contents.append(line)
             for line_i in range(0,len(contents)):
-                if contents[line_i]==(str(seq_n)+"\n"):
+                if contents[line_i]==(str(seq_n)+"\n") or contents[line_i]==("\ufeff1\n"):
                     matches = re.findall(r"(\d\d:\d\d:\d\d,\d\d\d)",contents[line_i + 1])
                     script_i = 2
                     script = ""
