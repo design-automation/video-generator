@@ -52,7 +52,9 @@ def _libreXML_to_SRT(folder_path, tar_fdr):
                     notes += note.text
             except AttributeError:
                 notes = ""
-            notes = notes.replace("“","\"").replace("”","\"").replace("&lt;","<").replace("&gt;",">")
+            notes = notes.replace("“","\"").replace("”","\"")
+            notes = notes.replace("&","&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            notes = re.sub(r"&lt;([/?sub].+?)&gt;", "<\g<1>>", notes)
             slide_dict[str(slide_i + 1)] = notes
     with open(tar_fdr + "\\" + file_name+"_en.srt", "wt", encoding="utf-8") as srt_f:
         for i in range(1, n_slides + 1):
