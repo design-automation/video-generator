@@ -2,6 +2,7 @@ import subprocess
 import os
 import glob
 import re
+import functools
 
 from bs4 import BeautifulSoup
 from _movie_to_polly import _to_time_str, VIDEO_RES
@@ -43,11 +44,15 @@ def _libreXML_to_SRT(folder_path, tar_fdr):
         n_slides = len(all_slides)
         for slide_i in range(0, n_slides):
             slide = all_slides[slide_i]
+            notes=""
             try:
-                notes = slide.find("div", id=re.compile(r'Notes*')).find("span").text
+                notesdiv = slide.find("div", id=re.compile(r'Notes*'))
+                notes_lst = notesdiv.findAll("span")
+                for note in notes_lst:
+                    notes += note.text
             except AttributeError:
                 notes = ""
-            notes = notes.replace("“","\"").replace("”","\"")
+            notes = notes.replace("“","\"").replace("”","\"").replace("&lt;","<").replace("&gt;",">")
             slide_dict[str(slide_i + 1)] = notes
     with open(tar_fdr + "\\" + file_name+"_en.srt", "wt", encoding="utf-8") as srt_f:
         for i in range(1, n_slides + 1):
