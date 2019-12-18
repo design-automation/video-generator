@@ -20,6 +20,14 @@ from _movie_to_polly import *
 import traceback
 from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES
 #--------------------------------------------------------------------------------------------------
+DEBUG_status = False
+DEBUG = dict(
+    section="w1",
+    subsection="s3",
+    unit="u3"
+)
+#--------------------------------------------------------------------------------------------------
+
 def main():
 
     change_log = {}
@@ -29,16 +37,22 @@ def main():
     # loop through sections in MOOC path
     # SECTIONS
     for section in SECTIONS:
+        if DEBUG_status and os.path.basename(section[:-1]) != DEBUG["section"]:
+            continue
         print('- ', section)
         SUBSECTIONS = glob.glob(os.path.join(section, '*\\'))
 
         # SUBSECTIONS
         for subsection in SUBSECTIONS:
+            if DEBUG_status and os.path.basename(subsection[:-1]) != DEBUG["subsection"]:
+                continue
             print('-- ', subsection)
             UNITS = glob.glob(os.path.join(subsection, '*\\'))
 
             # UNITS
             for unit in UNITS:
+                if DEBUG_status and os.path.basename(unit[:-1]) != DEBUG["unit"]:
+                    continue
                 print('--- ', unit)
 
                 unit = unit[:-1]
@@ -90,7 +104,7 @@ def main():
                         success = _generate_all(vid_obj)
                     if success:
                         vids_obj.set_vid_obj(vid_obj)
-                    if change != -1:
+                    if not DEBUG_status and change != -1:
                         shutil.rmtree(vid_obj.get_base_dir() + "\\" + vid_obj.get_file_name())
 
                 # write to JSON file
@@ -155,7 +169,8 @@ def _generate_video(vid_obj, language, change):
             raise e
         except:
             pass
-        
+        if DEBUG_status:
+            raise e
         traceback.print_exc()
         return False
 #--------------------------------------------------------------------------------------------------
