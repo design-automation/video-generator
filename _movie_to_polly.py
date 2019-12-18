@@ -147,6 +147,8 @@ class ToPollySRT:
                 new_start = prev_end
                 if script!="" and script[0] == "{":
                     script_ = json.loads(script)["display_name"]
+                else:
+                    script_ = clean_xml_tags(script)
                 new_end = new_start + splt_period
                 seq_dict = dict(
                     script=script_,
@@ -176,6 +178,9 @@ class ToPollySRT:
             if owrite:
                 self.__seq_dict[language][seq_n]["script_start"] = _to_time_str(float(prev_end)) 
         return op_dict
+
+def clean_xml_tags(script):
+    return re.sub(r"<[/?sub].+?>"," ",script)
 
 def _split_script(script, language): # to create separate split functions for different languages !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if language == "en":
