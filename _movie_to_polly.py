@@ -248,7 +248,7 @@ def _polly(session, output_fdr, file_name, script, voice_id, neural):
         sys.exit(-1)
 
 def _file_idx(file_name):
-    return re.search(r"-(\d+)\.",file_name).group(1)
+    return int(re.search(r"-(\d+)\.",file_name).group(1))
 
 def cut_MP4(mp4_obj, srt_obj): # returns mp4s in subfolder
     clip = VideoFileClip(mp4_obj.get_path())
@@ -327,7 +327,7 @@ def composite_PNGs(language, folder, vid_name, srt_obj):
 def _composite_video(typ, language, folder, vid_name, srt_obj):
     fade_color = [255,255,255]
     aud_clips = sorted(glob.glob(folder + "\\" + OUTPUT_FDR + "_%s\\" % language + "*.mp3"), key=_file_idx)
-    aud_dict = {int(_file_idx(aud_clips[i])):aud_clips[i] for i in range(0, len(aud_clips))}
+    aud_dict = {_file_idx(aud_clips[i]):aud_clips[i] for i in range(0, len(aud_clips))}
 
     vid_list = []
     for seq_i in range(1, srt_obj.get_n_seq() + 1): # seq 1 is title
@@ -352,7 +352,7 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
                 vid_clips = sorted(glob.glob(folder + "\\" + OUTPUT_FDR + "_VIDEOS\\" + "*.mp4"), key=_file_idx)
 
                 vid_clip = VideoFileClip(vid_clips[seq_i-1])
-                vid_idx = int(_file_idx(vid_clips[seq_i-1]))
+                vid_idx = _file_idx(vid_clips[seq_i-1])
                 aud_clip = AudioFileClip(aud_dict[vid_idx])
                 if (vid_clip.duration < aud_clip.duration):
                     vid_clip = vid_clip.set_duration(aud_clip.duration)
@@ -362,9 +362,8 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
                 
             else:
                 slide_pngs = sorted(glob.glob(folder + "\\images\\" + "*.png"), key=_file_idx)
-
                 slide_clip = ImageClip(slide_pngs[seq_i-1])
-                slides_idx = int(_file_idx(slide_pngs[seq_i-1])) + 1
+                slides_idx = _file_idx(slide_pngs[seq_i-1]) + 1
                 try:
                     aud_clip = AudioFileClip(aud_dict[slides_idx])
                     buffer = PAUSE_PERIOD
