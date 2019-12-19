@@ -8,6 +8,7 @@ import time
 import shutil
 import json
 
+import _xml_friendly
 from moviepy.editor import *
 from boto3 import Session
 from botocore.exceptions import BotoCoreError, ClientError
@@ -39,7 +40,8 @@ class ToPollySRT:
         self.__path = srt_path
         (root,ext) = os.path.splitext(srt_path)
         self.__name = os.path.basename(root)
-        self.__seq_dict = self.__seq_dict(self.__path)
+        self.__en_path = "%s_%s%s" % (root[:-3], "en", ext)
+        self.__seq_dict = self.__create_seq_dict(self.__path)
         self.__folder = os.path.dirname(srt_path)
         self.__n_seq
     def get_full_dict(self): #for errors
@@ -52,8 +54,14 @@ class ToPollySRT:
         lang = language
         if lang == "_NA_":
             lang = self.__language
-        print(self.__path)
         return self.__seq_dict[lang][n]
+    def get_seq_duration(self, language, n):
+        lang = language
+        if lang == "_NA_":
+            lang = self.__language
+        start_seconds = _to_seconds(self.__seq_dict[lang][n]["script_start"])
+        end_seconds = _to_seconds(self.__seq_dict[lang][n]["script_end"])
+        return end_seconds - start_seconds
     def get_n_seq(self):
         return self.__n_seq
     def get_folder(self):
@@ -62,13 +70,13 @@ class ToPollySRT:
         return self.__voices
     def get_language(self):
         return self.__language
-    def title_seq(self, seq_n):
+    def push_seq(self, seq_n, period):
         language = self.__language
         title_start = _to_seconds(self.__seq_dict[language][seq_n]["script_start"])
         for i in range(seq_n, self.get_n_seq() + 1):
             try:
                 next_start = _to_seconds(self.__seq_dict[language][i + 1]["script_start"])
-                self.__seq_dict[language][i + 1]["script_start"] = _to_time_str(next_start - title_start + TITLE_PERIOD)
+                self.__seq_dict[language][i + 1]["script_start"] = _to_time_str(next_start + period)
             except KeyError:
                 pass
     def set_seq_end(self, seq_n, seconds):
@@ -88,17 +96,13 @@ class ToPollySRT:
         
         with open(tar_path, "wt", encoding="utf-8") as srt_f:
             for seq_n in new_dict:
-                if seq_n != 1:
-                    new_dict = self.update_seq_start(seq_n, new_dict)
                 srt_f.write(self.__seq_for_SRT(seq_n, new_dict))
         print("\nUpdated SRT (%s) created at %s" % (self.__path, tar_path))
     def __write_base_lang(self, language):
         with open(self.__folder + "\\"+ self.__name[:-3] + "_" + language + ".srt", "wt", encoding="utf-8") as srt_f:
             for seq_n in self.__seq_dict[language]:
-                if seq_n != 1:
-                    self.update_seq_start(seq_n)
                 srt_f.write(self.__seq_for_SRT(seq_n))
-    def __seq_dict(self,srt_file): # cut SRT into timestamp dict
+    def __create_seq_dict(self,srt_file): # cut SRT into timestamp dict
         seq_dict = {lang:{} for lang in self.__voices}
         contents = []
         seq_n = 1
@@ -114,11 +118,13 @@ class ToPollySRT:
                         script += contents[line_i + script_i][:-1] + " "
                         script_i += 1
                     for lang in self.__voices:
+                        if lang != "en":
+                            script = clean_ssml_tags(script)
                         seq_dict[lang][seq_n] = {"script_start": matches[0],
                                         "script_end": "",
                                         "script": script}
                     seq_n += 1
-            self.__n_seq = seq_n - 1 #-1
+            self.__n_seq = seq_n - 1
         return seq_dict
 
     def __rebuild_dict(self):
@@ -132,8 +138,8 @@ class ToPollySRT:
             ori_len = len(seq_script)
             if seq_script == "":
                 continue
-            ori_start = _to_seconds(self.__seq_dict[language][seq_i]["script_start"]) - BASE_START #+ TITLE_PERIOD 
-            ori_end = _to_seconds(self.__seq_dict[language][seq_i]["script_end"])- BASE_START #+ TITLE_PERIOD 
+            ori_start = _to_seconds(self.__seq_dict[language][seq_i]["script_start"]) - BASE_START
+            ori_end = _to_seconds(self.__seq_dict[language][seq_i]["script_end"]) - BASE_START
             ori_period = ori_end - ori_start
             script_splt = [seq_script]
             if seq_script[0] != "{" :
@@ -148,7 +154,7 @@ class ToPollySRT:
                 if script!="" and script[0] == "{":
                     script_ = json.loads(script)["display_name"]
                 else:
-                    script_ = clean_xml_tags(script)
+                    script_ = clean_ssml_tags(script)
                 new_end = new_start + splt_period
                 seq_dict = dict(
                     script=script_,
@@ -165,7 +171,7 @@ class ToPollySRT:
         if op_dict == None:
             op_dict = self.__seq_dict[language]
         time_stamp = "%s --> %s"% (op_dict[seq_n]["script_start"], op_dict[seq_n]["script_end"])
-        return "%s\n%s\n%s\n\n" % (str(seq_n), time_stamp, op_dict[seq_n]["script"])
+        return "%s\n%s\n%s\n\n" % (str(seq_n), time_stamp, _xml_friendly.to_symbol(op_dict[seq_n]["script"]))
     
     def update_seq_start(self, seq_n, op_dict=None, owrite=False):
         language = self.__language
@@ -177,10 +183,13 @@ class ToPollySRT:
             op_dict[seq_n]["script_start"] = _to_time_str(float(prev_end))
             if owrite:
                 self.__seq_dict[language][seq_n]["script_start"] = _to_time_str(float(prev_end)) 
+            else:
+                print("push " + str(prev_end-curr_start))
+                self.push_seq(seq_n,prev_end-curr_start-TITLE_PERIOD)
         return op_dict
 
-def clean_xml_tags(script):
-    return re.sub(r"<[/?sub].+?>"," ",script)
+def clean_ssml_tags(script):
+    return re.sub(r"<[/?\w+].+?>"," ",script)
 
 def _split_script(script, language): # to create separate split functions for different languages !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if language == "en":
@@ -224,7 +233,7 @@ def _polly(session, output_fdr, file_name, script, voice_id, neural):
     polly = session.client("polly")
     str_frnt = "<speak>"
     str_back = "</speak>"
-    text = str_frnt + script + str_back
+    text = str_frnt + _xml_friendly.to_xml(script) + str_back
     engine = "standard"
     if neural:
         engine = "neural"
@@ -232,6 +241,7 @@ def _polly(session, output_fdr, file_name, script, voice_id, neural):
         response = polly.synthesize_speech(Text=text, OutputFormat="mp3", VoiceId=voice_id, Engine=engine, TextType="ssml")
     except (BotoCoreError, ClientError) as error:
         print(error)
+        print(text)
         sys.exit(-1)
 
     if "AudioStream" in response:
@@ -275,8 +285,11 @@ def to_Polly(srt_obj, voice_id, neural, pptx=False):# returns mp3s in subfolder
     output_fdr = srt_obj.get_folder() + "\\" + srt_obj.get_name()[:-3] +"\\" + OUTPUT_FDR + "_%s\\" % language
     os.makedirs(output_fdr, exist_ok=True)
     aud_i = 0
-    for seq_i in range(1, srt_obj.get_n_seq()+1): #range(0, srt_obj.get_n_seq())
+    for seq_i in range(1, srt_obj.get_n_seq()+1):
         script = srt_obj.get_seq(language, seq_i)["script"]
+        if seq_i != 1:
+            srt_obj.update_seq_start(seq_n=seq_i, op_dict=None, owrite=pptx)
+
         if script!="" and script[0]!="{":
             if srt_obj.get_name()[-2:] == "en" and language!="en": # translate
                 script = _translate(session, script, language) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -289,17 +302,16 @@ def to_Polly(srt_obj, voice_id, neural, pptx=False):# returns mp3s in subfolder
             aud_i += 1
             print("Polly MP3 saved at %s" % (aud_out))
             polly_aud = AudioFileClip(aud_out)
-            if pptx:
-                srt_obj.update_seq_start(seq_n=seq_i, op_dict=None, owrite=pptx)
-            srt_obj.set_seq_end(seq_i, polly_aud.duration)
+            srt_obj.set_seq_end(seq_i, polly_aud.duration + PAUSE_PERIOD)
             polly_aud.reader.close_proc()
         else:
-            seq_end = PAUSE_PERIOD
-            if script!="" and script[0]=="{":
-                seq_end = TITLE_PERIOD
-                srt_obj.title_seq(seq_i)
-            srt_obj.set_seq_end(seq_i, seq_end)
-
+            if script == "":
+                srt_obj.set_seq_end(seq_i, PAUSE_PERIOD)
+            elif script!="" and script[0]=="{":
+                if not pptx:
+                    srt_obj.push_seq(seq_i, TITLE_PERIOD)
+                srt_obj.set_seq_end(seq_i, TITLE_PERIOD)
+                
     srt_obj.update_SRT()
 
 def break_title(title):

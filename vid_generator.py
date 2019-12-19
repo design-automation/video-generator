@@ -129,7 +129,7 @@ def _generate_video(vid_obj, language, change):
             pptx_to_ingreds(vid_obj.get_pre_polly_path(), out_folder) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         srt_path = vid_obj.get_srt_path(language)
-        if vid_obj.get_srt_edit(language) == -1:
+        if not os.path.exists(srt_path):
             srt_path = vid_obj.get_srt_path("en")
         srt_obj = ToPollySRT(srt_path,language)
 
@@ -163,6 +163,7 @@ def _generate_video(vid_obj, language, change):
 
         vid_obj.set_srt_edit(language, os.path.getmtime(vid_obj.get_srt_path(language)))
         vid_obj.set_srt_edit("en", os.path.getmtime(vid_obj.get_srt_path("en")))
+        vid_obj.set_pre_polly_edit(os.path.getmtime(vid_obj.get_pre_polly_path()))
         return True
     except Exception as e:
         try:

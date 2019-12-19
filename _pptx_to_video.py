@@ -6,6 +6,7 @@ import functools
 
 from bs4 import BeautifulSoup
 from _movie_to_polly import _to_time_str, VIDEO_RES
+import _xml_friendly
 
 def _pptXML_to_SRT(folder_path):
     DEFAULT_TIME_BREAK = 3 #seconds
@@ -53,7 +54,7 @@ def _libreXML_to_SRT(folder_path, tar_fdr):
             except AttributeError:
                 notes = ""
             notes = notes.replace("“","\"").replace("”","\"")
-            notes = notes.replace("&","&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            notes = _xml_friendly.to_xml(notes)
             notes = re.sub(r"&lt;([/?sub].+?)&gt;", "<\g<1>>", notes)
             slide_dict[str(slide_i + 1)] = notes
     with open(tar_fdr + "\\" + file_name+"_en.srt", "wt", encoding="utf-8") as srt_f:
