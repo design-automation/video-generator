@@ -119,7 +119,7 @@ class ToPollySRT:
                         script_i += 1
                     for lang in self.__voices:
                         if lang != "en":
-                            script = clean_ssml_tags(script)
+                            script = clean_ssml_tags(script, True)
                         seq_dict[lang][seq_n] = {"script_start": matches[0],
                                         "script_end": "",
                                         "script": script}
@@ -184,12 +184,14 @@ class ToPollySRT:
             if owrite:
                 self.__seq_dict[language][seq_n]["script_start"] = _to_time_str(float(prev_end)) 
             else:
-                print("push " + str(prev_end-curr_start))
                 self.push_seq(seq_n,prev_end-curr_start-TITLE_PERIOD)
         return op_dict
 
-def clean_ssml_tags(script):
-    return re.sub(r"<[/?\w+].+?>"," ",script)
+def clean_ssml_tags(script, remove_all=False):
+    if remove_all:
+        return re.sub(r"<[\w+].+?>.+?<[/\w+].+?>","",script)
+    else:
+        return re.sub(r"<[/?\w+].+?>"," ",script)
 
 def _split_script(script, language): # to create separate split functions for different languages !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if language == "en":
@@ -233,7 +235,7 @@ def _polly(session, output_fdr, file_name, script, voice_id, neural):
     polly = session.client("polly")
     str_frnt = "<speak>"
     str_back = "</speak>"
-    text = str_frnt + _xml_friendly.to_xml(script) + str_back
+    text = str_frnt + script + str_back
     engine = "standard"
     if neural:
         engine = "neural"
