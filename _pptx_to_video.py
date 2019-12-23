@@ -53,7 +53,7 @@ def _libreXML_to_SRT(folder_path, tar_fdr):
                     notes += note.text
             except AttributeError:
                 notes = ""
-            notes = notes.replace("“","\"").replace("”","\"").replace("’","'")
+            notes = notes.replace("“","\"").replace("”","\"").replace("’","'").replace("\u200c","")
             notes = _xml_friendly.to_xml(notes)
             notes = re.sub(r"&lt;([/?sub].+?)&gt;", "<\g<1>>", notes)
             slide_dict[str(slide_i + 1)] = notes
