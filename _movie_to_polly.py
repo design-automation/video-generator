@@ -189,7 +189,7 @@ class ToPollySRT:
 
 def clean_ssml_tags(script, remove_all=False):
     if remove_all:
-        re.sub(r"<.+?[\"'](.+?)[\"']>.+?<[/\w+].+?>","\g<1>",script)
+        return re.sub(r"<.+?[\"'](.+?)[\"']>.+?<[/\w+].+?>","\g<1>",script)
     else:
         return re.sub(r"<[/?\w+].+?>"," ",script)
 
