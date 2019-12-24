@@ -54,7 +54,7 @@ def _libreXML_to_SRT(folder_path, tar_fdr):
             except AttributeError:
                 notes = ""
             notes = notes.replace("“","\"").replace("”","\"") #.replace("’","'").replace("\u200c","")
-            if notes[0]!="{":
+            if notes!="" and notes[0]!="{":
                 notes = notes.encode("ascii","ignore").decode("utf-8")
             notes = _xml_friendly.to_xml(notes)
             notes = re.sub(r"&lt;([/?sub].+?)&gt;", "<\g<1>>", notes)
