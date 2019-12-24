@@ -20,7 +20,7 @@ from _movie_to_polly import *
 import traceback
 from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES
 #--------------------------------------------------------------------------------------------------
-DEBUG_status = False
+DEBUG_status = True
 DEBUG = dict(
     section="w2",
     subsection="s3",

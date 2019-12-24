@@ -294,12 +294,12 @@ def to_Polly(srt_obj, voice_id, neural, pptx=False):# returns mp3s in subfolder
 
         if script!="" and script[0]!="{":
             if srt_obj.get_name()[-2:] == "en" and language!="en": # translate
-                script = _translate(session, script, language) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                # script = _translate(session, script, language) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 srt_obj.update_script(seq_i, script)
             file_name = srt_obj.get_name() + "-" + str(seq_i).zfill(3) + ".mp3"
             output_path = output_fdr + file_name
             print("\nCommunicating to AWS Polly")
-            _polly(session=session, output_fdr=output_fdr, file_name=file_name, script=script, voice_id=voice_id , neural=neural) # !!!!!!!!!
+            # _polly(session=session, output_fdr=output_fdr, file_name=file_name, script=script, voice_id=voice_id , neural=neural) # !!!!!!!!!
             aud_out = glob.glob(output_fdr + "*.mp3")[aud_i]
             aud_i += 1
             print("Polly MP3 saved at %s" % (aud_out))
