@@ -1,12 +1,14 @@
 import sys, os
 #--------------------------------------------------------------------------------------------------
-if len(sys.argv) != 2:
-    raise Exception('Usage: python ./vid_generator.py input_path')
+if len(sys.argv) != 3:
+    raise Exception('Usage: python ./vid_generator.py input_path run_steps')
 if not os.path.exists(sys.argv[1]):
     raise Exception('Path does not exist: ' + sys.argv[1])
 if not os.path.exists(os.path.join(sys.argv[1], '__SETTINGS__.py')):
     raise Exception('Path does not contain __SETTINGS__.py: ' + sys.argv[1])
 INPUT_PATH = os.path.normpath(sys.argv[1])
+RUN_STEP = int(sys.argv[2])
+RUN_STATUS = ["\nGENERATING INGREDIENTS\n", "\nGENERATING MP4\n"]
 sys.path.append(INPUT_PATH)
 #--------------------------------------------------------------------------------------------------
 from _checks import *
@@ -20,113 +22,123 @@ from _movie_to_polly import *
 import traceback
 from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES
 #--------------------------------------------------------------------------------------------------
-DEBUG_status = False
+DEBUG_status = True
 DEBUG = dict(
-    section="w1",
-    subsection="s0",
+    section="w3",
+    subsection="s3",
     unit="u1"
 )
 #--------------------------------------------------------------------------------------------------
 
 def main():
+    with open("errors.log" , "w") as error_f:
+        error_f.write("")
 
     change_log = {}
     end_msg = "To-Polly Process Complete."  
     SECTIONS = glob.glob(os.path.join(INPUT_PATH, 'Course', '*\\'))
 
-    # loop through sections in MOOC path
-    # SECTIONS
-    for section in SECTIONS:
-        if DEBUG_status and os.path.basename(section[:-1]) != DEBUG["section"]:
-            continue
-        print('- ', section)
-        SUBSECTIONS = glob.glob(os.path.join(section, '*\\'))
+    json_path = os.path.join(INPUT_PATH, "Course", "videos.json")
+    FRESH = not vids_json_exists(json_path,True)
+    o_vids_obj = VidsJSON(INPUT_PATH, json_path, FRESH)
 
-        # SUBSECTIONS
-        for subsection in SUBSECTIONS:
-            if DEBUG_status and os.path.basename(subsection[:-1]) != DEBUG["subsection"]:
+    range_arr = range(RUN_STEP, RUN_STEP + 1)
+    if RUN_STEP == 2:
+        range_arr = range(RUN_STEP + 1)
+    for run_i in range_arr: # 0 = ingredients only. 1 = MP4
+        print(RUN_STATUS[run_i])
+        # SECTIONS
+        for section in SECTIONS:
+            if DEBUG_status and os.path.basename(section[:-1]) != DEBUG["section"]:
                 continue
-            print('-- ', subsection)
-            UNITS = glob.glob(os.path.join(subsection, '*\\'))
+            print('- ', section)
+            SUBSECTIONS = glob.glob(os.path.join(section, '*\\'))
 
-            # UNITS
-            for unit in UNITS:
-                if DEBUG_status and os.path.basename(unit[:-1]) != DEBUG["unit"]:
+            # SUBSECTIONS
+            for subsection in SUBSECTIONS:
+                if DEBUG_status and os.path.basename(subsection[:-1]) != DEBUG["subsection"]:
                     continue
-                print('--- ', unit)
+                print('-- ', subsection)
+                UNITS = glob.glob(os.path.join(subsection, '*\\'))
 
-                unit = unit[:-1]
-                vid_files = get_paths_by_typ(unit, "pptx")
-                vid_files.extend(get_paths_by_typ(unit, "mp4"))
-                if vid_files == None:
-                    continue
-                json_path = os.path.join(unit, "videos.json")
-                FRESH = not vids_json_exists(json_path,True)
-                vids_obj = VidsJSON(INPUT_PATH, json_path, FRESH)
+                # UNITS
+                for unit in UNITS:
+                    if DEBUG_status and os.path.basename(unit[:-1]) != DEBUG["unit"]:
+                        continue
+                    print('--- ', unit)
 
-                # VIDEOS
-                for vid_file in vid_files:
-                    print('---- ', vid_file)
+                    unit = unit[:-1]
+                    vid_files = get_paths_by_typ(unit, "pptx")
+                    vid_files.extend(get_paths_by_typ(unit, "mp4"))
+                    if vid_files == None:
+                        continue
+                    json_path = os.path.join(unit, "videos.json")
+                    FRESH = not vids_json_exists(json_path,True)
+                    vids_obj = VidsJSON(INPUT_PATH, json_path, FRESH)
 
-                    vid_obj = Video(INPUT_PATH, vid_file)
-                    id = vid_obj.get_file_name()
-                    pp_curr_edit = vid_obj.get_pre_polly_edit()
-                    pp_last_edit = vids_obj.get_pre_polly_edit(id)
-                    vids_obj_edit = vids_obj.get_last_edit()
-                    change = -1
-                    success = False
-                    if pp_curr_edit > pp_last_edit and pp_curr_edit > vids_obj_edit:
-                        print("\nChange detected for %s. Generating videos for all languages.\n" % vid_obj.get_pre_polly_path())
-                        change = 0  # gen all languages
-                    else:
-                        for lang in LANGUAGES:
-                            lang_curr_modified = vid_obj.get_srt_edit(lang)
-                            lang_last_modified = vids_obj.get_srt_edit(lang,id)
-                            if lang_curr_modified > lang_last_modified and lang_curr_modified > vids_obj_edit:
-                                if lang == "en":
-                                    change = 0
+                    # VIDEOS
+                    for vid_file in vid_files:
+                        print('---- ', vid_file)
+
+                        vid_obj = Video(INPUT_PATH, vid_file)
+                        id = vid_obj.get_file_name()
+                        pp_curr_edit = vid_obj.get_pre_polly_edit()
+                        pp_last_edit = vids_obj.get_pre_polly_edit(id)
+                        vids_obj_edit = vids_obj.get_last_edit()
+                        change = -1
+                        success = False
+                        if pp_curr_edit > pp_last_edit and pp_curr_edit > vids_obj_edit:
+                            print("\nChange detected for %s. Generating videos for all languages.\n" % vid_obj.get_pre_polly_path())
+                            change = 0  # gen all languages
+                        else:
+                            for lang in LANGUAGES:
+                                lang_curr_modified = vid_obj.get_srt_edit(lang)
+                                lang_last_modified = vids_obj.get_srt_edit(lang,id)
+                                if lang_curr_modified > lang_last_modified and lang_curr_modified > vids_obj_edit:
+                                    if lang == "en":
+                                        change = 0
+                                        break
+                                    else:
+                                        change = 1 # gen specific language
+                                elif lang_curr_modified == -1:
+                                    if lang == "en" and vid_obj.get_ext == "mp4":
+                                        raise Exception (vid_obj.get_file_name() + "_en.srt does not exist")
+                                    else:
+                                        change = 1
+                                else:
+                                    print("\nNo change for %s\\%s_%s.srt\n" % (vid_obj.get_base_dir(), vid_obj.get_file_name(), lang))
+                                    continue # no change
+                                # change == 1
+                                success = _generate_video(run_i, vid_obj, lang, change)
+                                if not success:
                                     break
-                                else:
-                                    change = 1 # gen specific language
-                            elif lang_curr_modified == -1:
-                                if lang == "en" and vid_obj.get_ext == "mp4":
-                                    raise Exception (vid_obj.get_file_name() + "_en.srt does not exist")
-                                else:
-                                    change = 1
-                            else:
-                                print("\nNo change for %s\\%s_%s.srt\n" % (vid_obj.get_base_dir(), vid_obj.get_file_name(), lang))
-                                continue # no change
-                            # change == 1
-                            success = _generate_video(vid_obj, lang, change)
-                            if not success:
-                                break
-                    if change == 0:
-                        success = _generate_all(vid_obj)
-                    if success:
-                        vids_obj.set_vid_obj(vid_obj)
-                    if not DEBUG_status and change != -1:
-                        shutil.rmtree(vid_obj.get_base_dir() + "\\" + vid_obj.get_file_name())
+                        if change == 0:
+                            success = _generate_all(run_i, vid_obj)
+                        if success:
+                            vids_obj.set_vid_obj(vid_obj)
+                        if not DEBUG_status and change != -1:
+                            shutil.rmtree(vid_obj.get_base_dir() + "\\" + vid_obj.get_file_name())
 
-                # write to JSON file
-                vids_obj.to_JSON()
+                    # write to JSON file
+                    vids_obj.to_JSON()
 #--------------------------------------------------------------------------------------------------
-def _generate_all(vid_obj):
+def _generate_all(run_i, vid_obj):
     success = False
     for lang in LANGUAGES:
-        success = _generate_video(vid_obj, lang, 0)
+        success = _generate_video(run_i, vid_obj, lang, 0)
         if not success:
             print("\nError occured. Process Terminated.")
             break
     return success
 #--------------------------------------------------------------------------------------------------
-def _generate_video(vid_obj, language, change):
+def _generate_video(run_i, vid_obj, language, change):
     print("\nGenerating %s video for %s\n" % (language, vid_obj.get_pre_polly_path()))
     try:
         vid_ext = vid_obj.get_ext()
         out_folder = "%s\\%s" % (vid_obj.get_base_dir(), vid_obj.get_file_name())
         os.makedirs(out_folder, exist_ok=True)
         if vid_ext == "pptx" and (language=="en" or change == 1): # break once
-            pptx_to_ingreds(vid_obj.get_pre_polly_path(), out_folder) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            pptx_to_ingreds(run_i, vid_obj.get_pre_polly_path(), out_folder) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         srt_path = vid_obj.get_srt_path(language)
         if not os.path.exists(srt_path):
@@ -136,10 +148,6 @@ def _generate_video(vid_obj, language, change):
         vid_obj.set_vid_args(srt_obj)
         vid_args = vid_obj.get_vid_args()
         vid_name = vid_args["video_file_name"]
-
-        if vid_ext == "mp4" and (language=="en" or change == 1): # break once
-            mp4_obj = ToPollyMP4(vid_obj.get_pre_polly_path())
-            cut_MP4(mp4_obj,srt_obj) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         voice_id = int(vid_args["voice"])
         
@@ -152,18 +160,24 @@ def _generate_video(vid_obj, language, change):
 
         if vid_ext == "mp4":
             to_Polly(srt_obj, polly_voice_id, neural)
-            comp_path = composite_MP4(language, out_folder, vid_name, srt_obj)
+            if run_i == 1:
+                if (language=="en" or change == 1):
+                    mp4_obj = ToPollyMP4(vid_obj.get_pre_polly_path())
+                    cut_MP4(mp4_obj,srt_obj) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                comp_path = composite_MP4(language, out_folder, vid_name, srt_obj)
         else:
             to_Polly(srt_obj, polly_voice_id, neural, True)
-            comp_path = composite_PNGs(language, out_folder, vid_name, srt_obj)
+            if run_i == 1:
+                comp_path = composite_PNGs(language, out_folder, vid_name, srt_obj)
       
-        S3_path = "%s/%s/%s_%s.mp4" % (S3_MOOC_FOLDER, S3_VIDEOS_FOLDER, re.sub("-", "/", vid_args["video_file_name"]), language)
-        upload_s3(comp_path, S3_BUCKET, S3_path)
-        print("\nUploaded to S3")
+        if run_i == 1:
+            S3_path = "%s/%s/%s_%s.mp4" % (S3_MOOC_FOLDER, S3_VIDEOS_FOLDER, re.sub("-", "/", vid_args["video_file_name"]), language)
+            upload_s3(comp_path, S3_BUCKET, S3_path)
+            print("\nUploaded to S3")
 
-        vid_obj.set_srt_edit(language, os.path.getmtime(vid_obj.get_srt_path(language)))
-        vid_obj.set_srt_edit("en", os.path.getmtime(vid_obj.get_srt_path("en")))
-        vid_obj.set_pre_polly_edit(os.path.getmtime(vid_obj.get_pre_polly_path()))
+            vid_obj.set_srt_edit(language, os.path.getmtime(vid_obj.get_srt_path(language)))
+            vid_obj.set_srt_edit("en", os.path.getmtime(vid_obj.get_srt_path("en")))
+            vid_obj.set_pre_polly_edit(os.path.getmtime(vid_obj.get_pre_polly_path()))
         return True
     except Exception as e:
         try:
@@ -175,4 +189,5 @@ def _generate_video(vid_obj, language, change):
         traceback.print_exc()
         return False
 #--------------------------------------------------------------------------------------------------
-main()
+if __name__ == '__main__':
+    main()

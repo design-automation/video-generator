@@ -3,10 +3,15 @@ import os
 import glob
 import re
 import functools
+import logging
 
 from bs4 import BeautifulSoup
 from _movie_to_polly import _to_time_str, VIDEO_RES
 import _xml_friendly
+
+logging.basicConfig(filename='errors.log', level=logging.ERROR, 
+                    format='%(asctime)s %(levelname)s %(name)s %(message)s')
+logger = logging.getLogger(__name__)
 
 def _pptXML_to_SRT(folder_path):
     DEFAULT_TIME_BREAK = 3 #seconds
@@ -66,7 +71,7 @@ def _libreXML_to_SRT(folder_path, tar_fdr):
             srt_f.write("%s\n" % slide_dict[str(i)])
             srt_f.write("\n")
     
-def pptx_to_ingreds(pptx_path, tar_folder):
+def pptx_to_ingreds(run_i, pptx_path, tar_folder):
     pptx_abs_path =  os.path.abspath(pptx_path)
     folder = os.path.abspath(tar_folder)
     file_name = re.sub("\.pptx", "", os.path.basename(pptx_abs_path))
@@ -74,15 +79,19 @@ def pptx_to_ingreds(pptx_path, tar_folder):
     os.makedirs(image_fdr, exist_ok=True)
     sz = "%sx%s" % VIDEO_RES
 
-    print("Converting pptx file to pdf")
-    subprocess.run([os.path.join(os.getenv('LIBRE_OFFICE_PROGRAM'), 'python.exe'), os.path.join(os.getenv('LIBRE_OFFICE_PROGRAM'), 'unoconv'), '-f', "pdf", "-o", "%s\\%s.pdf" % (folder, file_name),  pptx_abs_path])
+    try:
+        if run_i == 0:
+            print("Converting pptx file to xml")
+            subprocess.run([os.path.join(os.getenv('LIBRE_OFFICE_PROGRAM'), 'python.exe'), os.path.join(os.getenv('LIBRE_OFFICE_PROGRAM'), 'unoconv'), '-f', "xml", "-o", "%s\\%s.xml" % (folder, file_name), pptx_abs_path])
 
-    print("Converting pptx file to xml")
-    subprocess.run([os.path.join(os.getenv('LIBRE_OFFICE_PROGRAM'), 'python.exe'), os.path.join(os.getenv('LIBRE_OFFICE_PROGRAM'), 'unoconv'), '-f', "xml", "-o", "%s\\%s.xml" % (folder, file_name), pptx_abs_path])
+            print("Generating SRT from xml")
+            _libreXML_to_SRT(folder, os.path.dirname(pptx_path))
+        else:
+            print("Converting pptx file to pdf")
+            subprocess.run([os.path.join(os.getenv('LIBRE_OFFICE_PROGRAM'), 'python.exe'), os.path.join(os.getenv('LIBRE_OFFICE_PROGRAM'), 'unoconv'), '-f', "pdf", "-o", "%s\\%s.pdf" % (folder, file_name),  pptx_abs_path])
 
-    print("Generating Images from pdf file")
-    subprocess.run(['magick', 'convert', "-density", "300x300", os.path.abspath(os.path.join(folder, "%s.pdf" % file_name)), "-resize", sz, os.path.abspath(os.path.join(image_fdr, "%s.png" % file_name))])
-
-    print("Generating SRT from xml")
-    _libreXML_to_SRT(folder, os.path.dirname(pptx_path))
+            print("Generating Images from pdf file")
+            subprocess.run(['magick', 'convert', "-density", "300x300", os.path.abspath(os.path.join(folder, "%s.pdf" % file_name)), "-resize", sz, os.path.abspath(os.path.join(image_fdr, "%s.png" % file_name))])
+    except Exception:
+        logger.exception(run_i)
 

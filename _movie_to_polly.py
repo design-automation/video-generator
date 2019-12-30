@@ -7,6 +7,7 @@ import datetime
 import time
 import shutil
 import json
+import logging
 
 import _xml_friendly
 from moviepy.editor import *
@@ -19,6 +20,9 @@ from __AWS__ import aws_access_key_id, aws_secret_access_key
 
 OUTPUT_FDR = "output"
 PAUSE_PERIOD = 0.7 #seconds
+logging.basicConfig(filename='errors.log', level=logging.ERROR, 
+                    format='%(asctime)s %(levelname)s %(name)s %(message)s')
+logger = logging.getLogger(__name__)
 
 class ToPollyMP4:
     def __init__(self, mp4_path):
@@ -227,6 +231,7 @@ def _translate(session, str_to_translate, tar_lang):
     try:
         result = translate.translate_text(Text=str_to_translate, SourceLanguageCode="en", TargetLanguageCode=tar_lang)
     except (BotoCoreError, ClientError) as error:
+        logger.exception("_translate")
         print(error)
         sys.exit(-1)
     return result.get('TranslatedText')
@@ -242,6 +247,7 @@ def _polly(session, output_fdr, file_name, script, voice_id, neural):
     try:
         response = polly.synthesize_speech(Text=text, OutputFormat="mp3", VoiceId=voice_id, Engine=engine, TextType="ssml")
     except (BotoCoreError, ClientError) as error:
+        logger.exception(text)
         print(error)
         print(text)
         sys.exit(-1)
@@ -253,6 +259,7 @@ def _polly(session, output_fdr, file_name, script, voice_id, neural):
                 with open(output, "wb") as file:
                     file.write(stream.read())
             except IOError as error:
+                logger.exception("_polly_IO")
                 print(error)
                 sys.exit(-1)
     else:
@@ -263,23 +270,26 @@ def _file_idx(file_name):
     return int(re.search(r"-(\d+)\.",file_name).group(1))
 
 def cut_MP4(mp4_obj, srt_obj): # returns mp4s in subfolder
-    clip = VideoFileClip(mp4_obj.get_path())
-    output_fdr = mp4_obj.get_folder() + "\\" + mp4_obj.get_name() +"\\" + OUTPUT_FDR + "_VIDEOS\\"
-    os.makedirs(output_fdr, exist_ok=True)
-    num_seq = srt_obj.get_n_seq()
-    for seq_i in range(1, num_seq + 1):#range(0, num_seq)
-        script_start = srt_obj.get_seq("_NA_", seq_i)["script_start"]
-        new_clip = None
-        if seq_i == num_seq:#num_seq-1
-            new_clip = clip.subclip(script_start)
-        else:
-            next_start = srt_obj.get_seq("_NA_", seq_i + 1)["script_start"]
-            new_clip = clip.subclip(script_start, next_start)
-        
-        prev_end = script_start
-        file_name = mp4_obj.get_name() + "-" + str(seq_i).zfill(3) + ".mp4"
-        output_path = output_fdr + file_name
-        new_clip.write_videofile(output_path, audio=False)
+    try:
+        clip = VideoFileClip(mp4_obj.get_path())
+        output_fdr = mp4_obj.get_folder() + "\\" + mp4_obj.get_name() +"\\" + OUTPUT_FDR + "_VIDEOS\\"
+        os.makedirs(output_fdr, exist_ok=True)
+        num_seq = srt_obj.get_n_seq()
+        for seq_i in range(1, num_seq + 1):#range(0, num_seq)
+            script_start = srt_obj.get_seq("_NA_", seq_i)["script_start"]
+            new_clip = None
+            if seq_i == num_seq:#num_seq-1
+                new_clip = clip.subclip(script_start)
+            else:
+                next_start = srt_obj.get_seq("_NA_", seq_i + 1)["script_start"]
+                new_clip = clip.subclip(script_start, next_start)
+            
+            prev_end = script_start
+            file_name = mp4_obj.get_name() + "-" + str(seq_i).zfill(3) + ".mp4"
+            output_path = output_fdr + file_name
+            new_clip.write_videofile(output_path, audio=False)
+    except Exception:
+        logger.exception(mp4_obj.get_path())
 
 def to_Polly(srt_obj, voice_id, neural, pptx=False):# returns mp3s in subfolder
     session = Session(aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, region_name="us-east-1")
@@ -333,10 +343,16 @@ def break_title(title):
         return ret_title
 
 def composite_MP4(language, folder, vid_name, srt_obj):
-    return _composite_video("MP4", language, folder, vid_name, srt_obj)
+    try:
+        return _composite_video("MP4", language, folder, vid_name, srt_obj)
+    except Exception:
+        logger.exception("%s > MP4 build error" % vid_name)
 
-def composite_PNGs(language, folder, vid_name, srt_obj):    
-    return _composite_video("PPTX", language, folder, vid_name, srt_obj)
+def composite_PNGs(language, folder, vid_name, srt_obj):
+    try:    
+        return _composite_video("PPTX", language, folder, vid_name, srt_obj)
+    except Exception:
+        logger.exception("%s > MP4 build error" % vid_name)
 
 def _composite_video(typ, language, folder, vid_name, srt_obj):
     fade_color = [255,255,255]
