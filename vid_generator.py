@@ -22,10 +22,10 @@ from _movie_to_polly import *
 import traceback
 from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES
 #--------------------------------------------------------------------------------------------------
-DEBUG_status = True
+DEBUG_status = False
 DEBUG = dict(
-    section="w3",
-    subsection="s3",
+    section="w1",
+    subsection="s0",
     unit="u1"
 )
 #--------------------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ def main():
 
     range_arr = range(RUN_STEP, RUN_STEP + 1)
     if RUN_STEP == 2:
-        range_arr = range(RUN_STEP + 1)
+        range_arr = range(RUN_STEP)
     for run_i in range_arr: # 0 = ingredients only. 1 = MP4
         print(RUN_STATUS[run_i])
         # SECTIONS
@@ -116,11 +116,12 @@ def main():
                             success = _generate_all(run_i, vid_obj)
                         if success:
                             vids_obj.set_vid_obj(vid_obj)
-                        if not DEBUG_status and change != -1:
+                        if not DEBUG_status and change != -1 and run_i==1:
                             shutil.rmtree(vid_obj.get_base_dir() + "\\" + vid_obj.get_file_name())
 
                     # write to JSON file
-                    vids_obj.to_JSON()
+                    if run_i == 1:
+                        vids_obj.to_JSON()
 #--------------------------------------------------------------------------------------------------
 def _generate_all(run_i, vid_obj):
     success = False
@@ -159,15 +160,17 @@ def _generate_video(run_i, vid_obj, language, change):
         print("\n%s" % polly_voice_id)
 
         if vid_ext == "mp4":
-            to_Polly(srt_obj, polly_voice_id, neural)
-            if run_i == 1:
+            if run_i == 0:
+                to_Polly(srt_obj, polly_voice_id, neural)
+            else:
                 if (language=="en" or change == 1):
                     mp4_obj = ToPollyMP4(vid_obj.get_pre_polly_path())
                     cut_MP4(mp4_obj,srt_obj) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 comp_path = composite_MP4(language, out_folder, vid_name, srt_obj)
         else:
-            to_Polly(srt_obj, polly_voice_id, neural, True)
-            if run_i == 1:
+            if run_i == 0:
+                to_Polly(srt_obj, polly_voice_id, neural, True)
+            else:
                 comp_path = composite_PNGs(language, out_folder, vid_name, srt_obj)
       
         if run_i == 1:
