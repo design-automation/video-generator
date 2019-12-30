@@ -42,29 +42,32 @@ class VIDEO_OBJ:
         return dict(video_file_name=self.__video_file_name, display_name=self.__display_name, voice=self.__voice, meta=self.__meta)
 
 class COMPONENT:
-    def __init__(self, name, _dir, ext):
-        self.__path = _dir + "\\" + name + ".%s" % ext
-        self.__last_edit = -1
+    def __init__(self, INPUT_PATH, name, _dir, ext):
+        if INPUT_PATH[-1] != os.sep:
+            INPUT_PATH += os.sep
+        self.__full_path = _dir + "\\" + name + ".%s" % ext
+        self.__rel_path = self.__full_path.replace(INPUT_PATH, "")
         try:
-            self.__last_edit = float(re.search(r"(\d+)", subprocess.run(args=["git", "log" , "-1", "--pretty='format:%ct'", self.__path], cwd=os.path.dirname(self.__path), capture_output=True, text=True).stdout).group(1))
-        except Exception:
-            print("%s NEW FILE" % self.__path)
+            self.__last_edit = float(re.search(r"(\d+)", subprocess.run(args=["git", "log" , "-1", "--pretty='format:%ct'", self.__full_path], cwd=os.path.dirname(self.__full_path), capture_output=True, text=True).stdout).group(1))
+        except Exception as e:
+            print("%s NEW FILE" % self.__rel_path)
             self.__last_edit = -1
     def as_dict(self):
-        return dict(path=self.__path, last_edit=self.__last_edit)
+        return dict(path=self.__rel_path, last_edit=self.__last_edit)
 
 class Video:
-    def __init__(self, path):
+    def __init__(self, INPUT_PATH, path):
         (root,ext) = os.path.splitext(path)
+        self.__input_path = INPUT_PATH
         self.__name = os.path.basename(root)
         self.__ext = ext[1:]
         self.__base_dir = os.path.dirname(path)
         self.__dict = VIDEO_OBJ().as_dict()
-        self.__dict["meta"]["pre_polly"] = COMPONENT(self.__name, self.__base_dir, self.__ext).as_dict()
+        self.__dict["meta"]["pre_polly"] = COMPONENT(INPUT_PATH, self.__name, self.__base_dir, self.__ext).as_dict()
         self.__dict["meta"]["srt"] = {}
         for lang in LANGUAGES:
             srt_name = self.__name + "_%s" % lang
-            srt_component = COMPONENT(srt_name, self.__base_dir, "srt").as_dict()
+            srt_component = COMPONENT(INPUT_PATH, srt_name, self.__base_dir, "srt").as_dict()
             self.__dict["meta"]["srt"][lang] = srt_component  
     def set_pre_polly_edit(self, value):
         self.__dict["meta"]["pre_polly"]["last_edit"] = value
@@ -91,11 +94,11 @@ class Video:
     def get_pre_polly_edit(self):
         return self.__dict["meta"]["pre_polly"]["last_edit"]
     def get_pre_polly_path(self):
-        return self.__dict["meta"]["pre_polly"]["path"]
+        return os.path.join(self.__input_path, self.__dict["meta"]["pre_polly"]["path"])
     def get_srt_edit(self, language):
         return self.__dict["meta"]["srt"][language]["last_edit"]
     def get_srt_path(self, language):
-        return self.__dict["meta"]["srt"][language]["path"]
+        return os.path.join(self.__input_path, self.__dict["meta"]["srt"][language]["path"])
     def get_vid_args(self):
         sh_cpy = dict(self.__dict)
         del sh_cpy["meta"]
@@ -104,10 +107,11 @@ class Video:
         return self.__dict
 
 class VidsJSON:
-    def __init__(self, path, fresh):
+    def __init__(self, INPUT_PATH, path, fresh):
+        self.__input_path = INPUT_PATH
         self.__path = path
-        self.__dict = self.__to_dict(path, fresh)
         self.__last_edit = -1
+        self.__dict = self.__to_dict(path, fresh)
     def __to_dict(self, path, fresh):
         vids_dict = None
         if fresh:
@@ -118,16 +122,18 @@ class VidsJSON:
                 self.__last_edit = float(re.search(r"(\d+)", subprocess.run(args=["git", "log" , "-1", "--pretty='format:%ct'", self.__path], cwd=os.path.dirname(self.__path), capture_output=True, text=True).stdout).group(1))
             except Exception:
                 print("%s NEW FILE" % self.__path)
-                pass
+                self.__last_edit = -1
         return vids_dict
     def set_vid_obj(self, vid_obj):
         self.__dict[vid_obj.get_file_name()] = vid_obj.to_dict()
     def get_pre_polly_edit(self, id):
+        id = id.replace(self.__input_path, "")
         try:
             return self.__dict[id]["meta"]["pre_polly"]["last_edit"]
         except KeyError:
             return -1
     def get_srt_edit(self, language, id):
+        id = id.replace(self.__input_path, "")
         try:
             return self.__dict[id]["meta"]["srt"][language]["last_edit"]
         except KeyError:

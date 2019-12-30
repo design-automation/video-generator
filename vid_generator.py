@@ -22,9 +22,9 @@ from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES
 #--------------------------------------------------------------------------------------------------
 DEBUG_status = False
 DEBUG = dict(
-    section="w2",
-    subsection="s3",
-    unit="u5"
+    section="w1",
+    subsection="s0",
+    unit="u1"
 )
 #--------------------------------------------------------------------------------------------------
 
@@ -62,13 +62,13 @@ def main():
                     continue
                 json_path = os.path.join(unit, "videos.json")
                 FRESH = not vids_json_exists(json_path,True)
-                vids_obj = VidsJSON(json_path, FRESH)
+                vids_obj = VidsJSON(INPUT_PATH, json_path, FRESH)
 
                 # VIDEOS
                 for vid_file in vid_files:
                     print('---- ', vid_file)
 
-                    vid_obj = Video(vid_file)
+                    vid_obj = Video(INPUT_PATH, vid_file)
                     id = vid_obj.get_file_name()
                     pp_curr_edit = vid_obj.get_pre_polly_edit()
                     pp_last_edit = vids_obj.get_pre_polly_edit(id)
