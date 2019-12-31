@@ -24,9 +24,9 @@ from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES
 #--------------------------------------------------------------------------------------------------
 DEBUG_status = False
 DEBUG = dict(
-    section="w1",
-    subsection="s0",
-    unit="u1"
+    section="w3",
+    subsection="s3",
+    unit="u2"
 )
 #--------------------------------------------------------------------------------------------------
 
@@ -37,10 +37,6 @@ def main():
     change_log = {}
     end_msg = "To-Polly Process Complete."  
     SECTIONS = glob.glob(os.path.join(INPUT_PATH, 'Course', '*\\'))
-
-    json_path = os.path.join(INPUT_PATH, "Course", "videos.json")
-    FRESH = not vids_json_exists(json_path,True)
-    o_vids_obj = VidsJSON(INPUT_PATH, json_path, FRESH)
 
     range_arr = range(RUN_STEP, RUN_STEP + 1)
     if RUN_STEP == 2:
