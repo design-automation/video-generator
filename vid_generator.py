@@ -113,7 +113,7 @@ def main():
                         if success:
                             vids_obj.set_vid_obj(vid_obj)
                         if not DEBUG_status and change != -1 and run_i==1:
-                            shutil.rmtree(vid_obj.get_base_dir() + "\\" + vid_obj.get_file_name())
+                            shutil.rmtree(path=vid_obj.get_base_dir() + "\\" + vid_obj.get_file_name(), ignore_errors=True)
 
                     # write to JSON file
                     if run_i == 1:
