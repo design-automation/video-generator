@@ -62,6 +62,7 @@ def _libreXML_to_SRT(folder_path, tar_fdr):
             if notes!="" and notes[0]!="{":
                 notes = notes.encode("ascii","ignore").decode("utf-8")
             notes = _xml_friendly.to_xml(notes)
+            notes = re.sub(r"&lt;([/?p].+?)&gt;", "<\g<1>>", notes)
             notes = re.sub(r"&lt;([/?sub].+?)&gt;", "<\g<1>>", notes)
             slide_dict[str(slide_i + 1)] = notes
     with open(tar_fdr + "\\" + file_name+"_en.srt", "wt", encoding="utf-8") as srt_f:
