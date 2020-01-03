@@ -181,7 +181,7 @@ def _generate_video(run_i, vid_obj, language, change):
     except Exception as e:
         try:
             raise e
-        except:
+        except Exception:
             pass
         if DEBUG_status:
             raise e
