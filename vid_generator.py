@@ -24,8 +24,8 @@ from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES
 #--------------------------------------------------------------------------------------------------
 DEBUG_status = False
 DEBUG = dict(
-    section="w3",
-    subsection="s3",
+    section="w1",
+    subsection="s2",
     unit="u2"
 )
 #--------------------------------------------------------------------------------------------------
