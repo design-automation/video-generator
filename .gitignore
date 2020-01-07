@@ -11,4 +11,5 @@ __pycache__/
 
 __CONSTS_LOCAL__.py
 
-__RUN__.bat
+__RUN*
+!__RUN__.template.bat
