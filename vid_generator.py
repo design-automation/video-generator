@@ -25,8 +25,8 @@ from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES
 DEBUG_status = False
 DEBUG = dict(
     section="w1",
-    subsection="s2",
-    unit="u2"
+    subsection="s0",
+    unit="u0"
 )
 #--------------------------------------------------------------------------------------------------
 
@@ -108,6 +108,8 @@ def main():
                                 success = _generate_video(run_i, vid_obj, lang, change)
                                 if not success:
                                     break
+                        # if vid_obj.get_ext == "pptx":
+                        #     change = 0
                         if change == 0:
                             success = _generate_all(run_i, vid_obj)
                         if success:
@@ -153,15 +155,16 @@ def _generate_video(run_i, vid_obj, language, change):
         lang_code = AVAIL_VOICES[language]["lang_code"]
         avail_voice_ids = AVAIL_VOICES[language]["ids"]
         polly_voice_id = avail_voice_ids[voice_id % len(avail_voice_ids)]
-        print("\n%s" % polly_voice_id)
 
         if vid_ext == "mp4":
             try:
-                mp4_type = json.loads(srt_obj.get_seq("_NA_", 0)["script"])["type"]
+                mp4_type = json.loads(srt_obj.get_seq("_NA_", 1)["script"])["type"]
                 if mp4_type == "headshot" and run_i != 0:
-                    comp_path = composite_headshot(vid_obj.get_pre_polly_path(), vid_name, srt_obj)
-            except KeyError: # not headshot video
+                    print("Generating Headshot Video")
+                    comp_path = composite_headshot(out_folder, vid_obj.get_pre_polly_path(), vid_name, srt_obj)
+            except KeyError as e: # not headshot video
                 if run_i == 0:
+                    print("\n%s" % polly_voice_id)
                     to_Polly(srt_obj, polly_voice_id, neural)
                 else:
                     if (language=="en" or change == 1):
@@ -170,6 +173,7 @@ def _generate_video(run_i, vid_obj, language, change):
                     comp_path = composite_MP4(language, out_folder, vid_name, srt_obj)
         else:
             if run_i == 0:
+                print("\n%s" % polly_voice_id)
                 to_Polly(srt_obj, polly_voice_id, neural, True)
             else:
                 comp_path = composite_PNGs(language, out_folder, vid_name, srt_obj)

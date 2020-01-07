@@ -356,7 +356,7 @@ def composite_PNGs(language, folder, vid_name, srt_obj):
 
 def composite_headshot(tar_folder, vid_path, vid_name, srt_obj):
     fade_color = [255,255,255]
-    script = srt_obj.get_seq("_NA_", 0)["script"]
+    script = srt_obj.get_seq("_NA_", 1)["script"]
     title = break_title(json.loads(script)["display_name"])
     title_clip = TextClip(txt=title, size=VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=FONT_SZ).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
     vid_list = [title_clip,VideoFileClip(vid_path)]
