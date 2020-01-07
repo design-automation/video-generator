@@ -354,6 +354,21 @@ def composite_PNGs(language, folder, vid_name, srt_obj):
     except Exception:
         logger.exception("%s > MP4 build error" % vid_name)
 
+def composite_headshot(tar_folder, vid_path, vid_name, srt_obj):
+    fade_color = [255,255,255]
+    script = srt_obj.get_seq("_NA_", 0)["script"]
+    title = break_title(json.loads(script)["display_name"])
+    title_clip = TextClip(txt=title, size=VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=FONT_SZ).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
+    vid_list = [title_clip,VideoFileClip(vid_path)]
+
+    composite = concatenate_videoclips(vid_list).resize(height=VIDEO_RES[1])
+    composite.fps = 30
+    composite_path = tar_folder + "\\" + vid_name + "_comp.mp4"
+    composite.write_videofile(composite_path)
+
+    print("Job Complete")
+    return composite_path
+
 def _composite_video(typ, language, folder, vid_name, srt_obj):
     fade_color = [255,255,255]
     aud_clips = sorted(glob.glob(folder + "\\" + OUTPUT_FDR + "_%s\\" % language + "*.mp3"), key=_file_idx)

@@ -156,13 +156,18 @@ def _generate_video(run_i, vid_obj, language, change):
         print("\n%s" % polly_voice_id)
 
         if vid_ext == "mp4":
-            if run_i == 0:
-                to_Polly(srt_obj, polly_voice_id, neural)
-            else:
-                if (language=="en" or change == 1):
-                    mp4_obj = ToPollyMP4(vid_obj.get_pre_polly_path())
-                    cut_MP4(mp4_obj,srt_obj) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                comp_path = composite_MP4(language, out_folder, vid_name, srt_obj)
+            try:
+                mp4_type = json.loads(srt_obj.get_seq("_NA_", 0)["script"])["type"]
+                if mp4_type == "headshot" and run_i != 0:
+                    comp_path = composite_headshot(vid_obj.get_pre_polly_path(), vid_name, srt_obj)
+            except KeyError: # not headshot video
+                if run_i == 0:
+                    to_Polly(srt_obj, polly_voice_id, neural)
+                else:
+                    if (language=="en" or change == 1):
+                        mp4_obj = ToPollyMP4(vid_obj.get_pre_polly_path())
+                        cut_MP4(mp4_obj,srt_obj) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    comp_path = composite_MP4(language, out_folder, vid_name, srt_obj)
         else:
             if run_i == 0:
                 to_Polly(srt_obj, polly_voice_id, neural, True)
