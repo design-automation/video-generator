@@ -80,7 +80,9 @@ class ToPollySRT:
         for i in range(seq_n, self.get_n_seq() + 1):
             try:
                 next_start = _to_seconds(self.__seq_dict[language][i + 1]["script_start"])
+                next_end = _to_seconds(self.__seq_dict[language][i + 1]["script_end"])
                 self.__seq_dict[language][i + 1]["script_start"] = _to_time_str(next_start + period)
+                self.__seq_dict[language][i + 1]["script_end"] = _to_time_str(next_end + period)
             except KeyError:
                 pass
     def set_seq_end(self, seq_n, seconds):
