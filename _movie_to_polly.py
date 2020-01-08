@@ -359,9 +359,9 @@ def composite_headshot(tar_folder, vid_path, vid_name, srt_obj):
     script = srt_obj.get_seq("_NA_", 1)["script"]
     title = break_title(json.loads(script)["display_name"])
     title_clip = TextClip(txt=title, size=HS_VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=FONT_SZ).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
-    vid_list = [title_clip,VideoFileClip(vid_path)]
+    vid_list = [title_clip,VideoFileClip(vid_path).resize(height=HS_VIDEO_RES[1])]
 
-    composite = concatenate_videoclips(vid_list).resize(height=HS_VIDEO_RES[1])
+    composite = concatenate_videoclips(vid_list).resize(width=VIDEO_RES[0])
     composite.fps = 30
     composite_path = tar_folder + "\\" + vid_name + "_comp.mp4"
     composite.write_videofile(composite_path)
