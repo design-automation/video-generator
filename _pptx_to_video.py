@@ -27,9 +27,6 @@ def _clean_notes(notes):
     notes = notes.replace("“","\"").replace("”","\"") #.replace("’","'").replace("\u200c","")
     if notes!="" and notes[0]!="{":
         notes = notes.encode("ascii","ignore").decode("utf-8")
-    notes = _xml_friendly.to_xml(notes)
-    notes = re.sub(r"&lt;([/?p].+?)&gt;", "<\g<1>>", notes)
-    notes = re.sub(r"&lt;([/?sub].+?)&gt;", "<\g<1>>", notes)
     return notes
 
 def _pptx_to_SRT(pptx_path, tar_fdr):

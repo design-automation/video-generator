@@ -298,7 +298,7 @@ def to_Polly(srt_obj, voice_id, neural, pptx=False):# returns mp3s in subfolder
     os.makedirs(output_fdr, exist_ok=True)
     aud_i = 0
     for seq_i in range(1, srt_obj.get_n_seq()+1):
-        script = srt_obj.get_seq(language, seq_i)["script"]
+        script = _xml_friendly.to_xml(srt_obj.get_seq(language, seq_i)["script"])
         if seq_i != 1:
             srt_obj.update_seq_start(seq_n=seq_i, op_dict=None, owrite=pptx)
 
