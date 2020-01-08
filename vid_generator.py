@@ -25,8 +25,8 @@ from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES
 DEBUG_status = False
 DEBUG = dict(
     section="w1",
-    subsection="s1",
-    unit="u1"
+    subsection="s0",
+    unit="u0"
 )
 #--------------------------------------------------------------------------------------------------
 
@@ -162,7 +162,6 @@ def _generate_video(run_i, vid_obj, language, change):
                 if mp4_type == "headshot" and run_i != 0:
                     print("Generating Headshot Video")
                     comp_path = composite_headshot(out_folder, vid_obj.get_pre_polly_path(), vid_name, srt_obj)
-                    srt_obj.update_SRT()
             except KeyError as e: # not headshot video
                 if run_i == 0:
                     print("\n%s" % polly_voice_id)

@@ -125,7 +125,7 @@ class ToPollySRT:
                         if lang != "en":
                             script = clean_ssml_tags(script, True)
                         seq_dict[lang][seq_n] = {"script_start": matches[0],
-                                        "script_end": "",
+                                        "script_end": matches[1],
                                         "script": script}
                     seq_n += 1
             self.__n_seq = seq_n - 1
@@ -366,8 +366,14 @@ def composite_headshot(tar_folder, vid_path, vid_name, srt_obj):
     composite_path = tar_folder + "\\" + vid_name + "_comp.mp4"
     composite.write_videofile(composite_path)
 
+    update_HS_srt(srt_obj)
     print("Job Complete")
     return composite_path
+
+def update_HS_srt(srt_obj):
+    srt_obj.set_seq_end(1,TITLE_PERIOD)
+    srt_obj.push_seq(1,TITLE_PERIOD)
+    srt_obj.update_SRT()
 
 def _composite_video(typ, language, folder, vid_name, srt_obj):
     fade_color = [255,255,255]
