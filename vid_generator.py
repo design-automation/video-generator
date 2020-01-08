@@ -162,6 +162,7 @@ def _generate_video(run_i, vid_obj, language, change):
                 if mp4_type == "headshot" and run_i != 0:
                     print("Generating Headshot Video")
                     comp_path = composite_headshot(out_folder, vid_obj.get_pre_polly_path(), vid_name, srt_obj)
+                    srt_obj.update_SRT()
             except KeyError as e: # not headshot video
                 if run_i == 0:
                     print("\n%s" % polly_voice_id)
