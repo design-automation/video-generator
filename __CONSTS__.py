@@ -2,6 +2,7 @@ import os
 
 ## Video settings
 VIDEO_RES = (1080,720)
+HS_VIDEO_RES = (1920,1080)
 TITLE_PERIOD = 3 #seconds
 FONT = "Ubuntu-Mono"
 IDEAL_LENGTH = 12

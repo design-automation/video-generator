@@ -15,7 +15,7 @@ from boto3 import Session
 from botocore.exceptions import BotoCoreError, ClientError
 from contextlib import closing
 from _get_by_type import *
-from __CONSTS__ import VOICES, VIDEO_RES, TITLE_PERIOD, FONT, FONT_SZ, IDEAL_LENGTH
+from __CONSTS__ import VOICES, HS_VIDEO_RES, VIDEO_RES, TITLE_PERIOD, FONT, FONT_SZ, IDEAL_LENGTH
 from __AWS__ import aws_access_key_id, aws_secret_access_key
 
 OUTPUT_FDR = "output"
@@ -358,10 +358,10 @@ def composite_headshot(tar_folder, vid_path, vid_name, srt_obj):
     fade_color = [255,255,255]
     script = srt_obj.get_seq("_NA_", 1)["script"]
     title = break_title(json.loads(script)["display_name"])
-    title_clip = TextClip(txt=title, size=VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=FONT_SZ).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
+    title_clip = TextClip(txt=title, size=HS_VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=FONT_SZ).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
     vid_list = [title_clip,VideoFileClip(vid_path)]
 
-    composite = concatenate_videoclips(vid_list).resize(height=VIDEO_RES[1])
+    composite = concatenate_videoclips(vid_list).resize(height=HS_VIDEO_RES[1])
     composite.fps = 30
     composite_path = tar_folder + "\\" + vid_name + "_comp.mp4"
     composite.write_videofile(composite_path)
