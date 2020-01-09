@@ -410,6 +410,7 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
                     slide_clip = slide_clip.set_duration(aud_clip.duration + buffer).set_audio(aud_clip)
                 except KeyError:
                     slide_clip = slide_clip.set_duration(PAUSE_PERIOD)
+                    aud_clip = slide_clip
                     pass
                 if fadeout:
                     slide_clip = slide_clip.fadeout(duration=1, final_color=fade_color)
