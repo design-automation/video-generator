@@ -28,11 +28,12 @@ from _movie_to_polly import *
 import traceback
 from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES
 #--------------------------------------------------------------------------------------------------
-DEBUG_status = False
+DEBUG_status = True
+KEEP = False
 DEBUG = dict(
     section="w1",
-    subsection="s1",
-    unit="u1"
+    subsection="*",
+    unit="*"
 )
 #--------------------------------------------------------------------------------------------------
 
@@ -117,7 +118,7 @@ def main():
                             success = _generate_all(run_i, vid_obj)
                         if success:
                             vids_obj.set_vid_obj(vid_obj)
-                        if not DEBUG_status and change != -1 and run_i==1:
+                        if not KEEP and change != -1 and run_i==1:
                             shutil.rmtree(path=vid_obj.get_base_dir() + "\\" + vid_obj.get_file_name(), ignore_errors=True)
 
                     # write to JSON file
