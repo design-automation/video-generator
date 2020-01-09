@@ -196,7 +196,7 @@ def _generate_video(run_i, vid_obj, language, change):
             raise e
         except Exception:
             pass
-        if DEBUG_status:
+        if DEBUG_status and len(sys.argv) != 4:
             raise e
         traceback.print_exc()
         return False
