@@ -141,7 +141,6 @@ class ToPollySRT:
         n_seq_i = 1
         for seq_i in self.__seq_dict[language]:
             seq_script = self.__seq_dict[language][seq_i]["script"]
-            ori_len = len(seq_script)
             if seq_script == "":
                 continue
             ori_start = _to_seconds(self.__seq_dict[language][seq_i]["script_start"])
@@ -149,7 +148,9 @@ class ToPollySRT:
             ori_period = ori_end - ori_start
             script_splt = [seq_script]
             if seq_script[0] != "{" :
+                seq_script = clean_ssml_tags(seq_script)
                 script_splt = _split_script(seq_script, language)
+            ori_len = len(seq_script)
             n_script_splt = len(script_splt)
             prev_end = ori_start
             for script in script_splt:
@@ -159,8 +160,6 @@ class ToPollySRT:
                 new_start = prev_end
                 if script!="" and script[0] == "{":
                     script_ = json.loads(script)["display_name"]
-                else:
-                    script_ = clean_ssml_tags(script)
                 new_end = new_start + splt_period
                 seq_dict = dict(
                     script=script_,
