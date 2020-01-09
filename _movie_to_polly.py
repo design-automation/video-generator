@@ -76,7 +76,6 @@ class ToPollySRT:
         return self.__language
     def push_seq(self, seq_n, period):
         language = self.__language
-        title_start = _to_seconds(self.__seq_dict[language][seq_n]["script_start"])
         for i in range(seq_n, self.get_n_seq() + 1):
             try:
                 next_start = _to_seconds(self.__seq_dict[language][i + 1]["script_start"])
@@ -85,6 +84,9 @@ class ToPollySRT:
                 self.__seq_dict[language][i + 1]["script_end"] = _to_time_str(next_end + period)
             except KeyError:
                 pass
+    def set_seq_start(self, seq_n, seconds):
+        language = self.__language
+        self.__seq_dict[language][seq_n]["script_start"] = _to_time_str(seconds)
     def set_seq_end(self, seq_n, seconds):
         language = self.__language
         start_secs = _to_seconds(self.__seq_dict[language][seq_n]["script_start"])
@@ -137,15 +139,13 @@ class ToPollySRT:
         language = self.__language
         new_dict = {}
         n_seq_i = 1
-
-        BASE_START = _to_seconds(self.__seq_dict[language][1]["script_start"])
         for seq_i in self.__seq_dict[language]:
             seq_script = self.__seq_dict[language][seq_i]["script"]
             ori_len = len(seq_script)
             if seq_script == "":
                 continue
-            ori_start = _to_seconds(self.__seq_dict[language][seq_i]["script_start"]) - BASE_START
-            ori_end = _to_seconds(self.__seq_dict[language][seq_i]["script_end"]) - BASE_START
+            ori_start = _to_seconds(self.__seq_dict[language][seq_i]["script_start"])
+            ori_end = _to_seconds(self.__seq_dict[language][seq_i]["script_end"])
             ori_period = ori_end - ori_start
             script_splt = [seq_script]
             if seq_script[0] != "{" :
@@ -178,20 +178,6 @@ class ToPollySRT:
             op_dict = self.__seq_dict[language]
         time_stamp = "%s --> %s"% (op_dict[seq_n]["script_start"], op_dict[seq_n]["script_end"])
         return "%s\n%s\n%s\n\n" % (str(seq_n), time_stamp, _xml_friendly.to_symbol(op_dict[seq_n]["script"]))
-    
-    def update_seq_start(self, seq_n, op_dict=None, owrite=False):
-        language = self.__language
-        if op_dict == None:
-            op_dict = self.__seq_dict[language]
-        prev_end = _to_seconds(op_dict[seq_n-1]["script_end"])
-        curr_start = _to_seconds(op_dict[seq_n]["script_start"])
-        if prev_end > curr_start or owrite:
-            op_dict[seq_n]["script_start"] = _to_time_str(float(prev_end))
-            if owrite:
-                self.__seq_dict[language][seq_n]["script_start"] = _to_time_str(float(prev_end)) 
-            else:
-                self.push_seq(seq_n,prev_end-curr_start-TITLE_PERIOD)
-        return op_dict
 
 def clean_ssml_tags(script, remove_all=False):
     if remove_all:
@@ -301,8 +287,6 @@ def to_Polly(srt_obj, voice_id, neural, pptx=False):# returns mp3s in subfolder
     aud_i = 0
     for seq_i in range(1, srt_obj.get_n_seq()+1):
         script = _xml_friendly.to_xml(srt_obj.get_seq(language, seq_i)["script"])
-        if seq_i != 1:
-            srt_obj.update_seq_start(seq_n=seq_i, op_dict=None, owrite=pptx)
 
         if script!="" and script[0]!="{":
             if srt_obj.get_name()[-2:] == "en" and language!="en": # translate
@@ -316,17 +300,15 @@ def to_Polly(srt_obj, voice_id, neural, pptx=False):# returns mp3s in subfolder
             aud_i += 1
             print("Polly MP3 saved at %s" % (aud_out))
             polly_aud = AudioFileClip(aud_out)
-            srt_obj.set_seq_end(seq_i, polly_aud.duration + PAUSE_PERIOD)
+            ori_duration = srt_obj.get_seq_duration(language, seq_i)
+            curr_duration = polly_aud.duration + PAUSE_PERIOD
+            srt_obj.set_seq_end(seq_i, curr_duration)
             polly_aud.reader.close_proc()
         else:
             if script == "":
                 srt_obj.set_seq_end(seq_i, PAUSE_PERIOD)
             elif script!="" and script[0]=="{":
-                if not pptx:
-                    srt_obj.push_seq(seq_i, TITLE_PERIOD)
                 srt_obj.set_seq_end(seq_i, TITLE_PERIOD)
-                
-    srt_obj.update_SRT()
 
 def break_title(title):
     title_len = len(title)
@@ -383,7 +365,11 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
     aud_dict = {_file_idx(aud_clips[i]):aud_clips[i] for i in range(0, len(aud_clips))}
 
     vid_list = []
+    total_duration = 0
     for seq_i in range(1, srt_obj.get_n_seq() + 1): # seq 1 is title
+        seq_clip = None
+        aud_clip = None
+
         script = srt_obj.get_seq(language, seq_i)["script"]
         fadeout = False
         try:
@@ -400,6 +386,8 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
                 title += "\n(%s)" % language
             title_clip = TextClip(txt=title, size=VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=FONT_SZ).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
             vid_list.append(title_clip)
+            seq_clip = title_clip
+            aud_clip = title_clip
         else:
             if typ == "MP4":
                 vid_clips = sorted(glob.glob(folder + "\\" + OUTPUT_FDR + "_VIDEOS\\" + "*.mp4"), key=_file_idx)
@@ -412,7 +400,7 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
                 if fadeout:
                     vid_clip = vid_clip.fadeout(duration=1, final_color=fade_color)
                 vid_list.append(vid_clip.set_audio(aud_clip))
-                
+                seq_clip = vid_clip
             else:
                 slide_pngs = sorted(glob.glob(folder + "\\images\\" + "*.png"), key=_file_idx)
                 slide_clip = ImageClip(slide_pngs[seq_i-1])
@@ -427,12 +415,20 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
                 if fadeout:
                     slide_clip = slide_clip.fadeout(duration=1, final_color=fade_color)
                 vid_list.append(slide_clip)
+                seq_clip = slide_clip
             fadein = False
+        seq_duration = seq_clip.duration
+        aud_duration = aud_clip.duration
+        seq_start = total_duration
+        srt_obj.set_seq_start(seq_i, seq_start)
+        srt_obj.set_seq_end(seq_i, aud_duration)
+        total_duration += seq_duration
 
     composite = concatenate_videoclips(vid_list).resize(height=VIDEO_RES[1])
     composite.fps = 30
     composite_path = folder + "\\" + vid_name + "_%s_comp.mp4" % language
     composite.write_videofile(composite_path)
 
+    srt_obj.update_SRT()
     print("Job Complete")
     return composite_path

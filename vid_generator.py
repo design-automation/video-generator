@@ -1,11 +1,17 @@
 import sys, os
 #--------------------------------------------------------------------------------------------------
-if len(sys.argv) != 3:
-    raise Exception('Usage: python ./vid_generator.py input_path run_steps')
+if len(sys.argv) < 3:
+    raise Exception('Usage: python ./vid_generator.py input_path run_steps force(optional)')
 if not os.path.exists(sys.argv[1]):
     raise Exception('Path does not exist: ' + sys.argv[1])
 if not os.path.exists(os.path.join(sys.argv[1], '__SETTINGS__.py')):
     raise Exception('Path does not contain __SETTINGS__.py: ' + sys.argv[1])
+
+FORCE = False
+if len(sys.argv) == 4:
+    FORCE = True
+    print("(RE)GENERATING ALL VIDEO\n")
+
 INPUT_PATH = os.path.normpath(sys.argv[1])
 RUN_STEP = int(sys.argv[2])
 RUN_STATUS = ["\nGENERATING INGREDIENTS\n", "\nGENERATING MP4\n"]
@@ -25,8 +31,8 @@ from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES
 DEBUG_status = False
 DEBUG = dict(
     section="w1",
-    subsection="s0",
-    unit="u0"
+    subsection="s4",
+    unit="u1"
 )
 #--------------------------------------------------------------------------------------------------
 
@@ -45,21 +51,21 @@ def main():
         print(RUN_STATUS[run_i])
         # SECTIONS
         for section in SECTIONS:
-            if DEBUG_status and os.path.basename(section[:-1]) != DEBUG["section"]:
+            if DEBUG_status and DEBUG["section"] != "*" and os.path.basename(section[:-1]) != DEBUG["section"]:
                 continue
             print('- ', section)
             SUBSECTIONS = glob.glob(os.path.join(section, '*\\'))
 
             # SUBSECTIONS
             for subsection in SUBSECTIONS:
-                if DEBUG_status and os.path.basename(subsection[:-1]) != DEBUG["subsection"]:
+                if DEBUG_status and DEBUG["subsection"] != "*" and os.path.basename(subsection[:-1]) != DEBUG["subsection"]:
                     continue
                 print('-- ', subsection)
                 UNITS = glob.glob(os.path.join(subsection, '*\\'))
 
                 # UNITS
                 for unit in UNITS:
-                    if DEBUG_status and os.path.basename(unit[:-1]) != DEBUG["unit"]:
+                    if DEBUG_status and DEBUG["unit"] != "*" and os.path.basename(unit[:-1]) != DEBUG["unit"]:
                         continue
                     print('--- ', unit)
 
@@ -83,7 +89,7 @@ def main():
                         vids_obj_edit = vids_obj.get_last_edit()
                         change = -1
                         success = False
-                        if pp_curr_edit > pp_last_edit and pp_curr_edit > vids_obj_edit:
+                        if (pp_curr_edit > pp_last_edit and pp_curr_edit > vids_obj_edit) or FORCE:
                             print("\nChange detected for %s. Generating videos for all languages.\n" % vid_obj.get_pre_polly_path())
                             change = 0  # gen all languages
                         else:
@@ -104,12 +110,9 @@ def main():
                                 else:
                                     print("\nNo change for %s\\%s_%s.srt\n" % (vid_obj.get_base_dir(), vid_obj.get_file_name(), lang))
                                     continue # no change
-                                # change == 1
                                 success = _generate_video(run_i, vid_obj, lang, change)
                                 if not success:
                                     break
-                        # if vid_obj.get_ext == "pptx":
-                        #     change = 0
                         if change == 0:
                             success = _generate_all(run_i, vid_obj)
                         if success:
@@ -148,21 +151,21 @@ def _generate_video(run_i, vid_obj, language, change):
         vid_args = vid_obj.get_vid_args()
         vid_name = vid_args["video_file_name"]
 
-        voice_id = int(vid_args["voice"])
+        voice_id = vid_args["voice"]
         
-        AVAIL_VOICES = srt_obj.get_voices()
-        neural = AVAIL_VOICES[language]["neural"]
-        lang_code = AVAIL_VOICES[language]["lang_code"]
-        avail_voice_ids = AVAIL_VOICES[language]["ids"]
-        polly_voice_id = avail_voice_ids[voice_id % len(avail_voice_ids)]
+        if voice_id == "headshot":
+            if run_i != 0:
+                print("Generating Headshot Video")
+                comp_path = composite_headshot(out_folder, vid_obj.get_pre_polly_path(), vid_name, srt_obj)
+        else: 
+            voice_id = int(voice_id)
+            AVAIL_VOICES = srt_obj.get_voices()
+            neural = AVAIL_VOICES[language]["neural"]
+            lang_code = AVAIL_VOICES[language]["lang_code"]
+            avail_voice_ids = AVAIL_VOICES[language]["ids"]
+            polly_voice_id = avail_voice_ids[voice_id % len(avail_voice_ids)]
 
-        if vid_ext == "mp4":
-            try:
-                mp4_type = json.loads(srt_obj.get_seq("_NA_", 1)["script"])["type"]
-                if mp4_type == "headshot" and run_i != 0:
-                    print("Generating Headshot Video")
-                    comp_path = composite_headshot(out_folder, vid_obj.get_pre_polly_path(), vid_name, srt_obj)
-            except KeyError as e: # not headshot video
+            if vid_ext == "mp4":
                 if run_i == 0:
                     print("\n%s" % polly_voice_id)
                     to_Polly(srt_obj, polly_voice_id, neural)
@@ -171,12 +174,12 @@ def _generate_video(run_i, vid_obj, language, change):
                         mp4_obj = ToPollyMP4(vid_obj.get_pre_polly_path())
                         cut_MP4(mp4_obj,srt_obj) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     comp_path = composite_MP4(language, out_folder, vid_name, srt_obj)
-        else:
-            if run_i == 0:
-                print("\n%s" % polly_voice_id)
-                to_Polly(srt_obj, polly_voice_id, neural, True)
             else:
-                comp_path = composite_PNGs(language, out_folder, vid_name, srt_obj)
+                if run_i == 0:
+                    print("\n%s" % polly_voice_id)
+                    to_Polly(srt_obj, polly_voice_id, neural, True)
+                else:
+                    comp_path = composite_PNGs(language, out_folder, vid_name, srt_obj)
       
         if run_i == 1:
             S3_path = "%s/%s/%s_%s.mp4" % (S3_MOOC_FOLDER, S3_VIDEOS_FOLDER, re.sub("-", "/", vid_args["video_file_name"]), language)
