@@ -141,6 +141,7 @@ class ToPollySRT:
         n_seq_i = 1
         for seq_i in self.__seq_dict[language]:
             seq_script = self.__seq_dict[language][seq_i]["script"]
+            seq_script = re.sub(r"\s+", " ", seq_script)
             if seq_script == "":
                 continue
             ori_start = _to_seconds(self.__seq_dict[language][seq_i]["script_start"])
