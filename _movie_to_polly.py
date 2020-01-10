@@ -102,9 +102,9 @@ class ToPollySRT:
         new_dict = self.__rebuild_dict()    
         tar_path = self.__folder + "\\"+ self.__name[:-3] + "_sub_" + language + ".srt"
         
-        with open(tar_path, "w", encoding="utf-16") as srt_f:
+        with open(tar_path, "wb") as srt_f:
             for seq_n in new_dict:
-                srt_f.write(self.__seq_for_SRT(seq_n, new_dict))
+                srt_f.write(self.__seq_for_SRT(seq_n, new_dict).encode("ascii", "ignore"))
         print("\nUpdated SRT (%s) created at %s" % (self.__path, tar_path))
     def __write_base_lang(self, language):
         with open(self.__folder + "\\"+ self.__name[:-3] + "_" + language + ".srt", "wt", encoding="utf-8") as srt_f:
