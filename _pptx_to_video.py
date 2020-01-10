@@ -47,7 +47,7 @@ def _pptx_to_SRT(pptx_path, tar_fdr):
             slide_notes = ""
             for note_seg in note_segs:
                 slide_notes += note_seg.find("a:t").text
-                if slide_notes!="" and slide_notes[0] != "{" and slide_notes[-1]!="/":
+                if slide_notes!="" and slide_notes[0] != "{" and slide_notes[-1]!="/" and slide_notes[-1]!="<":
                     slide_notes += " "
             slide_dict[str(slide_i+1)] = _clean_notes(slide_notes)
     with open(tar_fdr + "..\\..\\..\\" + file_name+"_en.srt", "wt", encoding="utf-8") as srt_f:
