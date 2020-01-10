@@ -26,14 +26,14 @@ from _pptx_to_video import pptx_to_ingreds
 from _to_S3 import upload_s3
 from _movie_to_polly import *
 import traceback
-from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES
+from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES, SEQ_CONVERT
 #--------------------------------------------------------------------------------------------------
 DEBUG_status = False
 KEEP = False
 DEBUG = dict(
-    section="w2",
+    section="w3",
     subsection="s3",
-    unit="u5"
+    unit="u1"
 )
 #--------------------------------------------------------------------------------------------------
 
@@ -169,7 +169,7 @@ def _generate_video(run_i, vid_obj, language, change):
             if vid_ext == "mp4":
                 if run_i == 0:
                     print("\n%s" % polly_voice_id)
-                    to_Polly(srt_obj, polly_voice_id, neural)
+                    to_Polly(srt_obj, polly_voice_id, neural, SEQ_CONVERT)
                 else:
                     if (language=="en" or change == 1):
                         mp4_obj = ToPollyMP4(vid_obj.get_pre_polly_path())
@@ -178,7 +178,7 @@ def _generate_video(run_i, vid_obj, language, change):
             else:
                 if run_i == 0:
                     print("\n%s" % polly_voice_id)
-                    to_Polly(srt_obj, polly_voice_id, neural, True)
+                    to_Polly(srt_obj, polly_voice_id, neural, SEQ_CONVERT, True)
                 else:
                     comp_path = composite_PNGs(language, out_folder, vid_name, srt_obj)
       
