@@ -102,7 +102,7 @@ class ToPollySRT:
         new_dict = self.__rebuild_dict()    
         tar_path = self.__folder + "\\"+ self.__name[:-3] + "_sub_" + language + ".srt"
         
-        with open(tar_path, "wt", encoding="utf-8") as srt_f:
+        with open(tar_path, "w", encoding="utf-16") as srt_f:
             for seq_n in new_dict:
                 srt_f.write(self.__seq_for_SRT(seq_n, new_dict))
         print("\nUpdated SRT (%s) created at %s" % (self.__path, tar_path))
@@ -141,7 +141,7 @@ class ToPollySRT:
         n_seq_i = 1
         for seq_i in self.__seq_dict[language]:
             seq_script = self.__seq_dict[language][seq_i]["script"]
-            seq_script = re.sub(r"\s+", " ", seq_script)
+            seq_script = re.sub(r"\s\s+", " ", seq_script)
             if seq_script == "":
                 continue
             ori_start = _to_seconds(self.__seq_dict[language][seq_i]["script_start"])
