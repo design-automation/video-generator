@@ -291,7 +291,7 @@ def to_Polly(srt_obj, voice_id, neural, SEQ_CONVERT, pptx=False):# returns mp3s 
         script = _xml_friendly.to_xml(srt_obj.get_seq(language, seq_i)["script"])
         for RULE in RULES:
             if RULE.lower() in script.lower():
-                script = re.sub(RULE, "<sub alias='%s'>%s</sub>" % (SEQ_CONVERT[RULE],RULE), script)
+                script = re.sub(RULE, SEQ_CONVERT[RULE], script)
 
         if script!="" and script[0]!="{":
             if srt_obj.get_name()[-2:] == "en" and language!="en": # translate
