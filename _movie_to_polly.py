@@ -401,7 +401,7 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
                 vid_idx = _file_idx(vid_clips[seq_i-1])
                 aud_clip = AudioFileClip(aud_dict[vid_idx])
                 if (vid_clip.duration < aud_clip.duration):
-                    vid_clip = vid_clip.set_duration(aud_clip.duration + PAUSE_PERIOD)
+                    vid_clip = vid_clip.set_duration(aud_clip.duration + PAUSE_PERIOD * 2)
                 if fadeout:
                     vid_clip = vid_clip.fadeout(duration=1, final_color=fade_color)
                 vid_list.append(vid_clip.set_audio(aud_clip))
@@ -412,8 +412,7 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
                 slides_idx = _file_idx(slide_pngs[seq_i-1]) + 1
                 try:
                     aud_clip = AudioFileClip(aud_dict[slides_idx])
-                    buffer = PAUSE_PERIOD
-                    slide_clip = slide_clip.set_duration(aud_clip.duration + buffer).set_audio(aud_clip)
+                    slide_clip = slide_clip.set_duration(aud_clip.duration + PAUSE_PERIOD * 2).set_audio(aud_clip)
                 except KeyError:
                     slide_clip = slide_clip.set_duration(PAUSE_PERIOD)
                     aud_clip = slide_clip
