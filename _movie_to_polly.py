@@ -19,7 +19,7 @@ from __CONSTS__ import VOICES, HS_VIDEO_RES, VIDEO_RES, TITLE_PERIOD, FONT, FONT
 from __AWS__ import aws_access_key_id, aws_secret_access_key
 
 OUTPUT_FDR = "output"
-PAUSE_PERIOD = 0.7 #seconds
+PAUSE_PERIOD = 1 #seconds
 logging.basicConfig(filename='errors.log', level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(name)s %(message)s')
 logger = logging.getLogger(__name__)
