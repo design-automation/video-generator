@@ -189,7 +189,7 @@ def sequence_convert(SEQ_CONVERT, script):
     RULES = list(SEQ_CONVERT.keys())
     for RULE in RULES:
         if RULE.lower() in script.lower():
-            script = re.sub(r"(<.+?[\"'].+?[\"']>)?%s(<[/\w+].+?>)?" % RULE, SEQ_CONVERT[RULE], script)
+            script = re.compile(r"\s*(<.+?[\"'].+?[\"']>)?(\s*%s\s*)(<[/\w+].+?>)?\s*" % RULE).sub(" %s " % SEQ_CONVERT[RULE], script)
     return script
 
 def _split_script(script, language): # to create separate split functions for different languages !!!!!!!!!!!!!!!!!!!!!!!!!!!!
