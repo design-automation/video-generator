@@ -185,6 +185,15 @@ def clean_ssml_tags(script, remove_all=False):
     else:
         return re.sub(r"<[/?\w+].+?>"," ",script)
 
+def sequence_convert(script):
+    for RULE in RULES:
+        if RULE.lower() in script.lower():
+            if SEQ_CONVERT[RULE].startswith("<"):
+                script = re.sub(r"(<.+?[\"'].+?[\"']>)?%s(<[/\w+].+?>)?" % RULE, SEQ_CONVERT[RULE], script)
+            else:
+                script = re.sub(r"%s" % RULE, SEQ_CONVERT[RULE], script)
+    return script
+
 def _split_script(script, language): # to create separate split functions for different languages !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if language == "en":
         return _split_script_en(script)
@@ -289,9 +298,7 @@ def to_Polly(srt_obj, voice_id, neural, SEQ_CONVERT, pptx=False):# returns mp3s 
     aud_i = 0
     for seq_i in range(1, srt_obj.get_n_seq()+1):
         script = _xml_friendly.to_xml(srt_obj.get_seq(language, seq_i)["script"])
-        for RULE in RULES:
-            if RULE.lower() in script.lower():
-                script = re.sub(RULE, SEQ_CONVERT[RULE], script)
+        script = sequence_convert(script)
 
         if script!="" and script[0]!="{":
             if srt_obj.get_name()[-2:] == "en" and language!="en": # translate
