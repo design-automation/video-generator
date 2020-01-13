@@ -188,10 +188,7 @@ def clean_ssml_tags(script, remove_all=False):
 def sequence_convert(script):
     for RULE in RULES:
         if RULE.lower() in script.lower():
-            if SEQ_CONVERT[RULE].startswith("<"):
-                script = re.sub(r"(<.+?[\"'].+?[\"']>)?%s(<[/\w+].+?>)?" % RULE, SEQ_CONVERT[RULE], script)
-            else:
-                script = re.sub(r"%s" % RULE, SEQ_CONVERT[RULE], script)
+            script = re.sub(r"(<.+?[\"'].+?[\"']>)?%s(<[/\w+].+?>)?" % RULE, SEQ_CONVERT[RULE], script)
     return script
 
 def _split_script(script, language): # to create separate split functions for different languages !!!!!!!!!!!!!!!!!!!!!!!!!!!!
