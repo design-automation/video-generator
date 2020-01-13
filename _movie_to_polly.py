@@ -257,6 +257,7 @@ def _polly(session, output_fdr, file_name, script, voice_id, neural):
                 logger.exception("_polly_IO")
                 print(error)
                 sys.exit(-1)
+            return output
     else:
         print("Could not stream audio")
         sys.exit(-1)
@@ -291,7 +292,6 @@ def to_Polly(srt_obj, voice_id, neural, SEQ_CONVERT, pptx=False):# returns mp3s 
     language = srt_obj.get_language()
     output_fdr = srt_obj.get_folder() + "\\" + srt_obj.get_name()[:-3] +"\\" + OUTPUT_FDR + "_%s\\" % language
     os.makedirs(output_fdr, exist_ok=True)
-    aud_i = 0
     for seq_i in range(1, srt_obj.get_n_seq()+1):
         script = _xml_friendly.to_xml(srt_obj.get_seq(language, seq_i)["script"])
         script = sequence_convert(SEQ_CONVERT, script)
@@ -303,15 +303,8 @@ def to_Polly(srt_obj, voice_id, neural, SEQ_CONVERT, pptx=False):# returns mp3s 
             file_name = srt_obj.get_name() + "-" + str(seq_i).zfill(3) + ".mp3"
             output_path = output_fdr + file_name
             print("\nCommunicating to AWS Polly")
-            _polly(session=session, output_fdr=output_fdr, file_name=file_name, script=script, voice_id=voice_id , neural=neural) # !!!!!!!!!
-            aud_out = glob.glob(output_fdr + "*.mp3")[aud_i]
-            aud_i += 1
+            aud_out = _polly(session=session, output_fdr=output_fdr, file_name=file_name, script=script, voice_id=voice_id , neural=neural) # !!!!!!!!!
             print("Polly MP3 saved at %s" % (aud_out))
-            polly_aud = AudioFileClip(aud_out)
-            ori_duration = srt_obj.get_seq_duration(language, seq_i)
-            curr_duration = polly_aud.duration + PAUSE_PERIOD
-            srt_obj.set_seq_end(seq_i, curr_duration)
-            polly_aud.reader.close_proc()
         else:
             if script == "":
                 srt_obj.set_seq_end(seq_i, PAUSE_PERIOD)
@@ -417,7 +410,7 @@ def _composite_video(typ, language, folder, vid_name, srt_obj):
                     aud_clip = AudioFileClip(aud_dict[slides_idx])
                     slide_clip = slide_clip.set_duration(aud_clip.duration + PAUSE_PERIOD * 2).set_audio(aud_clip)
                 except KeyError:
-                    slide_clip = slide_clip.set_duration(PAUSE_PERIOD)
+                    slide_clip = slide_clip.set_duration(PAUSE_PERIOD * 2)
                     aud_clip = slide_clip
                     pass
                 if fadeout:

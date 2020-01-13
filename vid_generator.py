@@ -147,7 +147,7 @@ def _generate_video(run_i, vid_obj, language, change):
         if not os.path.exists(srt_path):
             srt_path = vid_obj.get_srt_path("en")
         srt_obj = ToPollySRT(srt_path,language)
-
+        
         vid_obj.set_vid_args(srt_obj)
         vid_args = vid_obj.get_vid_args()
         vid_name = vid_args["video_file_name"]

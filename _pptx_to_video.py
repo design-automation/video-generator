@@ -38,9 +38,8 @@ def _pptx_to_SRT(pptx_path, tar_fdr):
     xml_files = sorted(glob.glob(folder_path + "*.xml"), key=_slide_idx)
 
     slide_dict = {}
-    n_slides = len(xml_files)
-    for slide_i in range(0, n_slides):
-        xml_file = xml_files[slide_i]
+    n_slides = 0
+    for xml_file in xml_files:
         with open (xml_file, "rt", encoding="utf-8") as xml_f:
             soup = BeautifulSoup(xml_f, "xml")
             note_segs = soup.findAll("a:r")
@@ -49,12 +48,18 @@ def _pptx_to_SRT(pptx_path, tar_fdr):
                 slide_notes += note_seg.find("a:t").text
                 if slide_notes!="" and slide_notes[0] != "{" and slide_notes[-1]!="/" and slide_notes[-1]!="<":
                     slide_notes += " "
-            slide_dict[str(slide_i+1)] = _clean_notes(slide_notes)
+            slide_i= soup.find("a:fld").find("a:t").text
+            slide_dict[str(slide_i)] = _clean_notes(slide_notes)
+            n_slides = slide_i
     with open(tar_fdr + "..\\..\\..\\" + file_name+"_en.srt", "wt", encoding="utf-8") as srt_f:
-        for i in range(1, n_slides + 1):
+        for i in range(1, int(n_slides) + 1):
             srt_f.write("%s\n" % str(i))
             srt_f.write("%s --> %s\n" % (_to_time_str((i-1)*DEFAULT_TIME_BREAK + 0.5), _to_time_str((i)*DEFAULT_TIME_BREAK + 0.5)))
-            srt_f.write("%s\n" % slide_dict[str(i)])
+            try:
+                script = "%s\n" % slide_dict[str(i)]
+            except KeyError:
+                script = "\n"
+            srt_f.write(script)
             srt_f.write("\n")
 
 def _libreXML_to_SRT(folder_path, tar_fdr):
