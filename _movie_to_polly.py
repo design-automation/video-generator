@@ -185,7 +185,8 @@ def clean_ssml_tags(script, remove_all=False):
     else:
         return re.sub(r"<[/?\w+].+?>"," ",script)
 
-def sequence_convert(script):
+def sequence_convert(SEQ_CONVERT, script):
+    RULES = list(SEQ_CONVERT.keys())
     for RULE in RULES:
         if RULE.lower() in script.lower():
             script = re.sub(r"(<.+?[\"'].+?[\"']>)?%s(<[/\w+].+?>)?" % RULE, SEQ_CONVERT[RULE], script)
@@ -286,8 +287,6 @@ def cut_MP4(mp4_obj, srt_obj): # returns mp4s in subfolder
         logger.exception(mp4_obj.get_path())
 
 def to_Polly(srt_obj, voice_id, neural, SEQ_CONVERT, pptx=False):# returns mp3s in subfolder
-    RULES = list(SEQ_CONVERT.keys())
-
     session = Session(aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, region_name="us-east-1")
     language = srt_obj.get_language()
     output_fdr = srt_obj.get_folder() + "\\" + srt_obj.get_name()[:-3] +"\\" + OUTPUT_FDR + "_%s\\" % language
@@ -295,7 +294,7 @@ def to_Polly(srt_obj, voice_id, neural, SEQ_CONVERT, pptx=False):# returns mp3s 
     aud_i = 0
     for seq_i in range(1, srt_obj.get_n_seq()+1):
         script = _xml_friendly.to_xml(srt_obj.get_seq(language, seq_i)["script"])
-        script = sequence_convert(script)
+        script = sequence_convert(SEQ_CONVERT, script)
 
         if script!="" and script[0]!="{":
             if srt_obj.get_name()[-2:] == "en" and language!="en": # translate
