@@ -349,7 +349,7 @@ def composite_headshot(tar_folder, vid_path, vid_name, srt_obj):
     composite = concatenate_videoclips(vid_list).resize(width=VIDEO_RES[0])
     composite.fps = 30
     composite_path = tar_folder + "\\" + vid_name + "_comp.mp4"
-    composite.write_videofile(composite_path)
+    composite.write_videofile(composite_path, audio_codec="aac")
 
     update_HS_srt(srt_obj)
     print("Job Complete")
