@@ -76,8 +76,7 @@ class Video:
         arg_dict = json.loads(script)
         for key_name in arg_dict:
             self.__dict[key_name] = arg_dict[key_name]
-        if self.__dict["video_file_name"] == "":
-            self.__dict["video_file_name"] = self.__name
+        self.__dict["video_file_name"] = self.__name
         if self.__dict["voice"] == "":
             self.__dict["voice"] = "0"
         if self.__dict["display_name"] == "":
