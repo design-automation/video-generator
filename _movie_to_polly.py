@@ -384,7 +384,7 @@ def composite_MP4(language, folder, vid_name, srt_obj):
                             aud_clip = AudioFileClip(aud_dict[vid_idx])
                             if (vid_clip.duration < aud_clip.duration):
                                 vid_clip = vid_clip.set_duration(aud_clip.duration + PAUSE_PERIOD * 2)
-                            vid_clip.set_audio(aud_clip)
+                            vid_clip = vid_clip.set_audio(aud_clip)
                         else:
                             if vid_clip.duration < 1:
                                 vid_clip.duration = 1
@@ -400,8 +400,6 @@ def composite_MP4(language, folder, vid_name, srt_obj):
                     srt_obj.set_seq_start(seq_i, seq_start)
                     srt_obj.set_seq_end(seq_i, aud_duration)
                     total_duration += seq_duration
-                    seq_clip.close()
-                    aud_clip.close()
                 composite_chunk = concatenate_videoclips(vid_list).resize(height=VIDEO_RES[1])
                 composite_chunk.fps = 30
                 composite_chunk_path = os.path.join(folder, vid_name + "_%s_chunk_%s-%s.mp4" % (language, prev, i-1))
@@ -419,7 +417,8 @@ def composite_MP4(language, folder, vid_name, srt_obj):
             return composite_path
         except Exception:
             retries += 1
-            os.remove(composite_chunk_path)
+            if os.path.exists(composite_chunk_path):
+                os.remove(composite_chunk_path)
             if retries == MAX_RETRIES:
                 logger.exception("%s > MP4 build error" % vid_name)
             else:
