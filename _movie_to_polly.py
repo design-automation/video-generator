@@ -15,7 +15,7 @@ from boto3 import Session
 from botocore.exceptions import BotoCoreError, ClientError
 from contextlib import closing
 from _get_by_type import *
-from __CONSTS__ import VOICES, HS_VIDEO_RES, VIDEO_RES, TITLE_PERIOD, FONT, FONT_SZ, IDEAL_LENGTH
+from __CONSTS__ import VOICES, HS_VIDEO_RES, VIDEO_RES, TITLE_PERIOD, FONT, FONT_SZ, IDEAL_LENGTH, CHUNK_SIZE, MAX_RETRIES
 from __AWS__ import aws_access_key_id, aws_secret_access_key
 
 OUTPUT_FDR = "output"
@@ -327,15 +327,165 @@ def break_title(title):
             curr_line_len += len(word)
         return ret_title
 
+def _range(start, end, step):
+    i = start
+    while i < end:
+        yield i
+        i += step
+    yield end
+
 def composite_MP4(language, folder, vid_name, srt_obj):
-    try:
-        return _composite_video("MP4", language, folder, vid_name, srt_obj)
-    except Exception:
-        logger.exception("%s > MP4 build error" % vid_name)
+    fade_color = [255,255,255]
+    aud_clips = sorted(glob.glob(folder + "\\" + OUTPUT_FDR + "_%s\\" % language + "*.mp3"), key=_file_idx)
+    aud_dict = {_file_idx(aud_clips[i]):aud_clips[i] for i in range(0, len(aud_clips))}
+
+    master_list = []
+    prev = 1
+    retries = 0
+    total_duration = 0
+    composite_chunk_path = None
+
+    while retries < MAX_RETRIES:
+        try:
+            for i in _range(CHUNK_SIZE + 1, srt_obj.get_n_seq() + 1, CHUNK_SIZE):        
+                vid_list = []
+                composite_chunk_path = os.path.join(folder, vid_name + "_%s_chunk_%s-%s.mp4" % (language, prev, i-1))
+                if os.path.exists(composite_chunk_path):
+                    master_list.append(composite_chunk_path)
+                    prev = i
+                    continue
+                for seq_i in range(prev, i): # seq 1 is title
+                    seq_clip = None
+                    aud_clip = None
+
+                    script = srt_obj.get_seq(language, seq_i)["script"]
+                    fadeout = False
+                    try:
+                        nxt_script = srt_obj.get_seq(language, seq_i + 1)["script"]
+                    except KeyError:
+                        nxt_script = ""
+                        pass
+                    if nxt_script != "" and nxt_script[0] == "{":
+                        fadeout = True
+
+                    if script != "" and script[0] == "{":
+                        title = break_title(json.loads(script)["display_name"])
+                        if seq_i == 1 and language!="en":
+                            title += "\n(%s)" % language
+                        title_clip = TextClip(txt=title, size=VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=FONT_SZ).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
+                        vid_list.append(title_clip)
+                        seq_clip = title_clip
+                        aud_clip = title_clip
+                    else:
+                        vid_clips = sorted(glob.glob(folder + "\\" + OUTPUT_FDR + "_VIDEOS\\" + "*.mp4"), key=_file_idx)
+                        vid_clip = VideoFileClip(vid_clips[seq_i-1]).resize(height=VIDEO_RES[1])
+                        vid_idx = _file_idx(vid_clips[seq_i-1])
+                        if script != "":
+                            aud_clip = AudioFileClip(aud_dict[vid_idx])
+                            if (vid_clip.duration < aud_clip.duration):
+                                vid_clip = vid_clip.set_duration(aud_clip.duration + PAUSE_PERIOD * 2)
+                            vid_clip.set_audio(aud_clip)
+                        else:
+                            if vid_clip.duration < 1:
+                                vid_clip.duration = 1
+                            aud_clip = vid_clip
+                        if fadeout:
+                            vid_clip = vid_clip.fadeout(duration=1, final_color=fade_color)
+                        vid_list.append(vid_clip)
+                        seq_clip = vid_clip
+                        fadein = False
+                    seq_duration = seq_clip.duration
+                    aud_duration = aud_clip.duration
+                    seq_start = total_duration
+                    srt_obj.set_seq_start(seq_i, seq_start)
+                    srt_obj.set_seq_end(seq_i, aud_duration)
+                    total_duration += seq_duration
+                    seq_clip.close()
+                    aud_clip.close()
+                composite_chunk = concatenate_videoclips(vid_list).resize(height=VIDEO_RES[1])
+                composite_chunk.fps = 30
+                composite_chunk_path = os.path.join(folder, vid_name + "_%s_chunk_%s-%s.mp4" % (language, prev, i-1))
+                composite_chunk.write_videofile(composite_chunk_path)
+                master_list.append(composite_chunk_path)
+                composite_chunk.close()
+                prev = i
+                retries = 0
+            composite = concatenate_videoclips(list(map(lambda x: VideoFileClip(x), master_list)))
+            composite_path = os.path.join(folder, vid_name + "_%s_comp.mp4" % language)
+            composite.write_videofile(composite_path)
+
+            srt_obj.update_SRT()
+            print("Job Complete")
+            return composite_path
+        except Exception:
+            retries += 1
+            os.remove(composite_chunk_path)
+            if retries == MAX_RETRIES:
+                logger.exception("%s > MP4 build error" % vid_name)
+            else:
+                pass
 
 def composite_PNGs(language, folder, vid_name, srt_obj):
+    fade_color = [255,255,255]
+    aud_clips = sorted(glob.glob(folder + "\\" + OUTPUT_FDR + "_%s\\" % language + "*.mp3"), key=_file_idx)
+    aud_dict = {_file_idx(aud_clips[i]):aud_clips[i] for i in range(0, len(aud_clips))}
+
     try:    
-        return _composite_video("PPTX", language, folder, vid_name, srt_obj)
+        vid_list = []
+        total_duration = 0
+        for seq_i in range(1, srt_obj.get_n_seq() + 1): # seq 1 is title
+            seq_clip = None
+            aud_clip = None
+
+            script = srt_obj.get_seq(language, seq_i)["script"]
+            fadeout = False
+            try:
+                nxt_script = srt_obj.get_seq(language, seq_i + 1)["script"]
+            except KeyError:
+                nxt_script = ""
+                pass
+            if nxt_script != "" and nxt_script[0] == "{":
+                fadeout = True
+
+            if script != "" and script[0] == "{":
+                title = break_title(json.loads(script)["display_name"])
+                if seq_i == 1 and language!="en":
+                    title += "\n(%s)" % language
+                title_clip = TextClip(txt=title, size=VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=FONT_SZ).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
+                vid_list.append(title_clip)
+                seq_clip = title_clip
+                aud_clip = title_clip
+            else:
+                slide_pngs = sorted(glob.glob(folder + "\\images\\" + "*.png"), key=_file_idx)
+                slide_clip = ImageClip(slide_pngs[seq_i-1])
+                slides_idx = _file_idx(slide_pngs[seq_i-1]) + 1
+                try:
+                    aud_clip = AudioFileClip(aud_dict[slides_idx])
+                    slide_clip = slide_clip.set_duration(aud_clip.duration + PAUSE_PERIOD * 2).set_audio(aud_clip)
+                except KeyError:
+                    slide_clip = slide_clip.set_duration(PAUSE_PERIOD * 2)
+                    aud_clip = slide_clip
+                    pass
+                if fadeout:
+                    slide_clip = slide_clip.fadeout(duration=1, final_color=fade_color)
+                vid_list.append(slide_clip)
+                seq_clip = slide_clip
+                fadein = False
+            seq_duration = seq_clip.duration
+            aud_duration = aud_clip.duration
+            seq_start = total_duration
+            srt_obj.set_seq_start(seq_i, seq_start)
+            srt_obj.set_seq_end(seq_i, aud_duration)
+            total_duration += seq_duration
+
+        composite = concatenate_videoclips(vid_list).resize(height=VIDEO_RES[1])
+        composite.fps = 30
+        composite_path = folder + "\\" + vid_name + "_%s_comp.mp4" % language
+        composite.write_videofile(composite_path)
+
+        srt_obj.update_SRT()
+        print("Job Complete")
+        return composite_path
     except Exception:
         logger.exception("%s > MP4 build error" % vid_name)
 
@@ -359,77 +509,3 @@ def update_HS_srt(srt_obj):
     srt_obj.set_seq_end(1,TITLE_PERIOD)
     srt_obj.push_seq(1,TITLE_PERIOD)
     srt_obj.update_SRT()
-
-def _composite_video(typ, language, folder, vid_name, srt_obj):
-    fade_color = [255,255,255]
-    aud_clips = sorted(glob.glob(folder + "\\" + OUTPUT_FDR + "_%s\\" % language + "*.mp3"), key=_file_idx)
-    aud_dict = {_file_idx(aud_clips[i]):aud_clips[i] for i in range(0, len(aud_clips))}
-
-    vid_list = []
-    total_duration = 0
-    for seq_i in range(1, srt_obj.get_n_seq() + 1): # seq 1 is title
-        seq_clip = None
-        aud_clip = None
-
-        script = srt_obj.get_seq(language, seq_i)["script"]
-        fadeout = False
-        try:
-            nxt_script = srt_obj.get_seq(language, seq_i + 1)["script"]
-        except KeyError:
-            nxt_script = ""
-            pass
-        if nxt_script != "" and nxt_script[0] == "{":
-            fadeout = True
-
-        if script != "" and script[0] == "{":
-            title = break_title(json.loads(script)["display_name"])
-            if seq_i == 1 and language!="en":
-                title += "\n(%s)" % language
-            title_clip = TextClip(txt=title, size=VIDEO_RES, method="label", font=FONT, color="black", bg_color="white", fontsize=FONT_SZ).set_duration("00:00:0%s" % (TITLE_PERIOD)).fadeout(duration=1, final_color=fade_color)
-            vid_list.append(title_clip)
-            seq_clip = title_clip
-            aud_clip = title_clip
-        else:
-            if typ == "MP4":
-                vid_clips = sorted(glob.glob(folder + "\\" + OUTPUT_FDR + "_VIDEOS\\" + "*.mp4"), key=_file_idx)
-
-                vid_clip = VideoFileClip(vid_clips[seq_i-1])
-                vid_idx = _file_idx(vid_clips[seq_i-1])
-                aud_clip = AudioFileClip(aud_dict[vid_idx])
-                if (vid_clip.duration < aud_clip.duration):
-                    vid_clip = vid_clip.set_duration(aud_clip.duration + PAUSE_PERIOD * 2)
-                if fadeout:
-                    vid_clip = vid_clip.fadeout(duration=1, final_color=fade_color)
-                vid_list.append(vid_clip.set_audio(aud_clip))
-                seq_clip = vid_clip
-            else:
-                slide_pngs = sorted(glob.glob(folder + "\\images\\" + "*.png"), key=_file_idx)
-                slide_clip = ImageClip(slide_pngs[seq_i-1])
-                slides_idx = _file_idx(slide_pngs[seq_i-1]) + 1
-                try:
-                    aud_clip = AudioFileClip(aud_dict[slides_idx])
-                    slide_clip = slide_clip.set_duration(aud_clip.duration + PAUSE_PERIOD * 2).set_audio(aud_clip)
-                except KeyError:
-                    slide_clip = slide_clip.set_duration(PAUSE_PERIOD * 2)
-                    aud_clip = slide_clip
-                    pass
-                if fadeout:
-                    slide_clip = slide_clip.fadeout(duration=1, final_color=fade_color)
-                vid_list.append(slide_clip)
-                seq_clip = slide_clip
-            fadein = False
-        seq_duration = seq_clip.duration
-        aud_duration = aud_clip.duration
-        seq_start = total_duration
-        srt_obj.set_seq_start(seq_i, seq_start)
-        srt_obj.set_seq_end(seq_i, aud_duration)
-        total_duration += seq_duration
-
-    composite = concatenate_videoclips(vid_list).resize(height=VIDEO_RES[1])
-    composite.fps = 30
-    composite_path = folder + "\\" + vid_name + "_%s_comp.mp4" % language
-    composite.write_videofile(composite_path)
-
-    srt_obj.update_SRT()
-    print("Job Complete")
-    return composite_path

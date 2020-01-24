@@ -7,6 +7,8 @@ TITLE_PERIOD = 3 #seconds
 FONT = "Ubuntu-Mono"
 IDEAL_LENGTH = 12
 FONT_SZ = 103
+CHUNK_SIZE = 10
+MAX_RETRIES = 3
 
 ## Audio settings
 VOICES = dict(
