@@ -184,7 +184,7 @@ def _generate_video(run_i, vid_obj, language, change):
       
         if run_i == 1:
             S3_path = "%s/%s/%s_%s.mp4" % (S3_MOOC_FOLDER, S3_VIDEOS_FOLDER, re.sub("-", "/", vid_args["video_file_name"]), language)
-            upload_s3(comp_path, S3_BUCKET, S3_path)
+            upload_s3(comp_path, S3_BUCKET, S3_path) # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             print("\nUploaded to S3")
 
             vid_obj.set_srt_edit(language, os.path.getmtime(vid_obj.get_srt_path(language)))
