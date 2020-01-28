@@ -185,14 +185,25 @@ def clean_ssml_tags(script, remove_all=False):
     else:
         return re.sub(r"<[/?\w+].+?>"," ",script)
 
-def sequence_convert(SEQ_CONVERT, script):
+def sequence_convert(SEQ_CONVERT_RULES, script, seq_i, srt_obj):
+    SEQ_CONVERT = SEQ_CONVERT_RULES["SEQ_CONVERT"]
+    SRT_SEQ_CONVERT = SEQ_CONVERT_RULES["SRT_SEQ_CONVERT"]
+
     RULES = list(SEQ_CONVERT.keys())
     for RULE in RULES:
         if RULE.lower() in script.lower():
+            _sequence_convert_toSRT(SRT_SEQ_CONVERT, script, seq_i, srt_obj)
             script = re.compile(r"\s*(<.+?[\"'].+?[\"']>)?(\s*%s\s*)(<[/\w+].+?>)?\s*" % RULE).sub(" %s " % SEQ_CONVERT[RULE], script)
     return script
 
-def quotes_to_comma(script):
+def _sequence_convert_toSRT(SRT_SEQ_CONVERT, script, seq_i, srt_obj):
+    RULES = list(SRT_SEQ_CONVERT.keys())
+    for RULE in RULES:
+        if RULE.lower() in script.lower():
+            script = re.sub(RULE,SRT_SEQ_CONVERT[RULE], script)
+            srt_obj.update_script(seq_i, script)
+
+def _quotes_to_comma(script):
     return re.compile(r"&apos;\s?([^\s]+?)\s?&apos;").sub(",\g<1>,", script)
 
 def _split_script(script, language): # to create separate split functions for different languages !!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -290,15 +301,15 @@ def cut_MP4(mp4_obj, srt_obj): # returns mp4s in subfolder
     except Exception:
         logger.exception(mp4_obj.get_path())
 
-def to_Polly(srt_obj, voice_id, neural, SEQ_CONVERT, pptx=False):# returns mp3s in subfolder
+def to_Polly(srt_obj, voice_id, neural, SEQ_CONVERT_RULES, pptx=False):# returns mp3s in subfolder
     session = Session(aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, region_name="us-east-1")
     language = srt_obj.get_language()
     output_fdr = srt_obj.get_folder() + "\\" + srt_obj.get_name()[:-3] +"\\" + OUTPUT_FDR + "_%s\\" % language
     os.makedirs(output_fdr, exist_ok=True)
     for seq_i in range(1, srt_obj.get_n_seq()+1):
         script = _xml_friendly.to_xml(srt_obj.get_seq(language, seq_i)["script"])
-        script = quotes_to_comma(script)
-        script = sequence_convert(SEQ_CONVERT, script)
+        script = _quotes_to_comma(script)
+        script = sequence_convert(SEQ_CONVERT_RULES, script, seq_i, srt_obj)
 
         if script!="" and script[0]!="{":
             if srt_obj.get_name()[-2:] == "en" and language!="en": # translate
