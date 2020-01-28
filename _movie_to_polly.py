@@ -192,6 +192,9 @@ def sequence_convert(SEQ_CONVERT, script):
             script = re.compile(r"\s*(<.+?[\"'].+?[\"']>)?(\s*%s\s*)(<[/\w+].+?>)?\s*" % RULE).sub(" %s " % SEQ_CONVERT[RULE], script)
     return script
 
+def quotes_to_comma(script):
+    return re.compile(r"&apos;\s?([^\s]+?)\s?&apos;").sub(",\g<1>,", script)
+
 def _split_script(script, language): # to create separate split functions for different languages !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if language == "en":
         return _split_script_en(script)
@@ -294,6 +297,7 @@ def to_Polly(srt_obj, voice_id, neural, SEQ_CONVERT, pptx=False):# returns mp3s 
     os.makedirs(output_fdr, exist_ok=True)
     for seq_i in range(1, srt_obj.get_n_seq()+1):
         script = _xml_friendly.to_xml(srt_obj.get_seq(language, seq_i)["script"])
+        script = quotes_to_comma(script)
         script = sequence_convert(SEQ_CONVERT, script)
 
         if script!="" and script[0]!="{":
@@ -368,7 +372,7 @@ def composite_MP4(language, folder, vid_name, srt_obj):
                 vid_clip = VideoFileClip(vid_clips[seq_i-1]).resize(height=VIDEO_RES[1])
                 vid_idx = _file_idx(vid_clips[seq_i-1])
                 if script != "":
-                    aud_clip = AudioFileClip(aud_dict[vid_idx])
+                    aud_clip = AudioFileClip(aud_dict[vid_idx]).audio_fadein(0.01).audio_fadeout(0.01)
                     if (vid_clip.duration < aud_clip.duration):
                         vid_clip = vid_clip.set_duration(aud_clip.duration + PAUSE_PERIOD * 2)
                     vid_clip = vid_clip.set_audio(aud_clip)
@@ -434,7 +438,7 @@ def composite_PNGs(language, folder, vid_name, srt_obj):
                 slide_clip = ImageClip(slide_pngs[seq_i-1])
                 slides_idx = _file_idx(slide_pngs[seq_i-1]) + 1
                 try:
-                    aud_clip = AudioFileClip(aud_dict[slides_idx])
+                    aud_clip = AudioFileClip(aud_dict[slides_idx]).audio_fadein(0.01).audio_fadeout(0.01)
                     slide_clip = slide_clip.set_duration(aud_clip.duration + PAUSE_PERIOD * 2).set_audio(aud_clip)
                 except KeyError:
                     slide_clip = slide_clip.set_duration(PAUSE_PERIOD * 2)
