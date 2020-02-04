@@ -309,6 +309,7 @@ def to_Polly(srt_obj, voice_id, neural, SEQ_CONVERT_RULES, pptx=False):# returns
     for seq_i in range(1, srt_obj.get_n_seq()+1):
         script = _xml_friendly.to_xml(srt_obj.get_seq(language, seq_i)["script"])
         script = _quotes_to_comma(script)
+        script = re.sub("_", "-", script)
         script = sequence_convert(SEQ_CONVERT_RULES, script, seq_i, srt_obj)
 
         if script!="" and script[0]!="{":
