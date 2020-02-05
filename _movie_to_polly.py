@@ -204,7 +204,7 @@ def _sequence_convert_toSRT(SRT_SEQ_CONVERT, script, seq_i, srt_obj):
             srt_obj.update_script(seq_i, script)
 
 def _quotes_to_comma(script):
-    return re.compile(r"&apos;\s?([^\s]+?)\s?&apos;").sub(",\g<1>,", script)
+    return re.compile(r"[^=]\"\s?([^\s]+?)\s?\"").sub(",\g<1>,", script)
 
 def _split_script(script, language): # to create separate split functions for different languages !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if language == "en":
