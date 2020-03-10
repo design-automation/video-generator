@@ -46,10 +46,15 @@ def _pptx_to_SRT(pptx_path, tar_fdr):
             soup = BeautifulSoup(xml_f, "xml")
             note_segs = soup.findAll("a:r")
             slide_notes = ""
-            for note_seg in note_segs:
+            for note_seg_i in range(0, len(note_segs)):
+                note_seg = note_segs[note_seg_i]
                 slide_notes += note_seg.find("a:t").text
-                if slide_notes!="" and slide_notes[0] != "{" and slide_notes[-1]!="/" and slide_notes[-1]!="<":
-                    slide_notes += " "
+                if slide_notes!="" and slide_notes[0] != "{" and slide_notes[-1]!="/" and slide_notes[-1]!="<" and note_seg_i!=len(note_segs)-1:
+                    next_seg = note_segs[note_seg_i]
+                    curr_lang = note_seg.find("a:rPr")["lang"]
+                    next_lang = next_seg.find("a:rPr")["lang"]
+                    if curr_lang == next_lang:
+                        slide_notes += " "
             slide_i= soup.find("a:fld").find("a:t").text
             slide_dict[str(slide_i)] = _clean_notes(slide_notes)
             n_slides = slide_i
