@@ -92,7 +92,7 @@ def main():
                         vids_obj_edit = vids_obj.get_last_edit()
                         change = -1
                         success = False
-                        if (pp_curr_edit > pp_last_edit and pp_curr_edit > vids_obj_edit) or FORCE:
+                        if (pp_curr_edit > pp_last_edit and pp_curr_edit > vids_obj_edit) or FORCE or pp_last_edit==-1:
                             print("\nChange detected for %s. Generating videos for all languages.\n" % vid_obj.get_pre_polly_path())
                             change = 0  # gen all languages
                         else:
@@ -120,6 +120,8 @@ def main():
                             success = _generate_all(run_i, vid_obj)
                         if success:
                             vids_obj.set_vid_obj(vid_obj)
+                            if run_i==1:
+                                vids_obj.to_JSON()
                         if not KEEP and change != -1 and run_i==1:
                             shutil.rmtree(path=vid_obj.get_base_dir() + "\\" + vid_obj.get_file_name(), ignore_errors=True)
 
