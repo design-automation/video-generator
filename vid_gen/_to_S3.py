@@ -1,6 +1,6 @@
 from boto3 import Session
 from botocore.exceptions import BotoCoreError, ClientError
-from __AWS__ import aws_access_key_id, aws_secret_access_key
+from aws_cred import __AWS__
 
 def upload_s3(file_name, bucket, object_name=None):
     """Upload a file to an S3 bucket
@@ -15,7 +15,9 @@ def upload_s3(file_name, bucket, object_name=None):
         object_name = file_name
 
     # Upload the file
-    session = Session(aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+    session = Session(
+        aws_access_key_id=__AWS__.ID,
+        aws_secret_access_key=__AWS__.KEY)
     s3_client = session.client('s3')
     try:
         response = s3_client.upload_file(file_name, bucket, object_name, ExtraArgs={'ACL': 'public-read'})

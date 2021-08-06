@@ -9,14 +9,18 @@ import shutil
 import json
 import logging
 
-import _xml_friendly
 from moviepy.editor import *
 from boto3 import Session
 from botocore.exceptions import BotoCoreError, ClientError
 from contextlib import closing
-from _get_by_type import *
-from __CONSTS__ import VOICES, HS_VIDEO_RES, VIDEO_RES, TITLE_PERIOD, FONT, FONT_SZ, IDEAL_LENGTH
-from __AWS__ import aws_access_key_id, aws_secret_access_key
+
+from vid_gen.__CONSTS__ import VOICES, HS_VIDEO_RES, VIDEO_RES, TITLE_PERIOD, FONT, FONT_SZ, IDEAL_LENGTH
+from vid_gen import _xml_friendly
+from vid_gen._get_by_type import *
+from aws_cred import __AWS__
+
+
+
 
 OUTPUT_FDR = "output"
 PAUSE_PERIOD = 1 #seconds
@@ -302,7 +306,9 @@ def cut_MP4(mp4_obj, srt_obj): # returns mp4s in subfolder
         logger.exception(mp4_obj.get_path())
 
 def to_Polly(srt_obj, voice_id, neural, SEQ_CONVERT_RULES, pptx=False):# returns mp3s in subfolder
-    session = Session(aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, region_name="us-east-1")
+    session = Session(
+        aws_access_key_id = __AWS__.ID, 
+        aws_secret_access_key = __AWS__.KEY, region_name="us-east-1")
     language = srt_obj.get_language()
     output_fdr = srt_obj.get_folder() + "\\" + srt_obj.get_name()[:-3] +"\\" + OUTPUT_FDR + "_%s\\" % language
     os.makedirs(output_fdr, exist_ok=True)
@@ -423,6 +429,7 @@ def composite_PNGs(language, folder, vid_name, srt_obj):
     try:    
         vid_list = []
         total_duration = 0
+
         for seq_i in range(1, srt_obj.get_n_seq() + 1): # seq 1 is title
             seq_clip = None
             aud_clip = None
@@ -467,7 +474,6 @@ def composite_PNGs(language, folder, vid_name, srt_obj):
             srt_obj.set_seq_start(seq_i, seq_start)
             srt_obj.set_seq_end(seq_i, aud_duration)
             total_duration += seq_duration
-
         composite = concatenate_videoclips(vid_list).resize(height=VIDEO_RES[1])
         composite.fps = 30
         composite_path = folder + "\\" + vid_name + "_%s_comp.mp4" % language

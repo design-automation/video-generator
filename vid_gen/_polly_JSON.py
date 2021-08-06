@@ -3,8 +3,6 @@ import json
 import subprocess
 import re
 
-from __SETTINGS__ import LANGUAGES
-
 def _json_to_dict(path):
     json_dict = {}
     with open(path) as json_f:
@@ -48,7 +46,8 @@ class COMPONENT:
         self.__full_path = _dir + "\\" + name + ".%s" % ext
         self.__rel_path = self.__full_path.replace(INPUT_PATH, "")
         try:
-            self.__last_edit = float(re.search(r"(\d+)", subprocess.run(args=["git", "log" , "-1", "--pretty='format:%ct'", self.__full_path], cwd=os.path.dirname(self.__full_path), capture_output=True, text=True).stdout).group(1))
+            # self.__last_git_edit = float(re.search(r"(\d+)", subprocess.run(args=["git", "log" , "-1", "--pretty='format:%ct'", self.__full_path], cwd=os.path.dirname(self.__full_path), capture_output=True, text=True).stdout).group(1))
+            self.__last_edit = os.path.getmtime(self.__full_path)
         except Exception as e:
             print("%s NEW FILE" % self.__rel_path)
             self.__last_edit = -1
@@ -56,7 +55,7 @@ class COMPONENT:
         return dict(path=self.__rel_path, last_edit=self.__last_edit)
 
 class Video:
-    def __init__(self, INPUT_PATH, path):
+    def __init__(self, INPUT_PATH, path, langs):
         (root,ext) = os.path.splitext(path)
         self.__input_path = INPUT_PATH
         self.__name = os.path.basename(root)
@@ -65,7 +64,7 @@ class Video:
         self.__dict = VIDEO_OBJ().as_dict()
         self.__dict["meta"]["pre_polly"] = COMPONENT(INPUT_PATH, self.__name, self.__base_dir, self.__ext).as_dict()
         self.__dict["meta"]["srt"] = {}
-        for lang in LANGUAGES:
+        for lang in langs:
             srt_name = self.__name + "_%s" % lang
             srt_component = COMPONENT(INPUT_PATH, srt_name, self.__base_dir, "srt").as_dict()
             self.__dict["meta"]["srt"][lang] = srt_component  
@@ -141,3 +140,5 @@ class VidsJSON:
         return self.__last_edit
     def to_JSON(self):
         return dict_to_json(self.__dict, self.__path)
+    def to_dict(self):
+        return self.__dict

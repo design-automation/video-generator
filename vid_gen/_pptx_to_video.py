@@ -8,8 +8,8 @@ import zipfile
 import sys
 
 from bs4 import BeautifulSoup
-from _movie_to_polly import _to_time_str, VIDEO_RES
-import _xml_friendly
+from vid_gen._movie_to_polly import _to_time_str, VIDEO_RES
+from vid_gen import _xml_friendly
 
 logging.basicConfig(filename='errors.log', level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(name)s %(message)s')
