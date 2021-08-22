@@ -13,7 +13,7 @@ print("\n\n\n\n=========================================================\n\n\n\n
 # Minimum 4 args
 if len(sys.argv) < 4:
     raise Exception(
-        'Usage: python path_to_vid_generator.py path_to_MOOC_root_folder run_steps folders force(optional)')
+        'Usage: python path_to_vid_generator.py path_to_MOOC_root_folder run_steps folders force(optional) keep(optional)')
 
 # Arg 1: Path to MOOC root folder
 if not os.path.exists(sys.argv[1]):
@@ -45,14 +45,22 @@ if len(sys.argv) == 5 and sys.argv[4] == 'True':
 else:
     print("(RE)GENERATING VIDEOS WHERE CHANGES DETECTED\n")
 
+# Arg 5: Keep the files that are generated
+# For debugging it may be useful to set this to True, so you can see the data files
+KEEP = False
+if len(sys.argv) == 6 and sys.argv[5] == 'True':
+    KEEP = True
+    print("KEEPING TEMPORARY FILES\n")
+else:
+    print("DELETING TEMPORARY FILE\n")
+
 #--------------------------------------------------------------------------------------------------
 # Import the MOOC settings from the MOOC root folder
 from __SETTINGS__ import S3_MOOC_FOLDER, S3_BUCKET, S3_VIDEOS_FOLDER, LANGUAGES, SEQ_CONVERT, SRT_SEQ_CONVERT
 SEQ_CONVERT_RULES = dict(SEQ_CONVERT=SEQ_CONVERT, SRT_SEQ_CONVERT=SRT_SEQ_CONVERT)
 
 #--------------------------------------------------------------------------------------------------
-# For debugging it may be useful to set this to True, so you can see the data files
-KEEP = False
+
 
 #--------------------------------------------------------------------------------------------------
 
