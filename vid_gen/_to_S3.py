@@ -20,6 +20,10 @@ def upload_s3(file_name, bucket, object_name=None):
         aws_secret_access_key=__AWS__.KEY)
     s3_client = session.client('s3')
     try:
+        print("Upload to S3")
+        print("----- Filename:", file_name)
+        print("----- s3 Bucket:", bucket)
+        print("----- Object name:", object_name)
         response = s3_client.upload_file(file_name, bucket, object_name, ExtraArgs={'ACL': 'public-read'})
     except ClientError as e:
         return False
