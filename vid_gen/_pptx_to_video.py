@@ -107,15 +107,19 @@ def pptx_to_ingreds(run_i, pptx_path, tar_folder):
     os.makedirs(unzip_fdr, exist_ok=True)
     sz = "%sx%s" % VIDEO_RES
 
-    try:
-        if run_i == 0:
-            _pptx_to_SRT(pptx_abs_path, unzip_fdr)
-        else:
+    if run_i == 0:
+        _pptx_to_SRT(pptx_abs_path, unzip_fdr)
+    else:
+        try:
             print("Converting pptx file to pdf")
             subprocess.run([os.path.join(os.getenv('LIBRE_OFFICE_PROGRAM'), 'python.exe'), os.path.join(os.getenv('LIBRE_OFFICE_PROGRAM'), 'unoconv'), '-f', "pdf", "-o", "%s\\%s.pdf" % (folder, file_name),  pptx_abs_path])
-
+        except Exception:
+            print("ERROR: Conversion of pptx to PDF failed. Check that Office Libre is installed correctly.")
+            logger.exception(run_i)
+        try:
             print("Generating Images from pdf file")
             subprocess.run(['magick', 'convert', "-density", "300x300", os.path.abspath(os.path.join(folder, "%s.pdf" % file_name)), "-resize", sz, os.path.abspath(os.path.join(image_fdr, "%s.png" % file_name))])
-    except Exception:
-        logger.exception(run_i)
+        except Exception:
+            print("ERROR: Conversion of PDF to images failed. Check that Image Magick is installed correctly.")
+            logger.exception(run_i)
 
